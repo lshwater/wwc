@@ -1,0 +1,394 @@
+<ul class="breadcrumb">
+    <li>
+        <?=$this->Html->link("活動計劃書 - ".h($eventproposal['Eventproposal']['name']), array("action"=>"viewdetail", $eventproposal['Eventproposal']['id']))?>
+    </li>
+    <li class="active">修改活動計劃</li>
+</ul>
+
+
+<div class="row ">
+    <div class="col-sm-12">
+        <?php echo $this->Form->create('Eventproposal', array('class'=>'form-horizontal panel validate_form preventDoubleSubmission')); ?>
+        <?php echo $this->Form->hidden('id');?>
+        <?
+        switch($eventproposal['Approvalrecordstatus']['id']){
+            case 1:
+                $stsclass = "success";
+                break;
+            case 2:
+            case 5:
+                $stsclass = "warning";
+                break;
+            case 3:
+                $stsclass = "danger";
+                break;
+            case 4:
+                $stsclass = "default";
+                break;
+        }
+        ?>
+        <div class="panel-heading">
+            <span class="panel-title">基本資料
+            </span>
+            <div class="panel-heading-controls">
+                <span class="badge badge-<?=$stsclass?>"> <?=h($eventproposal['Approvalrecordstatus']['name'])?></span>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            <div class="form-group">
+                <?php echo $this->Form->label('name', __('活動名稱'), 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('name', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'required'=>"required"));?>
+                </div>
+            </div> <!-- / .form-group -->
+            <?if(empty($eventproposal['Eventproposal']['event_code'])){?>
+            <div class="form-group">
+                <?php echo $this->Form->label('year_id', "年度", 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('year_id', array('div'=>false, 'label'=>false, 'class'=>'form-control select2', 'required'=>"required", "empty"=>true));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+<!--            <div class="form-group">-->
+<!--                --><?php //echo $this->Form->label('eventproposalcode_id', "計劃編號類別", 'col-sm-2 control-label'); ?>
+<!--                <div class="col-sm-10">-->
+<!--                    --><?php //echo $this->Form->input('eventproposalcode_id', array('div'=>false, 'label'=>false, 'class'=>'form-control select2', 'required'=>"required", "empty"=>true));?>
+<!--                </div>-->
+<!--            </div> -->
+            <?}?>
+
+            <div class="form-group">
+                <?php echo $this->Form->label('aim', __('年度目標'), 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('aim', array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+            <div class="form-group">
+                <?php echo $this->Form->label('structure', __('理念架構'), 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('structure', array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+            <div class="form-group">
+                <?php echo $this->Form->label('objective', __('活動目標'), 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('objective', array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                </div>
+            </div> <!-- / .form-group -->
+        </div>
+        <div class="panel-heading">
+            <span class="panel-title">活動資料<small></small></span>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('target', __('對象'), 'col-sm-2 control-label'); ?>
+                        <div class="col-sm-10">
+                            <?php echo $this->Form->input('target', array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                        </div>
+                    </div> <!-- / .form-group -->
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('age', __('年齡'), 'col-sm-2 control-label'); ?>
+                        <div class="col-sm-10">
+                            <?php echo $this->Form->input('age', array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                        </div>
+                    </div> <!-- / .form-group -->
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('quota', __('名額'), 'col-sm-2 control-label'); ?>
+                        <div class="col-sm-10">
+                            <?php echo $this->Form->input('quota', array('div'=>false, 'label'=>false, 'class'=>'form-control vd_number'));?>
+                        </div>
+                    </div> <!-- / .form-group -->
+                </div>
+            </div>
+            <div class="row">
+                <!-- Range -->
+                <div class="col-sm-8">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('', __('日期'), 'col-sm-1 control-label'); ?>
+                        <div class="col-sm-11">
+                            <div class="input-daterange input-group" id="range">
+                                <?php echo $this->Form->input('startdate', array('div'=>false, 'label'=>false, 'class'=>'input-sm form-control', 'placeholder'=>"開始日期", 'type'=>"text"));?>
+                                <span class="input-group-addon">至</span>
+                                <?php echo $this->Form->input('enddate', array('div'=>false, 'label'=>false, 'class'=>'input-sm form-control', 'placeholder'=>"最後日期", 'type'=>"text"));?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('location', __('地點'), 'col-sm-2 control-label'); ?>
+                        <div class="col-sm-10">
+                            <?php echo $this->Form->input('location', array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                        </div>
+                    </div> <!-- / .form-group -->
+                </div>
+            </div>
+        </div>
+        <div class="panel-heading">
+            <span class="panel-title">宣傳安排<small></small></span>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <?php echo $this->Form->label('Eventproposalpromotion', __('宣傳方法'), 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('Eventproposalpromotion', array('div'=>false, 'label'=>false, 'class'=>'form-control select2-multiple', 'placeholder'=>"選擇宣傳方法"));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+            <div class="form-group">
+                <?php echo $this->Form->label('promotion_other', __('宣傳方法其他'), 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('promotion_other', array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                </div>
+            </div> <!-- / .form-group -->
+        </div>
+        <div class="panel-heading">
+            <span class="panel-title">人手安排<small></small></span>
+        </div>
+        <div class="panel-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <tr>
+                        <th>
+                            項目（人數）
+                        </th>
+                        <th>
+                            籌備
+                        </th>
+                        <th>
+                            推行
+                        </th>
+                        <th>
+                            評估及跟進
+                        </th>
+                    </tr>
+                    <?
+                    foreach($eventarrangementtypes as $key=>$val){
+                        if(!empty($this->data['Eventarrangement'][$key])){
+                                echo $this->Form->hidden("Eventarrangement.".$key.".id", array('value'=>$this->data['Eventarrangement'][$key]['id']));
+                        }
+                    ?>
+                        <tr>
+                            <td>
+                                <div class="form-group form-group-sm">
+                                    <?php echo $this->Form->label('Eventarrangement.'.$key.'.count', h($val), 'col-sm-8 control-label'); ?>
+                                    <div class="col-sm-4">
+                                        <?php echo $this->Form->input('Eventarrangement.'.$key.'.count', array('div'=>false, 'label'=>false, 'class'=>'form-control', "default"=>0));?>
+                                    </div>
+                                </div> <!-- / .form-group -->
+                            </td>
+                            <td>
+                                <?=$this->Form->hidden("Eventarrangement.".$key.".model", array('value'=>'Eventproposal'));?>
+                                <?=$this->Form->hidden("Eventarrangement.".$key.".model_id", array('value'=>$eventproposal['Eventproposal']['id']));?>
+                                <?=$this->Form->hidden("Eventarrangement.".$key.".eventarrangementtype_id", array('value'=>$key));?>
+                                <?=$this->Form->input("Eventarrangement.".$key.".preparation", array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                            </td>
+                            <td>
+                                <?=$this->Form->input("Eventarrangement.".$key.".ongoing", array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                            </td>
+                            <td>
+                                <?=$this->Form->input("Eventarrangement.".$key.".following", array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                            </td>
+                        </tr>
+                    <?
+                    }
+                    ?>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel-heading">
+            <span class="panel-title">活動程序<small></small></span>
+            <div class="panel-heading-controls">
+                <a href="javascript:void(0)" class="btn btn-xs btn-info btn-outline" onclick="addprocedure()"><span class="fa fa-plus"></span>&nbsp;&nbsp;新增</a>
+            </div> <!-- / .panel-heading-controls -->
+        </div>
+        <div class="panel-body">
+            <div class="table-responsive">
+                <table class="table" id="proceduretable">
+                    <tr>
+                        <th>日期</th>
+                        <th>時間</th>
+                        <th>次目標</th>
+                        <th>程序</th>
+                        <th>負責人</th>
+                        <th>物資</th>
+                        <th></th>
+                    </tr>
+                        <?
+                        $procdure_count = 0;
+                        if(!empty($this->data['Eventproposalprocedure'])){
+                            foreach($this->data['Eventproposalprocedure'] as $key=>$val){
+                        ?>
+                        <tr class="procedure_slot">
+                            <td>
+                                <?php echo $this->Form->input('Eventproposalprocedure.'.$procdure_count.'.date', array('type'=>"text",'div'=>false, 'label'=>false, 'class'=>'form-control datepicker'));?>
+                            </td>
+                            <td>
+                                <?php echo $this->Form->input('Eventproposalprocedure.'.$procdure_count.'.time', array('type'=>"text",'div'=>false, 'label'=>false, 'class'=>'form-control timepicker'));?>
+                            </td>
+                            <td>
+                                <?=$this->Form->input("Eventproposalprocedure.".$procdure_count.".objective", array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                            </td>
+                            <td>
+                                <?=$this->Form->input("Eventproposalprocedure.".$procdure_count.".procedure", array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                            </td>
+                            <td>
+                                <?=$this->Form->input("Eventproposalprocedure.".$procdure_count.".incharges", array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                            </td>
+                            <td>
+                                <?=$this->Form->input("Eventproposalprocedure.".$procdure_count.".inventory", array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                            </td>
+                            <td>
+                                <?=$this->Html->link("移除", "javascript:void(0)", array("class"=>"btn btn-danger proceduredelbtn"));?>
+                            </td>
+                        </tr>
+                    <?
+                        $procdure_count++;
+                        }
+                    }
+                    ?>
+                </table>
+            </div>
+        </div>
+
+        <script>
+            var procdure_count = <?=$procdure_count?>;
+        </script>
+
+        <div class="panel-heading">
+            <span class="panel-title">其他<small></small></span>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <?php echo $this->Form->label('contingency', __('應變方法'), 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('contingency', array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                </div>
+            </div> <!-- / .form-group -->
+            <div class="form-group">
+                <?php echo $this->Form->label('evaluation', __('評估方法'), 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('evaluation', array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                </div>
+            </div> <!-- / .form-group -->
+            <div class="form-group">
+                <?php echo $this->Form->label('effective', __('成效指標'), 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('effective', array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                </div>
+            </div> <!-- / .form-group -->
+            <div class="form-group">
+                <?php echo $this->Form->label('remarks', __('備註'), 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('remarks', array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                </div>
+            </div> <!-- / .form-group -->
+        </div>
+
+        <div class="panel-footer text-right">
+            <button type="submit" class="btn btn-primary" ><i class="glyphicon glyphicon-ok-sign"></i><? echo ' '.__('儲存');?></button>
+        </div>
+        <?php echo $this->Form->end(); ?>
+
+    </div>
+
+    <div style="display:none">
+        <table >
+            <tbody>
+            <tr id="sampleprocedure">
+                <td>
+                    <?php echo $this->Form->input('Eventproposalprocedure.__COUNT__.date', array('type'=>"text",'div'=>false, 'label'=>false, 'class'=>'form-control datepicker'));?>
+                </td>
+                <td>
+                    <?php echo $this->Form->input('Eventproposalprocedure.__COUNT__.time', array('type'=>"text",'div'=>false, 'label'=>false, 'class'=>'form-control timepicker'));?>
+                </td>
+                <td>
+                    <?=$this->Form->hidden("Eventproposalprocedure.__COUNT__.eventproposal_id", array('value'=>$eventproposal['Eventproposal']['id']));?>
+                    <?=$this->Form->input("Eventproposalprocedure.__COUNT__.objective", array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                </td>
+                <td>
+                    <?=$this->Form->input("Eventproposalprocedure.__COUNT__.procedure", array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                </td>
+                <td>
+                    <?=$this->Form->input("Eventproposalprocedure.__COUNT__.incharges", array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                </td>
+                <td>
+                    <?=$this->Form->input("Eventproposalprocedure.__COUNT__.inventory", array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                </td>
+                <td>
+                    <?=$this->Html->link("移除", "javascript:void(0)", array("class"=>"btn btn-danger proceduredelbtn"));?>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+
+        function addprocedure(){
+            var html_cell = $("#sampleprocedure").html();
+            html_cell = html_cell.replace(/__COUNT__/g, procdure_count);
+
+            $("#proceduretable").append("<tr class='procedure_slot' id='procedure_"+procdure_count+"'>"+html_cell+"</tr>");
+            var options = {
+                minuteStep: 5,
+                showSeconds: false,
+                showMeridian: false,
+                showInputs: false,
+                defaultTime: '08:00 AM',
+                orientation: $('body').hasClass('right-to-left') ? { x: 'right', y: 'auto'} : { x: 'auto', y: 'auto'}
+            }
+            $('#procedure_'+procdure_count+' .timepicker').timepicker(options);
+            $('#procedure_'+procdure_count+' .datepicker').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                todayBtn: "linked"
+            });
+
+            procdure_count++;
+        }
+
+        $(document).ready(function () {
+            <?if($eventproposal['Eventproposal']['approvalrecordstatus_id'] == 1){?>
+            bootbox.alert({
+                message: "注意： 活動計劃書已批閱，如果內容更改，將要重新批閱。",
+                callback: function() {
+
+                },
+                className: "bootbox-sm"
+            });
+
+            <?}?>
+
+            var options2 = {
+                format: 'yyyy-mm-dd',
+                todayBtn: "linked",
+                orientation: $('body').hasClass('right-to-left') ? "auto right" : 'auto auto',
+                <?if(!empty($_cutoffdate)){?>
+                startDate:'<?=h($_cutoffdate['Cutoffdate']['name'])?>'
+                <?}?>
+            };
+            $('#range').datepicker(options2);
+
+            var options = {
+                minuteStep: 5,
+                orientation: $('body').hasClass('right-to-left') ? { x: 'right', y: 'auto'} : { x: 'auto', y: 'auto'}
+            }
+            $('.timepicker').timepicker(options);
+
+            $("#proceduretable").on("click", ".proceduredelbtn", function(){
+                $(this).closest(".procedure_slot").remove();
+            });
+
+        });
+    </script>

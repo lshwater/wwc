@@ -1,0 +1,243 @@
+<ul class="breadcrumb">
+    <li>
+        <?=$this->Html->link("查看活動計劃 - ".h($activity['Eventproposal']['name'])."( 編號: ".h($activity['Eventproposal']['event_code'])." )", array("controller"=>"Eventproposals","action"=>"view", $activity['Eventproposal']['id'], "#"=>"tab".$activity['Activity']['id']))?>
+    </li>
+    <li class="active">編輯活動/小組</li>
+</ul>
+
+<div class="panel">
+    <div class="panel-heading">
+        <h2>
+            編輯活動/小組
+            <button type="button" class="close modalonly" data-dismiss="modal" style="display:none"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        </h2>
+    </div>
+    <?php echo $this->Form->create('Activity', array('class'=>'form-horizontal validate_form preventDoubleSubmission')); ?>
+    <?php echo $this->Form->hidden('id');?>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-sm-5">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('name', __('活動/服務 名稱'), 'control-label'); ?>
+                    <?php echo $this->Form->input('name', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>'活動名稱', 'required'=>"required"));?>
+                </div>
+            </div>
+            <div class="col-sm-7">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('startdate', __('日期'), 'control-label'); ?>
+                    <div class="input-daterange input-group bs-datepicker-range">
+                        <?php echo $this->Form->input('startdate', array('type' => 'text', 'div' => false, 'label' => false, 'class' => 'form-control input-sm datecount', 'required' => 'required', 'id' => 'startdate', 'placeholder'=>'開始日期')); ?>
+                        <span class="input-group-addon">to</span>
+                        <?php echo $this->Form->input('enddate', array('type' => 'text', 'div' => false, 'label' => false, 'class' => 'form-control input-sm datecount', 'required' => 'required', 'id' => 'enddate', 'placeholder'=>'結束日期')); ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('target', __('服務對象'), 'control-label'); ?>
+                    <?php echo $this->Form->input('target', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>'服務對象'));?>
+                </div>
+            </div><!-- col-sm-6 -->
+            <div class="col-sm-4">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('quota', __('名額'), 'control-label'); ?>
+                    <?php echo $this->Form->input('quota', array('div'=>false, 'label'=>false, 'class'=>'form-control vd_number', 'placeholder'=>'eg: 2', 'required'=>"required"));?>
+                </div>
+            </div><!-- col-sm-6 -->
+
+        </div>
+
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('place', __('地點'), 'control-label'); ?>
+                    <?php echo $this->Form->input('place', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>'地點'));?>
+                </div>
+            </div><!-- col-sm-6 -->
+            <div class="col-sm-4">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('tutor', __('導師'), 'control-label'); ?>
+                    <?php echo $this->Form->input('tutor', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>'導師'));?>
+                </div>
+            </div><!-- col-sm-6 -->
+            <div class="col-sm-4">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('incharge', __('負責職員'), 'control-label'); ?>
+                    <?php echo $this->Form->input('incharge', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>'負責職員'));?>
+                </div>
+            </div><!-- col-sm-6 -->
+        </div>
+        <?
+            if(!$activity['Activity']['publish'] || $issupervisor){
+        ?>
+        <h3>統計設定</h3>
+            <?
+            if($activity['Activity']['publish']){
+            ?>
+                <div class="panel panel-warning" id="warning">
+                    <div class="panel-heading">
+                        <span class="panel-title"><i class="fa fa-warning"></i> 更改統計設定有機會影響報告結果。</span>
+                        <div class="panel-heading-controls">
+                            <?php echo $this->Html->link('顯示', "javascript:void(0);", array('escape'=>false, "class"=>"btn btn-warning", 'id'=>"confirmchange")); ?>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    $(document).ready(function () {
+                        $("#editcontrol").hide();
+                        $("#confirmchange").click(function(){
+                            $("#editcontrol").show();
+                            $("#warning").hide();
+                        });
+                    });
+                </script>
+            <?
+            }
+            ?>
+        <div id="editcontrol">
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group no-margin-hr">
+                        <?php echo $this->Form->label('countuser_id', __('預設職員'), 'control-label'); ?>
+                        <?php echo $this->Form->input('countuser_id', array('div'=>false, 'label'=>false, 'class'=>'form-control select2', "empty"=>true));?>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group no-margin-hr">
+                        <?php echo $this->Form->label('Unit', __('單位 (如不用統計，（例如：興趣班）請留空。)'), 'control-label'); ?>
+                        <?php echo $this->Form->input('Unit', array('div'=>false, 'label'=>false, 'class'=>'form-control select2', "empty"=>true));?>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group no-margin-hr">
+                        <?php echo $this->Form->label('activitytype_id', __('類型'), 'control-label'); ?>
+                        <?php echo $this->Form->input('activitytype_id', array('div'=>false, 'label'=>false, 'class'=>'form-control select2', 'required'=>"required", "empty"=>true));?>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group no-margin-hr">
+                        <?php echo $this->Form->label('activitygroup_id', __('類別'), 'control-label'); ?>
+                        <?php echo $this->Form->input('activitygroup_id', array('div'=>false, 'label'=>false, 'class'=>'form-control select2', 'required'=>"required", "empty"=>true));?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?
+            }
+        ?>
+        <h3>報名設定</h3>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('enrolstart', __('報名日期'), 'control-label'); ?>
+                    <div class="input-daterange input-group bs-datepicker-range">
+                        <?php echo $this->Form->input('enrolstart', array('type' => 'text', 'div' => false, 'label' => false, 'class' => 'form-control input-sm ', 'placeholder'=>'開始日期')); ?>
+                        <span class="input-group-addon">to</span>
+                        <?php echo $this->Form->input('enrolend', array('type' => 'text', 'div' => false, 'label' => false, 'class' => 'form-control input-sm ', 'placeholder'=>'結束日期')); ?>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('memberonly', __('只限會員'), 'control-label'); ?>
+                    <?php echo $this->Form->input('memberonly', array('div'=>false, 'label'=>false, 'class'=>'form-control', "checked"=>"checked"));?>
+                </div>
+            </div><!-- col-sm-6 -->
+            <div class="col-sm-3">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('membershipcheck', __('會籍必須至 (可留空)'), 'control-label'); ?>
+                    <?php echo $this->Form->input('membershipcheck', array('div'=>false, "type"=>"text",'label'=>false, 'class'=>'form-control', "id"=>"datepicker"));?>
+                </div>
+            </div><!-- col-sm-6 -->
+        </div>
+
+        <h3>收費</h3>
+        <hr>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('fee', __('基本費用 ／ 非會員費用 (HKD)＊'), 'control-label'); ?>
+                    <?php echo $this->Form->input('fee', array('div'=>false, 'label'=>false, "type"=>'text','class'=>'form-control vd_isnumber', 'placeholder'=>'基本收費', 'required'=>"required"));?>
+                </div>
+            </div>
+        </div>
+        <?if(!empty($membertypes)){
+            ?>
+            <p>其他會員類別</p>
+            <div class="row">
+                <?
+                foreach($membertypes as $key=>$type){
+                    if(!empty($this->data['Activityfee'][$key])){
+                        echo $this->Form->hidden("Activityfee.".$key.".id", array("value"=>$this->data['Activityfee']['id']));
+                    }
+                    ?>
+
+                    <div class="col-sm-6">
+                        <div class="form-group no-margin-hr">
+                            <?=$this->Form->hidden("Activityfee.".$key.".membertype_id", array("value"=>$key));?>
+                            <?php echo $this->Form->label("Activityfee.".$key.".fee", h($type).__('的費用 (HKD)'), 'control-label'); ?>
+                            <?php echo $this->Form->input("Activityfee.".$key.".fee", array('div'=>false, 'label'=>false, "type"=>'text','class'=>'form-control vd_isnumber', 'placeholder'=>'(留空會自動填為基本收費)'));?>
+                        </div>
+                    </div>
+
+                <?
+                }
+                ?>
+            </div>
+        <?
+        }?>
+        <h3>其他</h3>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('remarks', __('活動備註'), 'control-label'); ?>
+                    <?php echo $this->Form->input('remarks', array('div'=>false, 'label'=>false,'class'=>'form-control', 'placeholder'=>'活動備註'));?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer text-right">
+        <button type="submit" class="btn btn-primary" ><i class="glyphicon glyphicon-ok-sign"></i><? echo ' '.__('確定');?></button>
+    </div>
+    <?php echo $this->Form->end(); ?>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var options = {
+            orientation: $('body').hasClass('right-to-left') ? "auto right" : 'auto auto',
+            autoclose: true,
+            format: 'yyyy-mm-dd',
+            todayBtn: 'linked'
+            <?
+                if(!empty($_cutoffdate)){
+            ?>
+            ,startDate:'<?=h($_cutoffdate['Cutoffdate']['name'])?>'
+            <?
+                }
+            ?>
+        }
+
+        $('.bs-datepicker-range').datepicker(options);
+        $('#datepicker').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true,
+            todayBtn: "linked"
+            <?
+                if(!empty($_cutoffdate)){
+            ?>
+            ,startDate:'<?=h($_cutoffdate['Cutoffdate']['name'])?>'
+            <?
+                }
+            ?>
+        });
+
+    });
+</script>
+

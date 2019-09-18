@@ -1,0 +1,543 @@
+<?php
+App::uses('AppModel', 'Model');
+App::uses('SimplePasswordHasher', 'Controller/Component/Auth');
+/**
+ * Member Model
+ *
+ * @property Memberinputfield $Memberinputfield
+ * @property Membertype $Membertype
+ */
+class Member extends AppModel {
+
+    public $gender = array(
+        "M"=>"男",
+        "F"=>"女"
+    );
+
+	public $validate = array(
+		'active' => array(
+			'boolean' => array(
+				'rule' => array('boolean'),
+				//'message' => 'Your custom message here',
+				//'allowEmpty' => false,
+				//'required' => false,
+				//'last' => false, // Stop validation after this rule
+				//'on' => 'create', // Limit validation to 'create' or 'update' operations
+			),
+		),
+        'identity' => array(
+            'notempty' => array(
+                'rule' => array('notempty'),
+                'message' => '不能留空',
+                //'allowEmpty' => false,
+                //'required' => false,
+                //'last' => false, // Stop validation after this rule
+                //'on' => 'create', // Limit validation to 'create' or 'update' operations
+            ),
+            'unique' => array(
+                'rule' => 'isUnique',
+                'required' => 'create',
+                'message' => '已經存在'
+            ),
+        ),
+        'identityhash'=>array(
+            'unique' => array(
+                'rule' => 'isUnique',
+                'required' => 'create',
+                'message' => '已經存在'
+            ),
+        ),
+	);
+
+    public $belongsTo = array(
+        'Identitytype' => array(
+            'className' => 'Identitytype',
+            'foreignKey' => 'identitytype_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+    );
+
+	//The Associations below have been created with all possible keys, those that are not needed can be removed
+    public $hasMany = array(
+        "Parentmember"=> array(
+            'className' => 'MembersMemberrelation',
+            'foreignKey' => 'member_parent',
+            'dependent' => true
+        ),
+        "Childmember"=> array(
+            'className' => 'MembersMemberrelation',
+            'foreignKey' => 'member_child',
+            'dependent' => true
+        ),
+        'Membership' => array(
+            'className' => 'Membership',
+            'foreignKey' => 'member_id',
+            'dependent' => true,
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        ),
+        'Membershiprecord' => array(
+            'className' => 'Membershiprecord',
+            'foreignKey' => 'member_id',
+            'dependent' => true,
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        )
+    );
+
+/**
+ * hasAndBelongsToMany associations
+ *
+ * @var array
+ */
+	public $hasAndBelongsToMany = array(
+        'Activity'=> array(
+            'className' => 'Activity',
+            'joinTable' => 'activityapplicants',
+            'foreignKey' => 'member_id',
+            'associationForeignKey' => 'activity_id',
+            'unique' => 'keepExisting',
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'finderQuery' => '',
+        ),
+	);
+
+    public function __construct($id = false, $table = null, $ds = null) {
+        parent::__construct($id, $table, $ds);
+        $this->virtualFields['displayname'] = sprintf(
+            'CONCAT(%s.c_name, " ", %s.e_name)', $this->alias, $this->alias
+        );
+        $this->virtualFields['age'] = "YEAR(NOW())-YEAR(".$this->alias.".dob)";
+    }
+
+    public function beforeValidate($id = false, $table = null, $ds = null) {
+        parent::__construct($id, $table, $ds);
+        if (!empty($this->data[$this->alias]['identity'])) {
+            $this->data[$this->alias]['identity'] = strtoupper(trim($this->data[$this->alias]['identity']));
+            $this->data[$this->alias]['identityhash'] = $this->datahash($this->data[$this->alias]['identity']);
+            $this->data[$this->alias]['identity'] = $this->encryptdata($this->data[$this->alias]['identity']);
+        }
+
+
+    }
+
+    public function savehistory($id, $data){
+
+        App::import('Model', 'Dbmodel');
+        $db_model = new Dbmodel();
+
+        $log_field = $db_model->getlogfield($this->alias);
+
+        App::import('Model', 'Updatelog');
+        $log = new Updatelog();
+
+        if($id){
+            $original = $this->find('first',array(
+                'conditions'=>array(
+                    $this->alias.'.id'=>$id
+                ),
+                'recursive'=>-1
+            ));
+
+            foreach ($original[$this->alias] as $field =>$val){
+
+                if(!empty($log_field[$field])){
+                    if($field == 'identity'){
+                        $data[$this->alias][$field] = $this->decryptdata($data[$this->alias][$field]);
+                    }
+
+                    if($data[$this->alias][$field] && $val && $val != $data[$this->alias][$field]){
+
+                        $new_log = array(
+                            'item_model'=>$this->alias,
+                            'item_id'=>$id,
+                            'type'=>'update',
+                            'field'=>$field,
+                            'before'=>$val,
+                            'after'=>$data[$this->alias][$field],
+                            'user_id'=>CakeSession::read("Auth.User.id"),
+                        );
+                        $log->create();
+                        $log->save($new_log);
+
+                    }
+                }
+            }
+        }
+
+    }
+
+    public function beforeSave($options = array()) {
+
+        if (isset($this->data[$this->alias]['e_name_first'])) {
+            $this->data[$this->alias]['e_name_first'] = trim($this->data[$this->alias]['e_name_first']);
+            $this->data[$this->alias]['e_name_first'] = strtoupper($this->data[$this->alias]['e_name_first']);
+        }
+        if (isset($this->data[$this->alias]['e_name_last'])) {
+            $this->data[$this->alias]['e_name_last'] = trim($this->data[$this->alias]['e_name_last']);
+            $this->data[$this->alias]['e_name_last'] = strtoupper($this->data[$this->alias]['e_name_last']);
+        }
+        if (isset($this->data[$this->alias]['e_name_last']) && isset($this->data[$this->alias]['e_name_last'])) {
+            $this->data[$this->alias]['e_name'] = $this->data[$this->alias]['e_name_last'].' '.$this->data[$this->alias]['e_name_first'];
+        }
+
+        if (isset($this->data[$this->alias]['c_name'])) {
+            $this->data[$this->alias]['c_name'] = trim($this->data[$this->alias]['c_name']);
+        }
+        $this->savehistory($this->data[$this->alias]['id'], $this->data);
+
+        return true;
+    }
+
+    public function beforeFind($queryData) {
+
+        if (isset($queryData['conditions'][$this->alias.'.e_name'])) {
+            $queryData['conditions'][$this->alias.'.e_name'] = strtoupper($queryData['conditions'][$this->alias.'.e_name']);
+        }
+
+        if (isset($queryData['conditions'][$this->alias.'.e_name_first'])) {
+            $queryData['conditions'][$this->alias.'.e_name_first'] = strtoupper($queryData['conditions'][$this->alias.'.e_name_first']);
+        }
+
+        if (isset($queryData['conditions'][$this->alias.'.e_name_last'])) {
+            $queryData['conditions'][$this->alias.'.e_name_last'] = strtoupper($queryData['conditions'][$this->alias.'.e_name_last']);
+        }
+
+        if (isset($queryData['conditions'][$this->alias.'.c_name'])) {
+            $queryData['conditions'][$this->alias.'.c_name'] = strtoupper($queryData['conditions'][$this->alias.'.c_name']);
+        }
+
+        return $queryData;
+    }
+
+    public function checkreportrange($id, $from_input, $to_input){
+
+        $in_range = false;
+
+        if(empty($from_input) || empty($to_input)){
+            return false;
+        }
+
+        $from = min($from_input, $to_input);
+        $to = max($from_input, $to_input);
+
+        $this->Behaviors->load('Containable');
+        $member = $this->find('first',array(
+            'conditions'=>array(
+                'Member.id'=>$id
+            ),
+            'contain'=>array(
+                'Parentmember.Parentmember',
+                'Childmember.Childmember'
+            )
+
+        ));
+
+        if(empty($member)){
+            return false;
+        }
+        $min_age = 0;
+        $max_age = 0;
+
+        /*
+        max < 6
+        min < 6,  6 < max < 24
+        6 < min < 24, 6 < max < 24
+        6 < min < 24, 24 < max
+        24 < min, 24 < max
+        */
+
+        if($member['Member']['dob'] < $from ){
+            $min_age = date_diff(date_create($member['Member']['dob']), date_create($from))->y;
+            $max_age = date_diff(date_create($member['Member']['dob']), date_create($to))->y;
+        }else if($member['Member']['dob'] < $to ){
+            $max_age = date_diff(date_create($member['Member']['dob']), date_create($to))->y;
+        }
+
+
+        if(!($max_age < 6 || ($max_age > 24 && $min_age > 24))){
+            $in_range = true;
+            return $in_range;
+        }else{
+
+            foreach($member['Parentmember'] as $k=>$persion){
+                $min_age = 0;
+                $max_age = 0;
+
+                if($persion['Childmember']['dob'] < $from ){
+                    $min_age = date_diff(date_create($persion['Childmember']['dob']), date_create($from))->y;
+                    $max_age = date_diff(date_create($persion['Childmember']['dob']), date_create($to))->y;
+                }else if($persion['Childmember']['dob'] < $to ){
+                    $max_age = date_diff(date_create($persion['Childmember']['dob']), date_create($to))->y;
+                }
+
+                if(!($max_age < 6 || ($max_age > 24 && $min_age > 24))){
+                    $in_range = true;
+                    return $in_range;
+                }
+            }
+
+            foreach($member['Childmember'] as $k=>$persion){
+                $min_age = 0;
+                $max_age = 0;
+
+                if($persion['Parentmember']['dob'] < $from ){
+                    $min_age = date_diff(date_create($persion['Parentmember']['dob']), date_create($from))->y;
+                    $max_age = date_diff(date_create($persion['Parentmember']['dob']), date_create($to))->y;
+                }else if($persion['Parentmember']['dob'] < $to ){
+                    $max_age = date_diff(date_create($persion['Parentmember']['dob']), date_create($to))->y;
+                }
+
+                if(!($max_age < 6 || ($max_age > 24 && $min_age > 24))){
+                    $in_range = true;
+                    return $in_range;
+                }
+            }
+        }
+
+        return $in_range;
+    }
+
+
+    public function checkreportdate($id, $defaultdate = null){
+
+        $in_range = false;
+
+        $range = range(6,24);
+        $date = "";
+        $max_age = "";
+
+        $this->Behaviors->load('Containable');
+        $member = $this->find('first',array(
+            'conditions'=>array(
+                'Member.id'=>$id
+            ),
+            'contain'=>array(
+                'Parentmember.Parentmember',
+                'Childmember.Childmember'
+            )
+
+        ));
+
+        if(empty($member)){
+            return false;
+        }
+
+        if(in_array($member['Member']['age'], $range)){
+            $in_range = true;
+        }else{
+            if($member['Member']['age'] < 6){
+                $date = $member['Member']['dob'];
+                $max_age = $member['Member']['age'];
+            }
+
+            foreach($member['Parentmember'] as $k=>$persion){
+                if(in_array($persion['Childmember']['age'], $range)){
+                    $in_range = true;
+                }else{
+                    if($persion['Childmember']['age'] < 6){
+                        $date = min($date, $persion['Childmember']['dob']);
+                        $max_age = max($max_age, $persion['Childmember']['age']);
+                    }
+                }
+            }
+
+            foreach($member['Childmember'] as $k=>$persion){
+                if(in_array($persion['Parentmember']['age'], $range)){
+                    $in_range = true;
+                }else{
+                    if($persion['Parentmember']['age'] < 6){
+                        $date = min($date, $persion['Parentmember']['dob']);
+                        $max_age = max($max_age, $persion['Parentmember']['age']);
+                    }
+                }
+            }
+        }
+
+        if($in_range){
+            if(!$defaultdate){
+                return date('Y-m')."-01";
+            }else{
+                return $defaultdate;
+            }
+
+        }else if(!empty($date)){
+            $year = date('Y') + 6-$max_age;
+            return $year."-".date("m-d",strtotime($date));
+        }else{
+            return false;
+        }
+    }
+
+    public function generatepassword($length = 8){
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $count = mb_strlen($chars);
+
+        for ($i = 0, $result = ''; $i < $length; $i++) {
+            $index = rand(0, $count - 1);
+            $result .= mb_substr($chars, $index, 1);
+        }
+
+        return $result;
+    }
+
+    /*
+     * Search Handler
+     */
+    public $actsAs = array('Search.Searchable');
+
+    public $filterArgs = array(
+        'filter' => array('type' => 'query', 'method' => 'orConditions'),
+    );
+
+    public function orConditions($data = array()) {
+
+    }
+
+    //HKID
+    public function replace_identity(&$item2, $key){
+
+        if($key == "identity"){
+            $item2 = $this->decryptdata($item2);
+            // for demo
+//            $item2 = substr($item2, 0,1)."XXXXXX(X)";
+        }
+
+    }
+
+    public function afterFind($results, $primary = false) {
+        foreach ($results as $key => $val) {
+//            if (isset($val[$this->alias]['dob'])) {
+//                $results[$key][$this->alias]['age'] = date_diff(date_create($val[$this->alias]['dob']), date_create('today'))->y;
+//            }
+            
+            // for demo
+//            if (isset($val['Member']['c_name'])) {
+//	            $results[$key]['Member']['c_name'] = substr($val['Member']['c_name'], 0,3)."XX";
+//	        }
+	        // for demo
+//	        if (isset($val['Member']['e_name'])) {
+//	            $results[$key]['Member']['e_name'] = substr($val['Member']['e_name'], 0,1)."XX XXX XXX";
+//	        }
+	        
+        }
+
+        array_walk_recursive($results, array($this,'replace_identity'));
+
+        return $results;
+    }
+
+
+    //checkmembership (date)
+//    public function checkmembership($id = null, $date = null, &$msg){
+//        if(!$this->exists($id)){
+//            $msg = "沒有此會員";
+//            return false;
+//        }
+//        if(!$date){
+//            $date = date("Y-m-d");
+//        }
+//        $rs = $this->find("count", array(
+//            "conditions"=>array(
+//                $this->alias.".valid"=>1,
+//                $this->alias.".active"=>1,
+//                $this->alias.".membershipdate >= "=>$date,
+//                $this->alias.".id"=>$id
+//            )
+//        ));
+//        if($rs == 0){
+//            $msg = "會籍不合資格，必須先續會到 {$date} 或以後日子。";
+//            return false;
+//        }
+//
+//        return true;
+//    }
+
+//    public function deactiveapplication($id=null){
+//        if(!$this->exists($id)){
+//            return false;
+//        }
+//
+//        $this->Behaviors->load('Containable');
+//        $options = array(
+//            'conditions' => array(
+//                'Member.' . $this->primaryKey => $id
+//            ),
+//            'contain' => array(
+//                'Memberapplication.id'
+//            ),
+//        );
+//
+//        $member = $this->find('first', $options);
+//        if(empty($member)){
+//            return false;
+//        }
+//        foreach($member['Memberapplication'] as $application){
+//
+//            $this->Memberapplication->id = $application['id'];
+//            if(!$this->Memberapplication->saveField('active', 0)){
+//                return false;
+//            }
+//        }
+//
+//        return true;
+//
+//    }
+
+//    public function constructvolunteer($member=null, $member_id=null){
+////        debug($member);
+//        $volunteer = null;
+//
+//        //id
+//        $volunteer['Volunteer']['member_id'] = $member_id;;
+//        //construct mandatory field
+//        $volunteer['Volunteer']['e_name'] = $member['Member']['e_name_last'].' '.$member['Member']['e_name_first'];
+//        $volunteer['Volunteer']['dob'] = $member['Member']['dob'];
+//        $volunteer['Volunteer']['gender'] = $this->retrievememberfield($member, 6);
+//        $volunteer['Volunteer']['phone_main'] = $this->retrievememberfield($member, 10);
+//        $volunteer['Volunteer']['identitytype_id'] = $member['Member']['identitytype_id'];
+//        $volunteer['Volunteer']['identity'] = $member['Member']['identity'];
+//
+//        //construct optional field
+//        $volunteer['Volunteer']['c_name'] = $member['Member']['c_name'];
+//        $volunteer['Volunteer']['membercard'] = $member['Member']['membercard'];
+//        $volunteer['Volunteer']['phone_other'] = $this->retrievememberfield($member, 11);
+//        $volunteer['Volunteer']['address'] = $this->retrievememberfield($member, 8);
+//        $volunteer['Volunteer']['email'] = $this->retrievememberfield($member, 9);
+//        $volunteer['Volunteer']['education_level'] = $this->retrievememberfield($member, 15);
+//
+//        //Eventproposaltarget
+//        $volunteer['Eventproposaltarget'] = $member['Eventproposaltarget'];
+//        $volunteer['Volunteertype'] = array(1);
+//        return $volunteer;
+//    }
+
+    //retrieve member customer field by field_id
+    public function retrievememberfield($member=null, $field_id=null){
+        foreach($member['MemberCustomField'] as $field){
+            if($field['memberinputfield_id'] == $field_id){
+                return $field['value'];
+            }
+        }
+        return null;
+    }
+    
+}

@@ -1,0 +1,334 @@
+<?
+    if($case['Casemanagement']['application_success']){
+        $dateofapprovalclass = "success";
+        $dateofapprovalicon = "check";
+    }else{
+        $dateofapprovalclass = "danger";
+        $dateofapprovalicon = "times";
+    }
+?>
+
+<ul class="breadcrumb">
+    <li>
+        <?=$this->Html->link("我的個案", array("action"=>"index"))?>
+    </li>
+    <li class="active"><?=h($case['Casemanagement']['code']) ?></li>
+</ul>
+
+<div class="row m-t-1">
+    <div class="col-md-2">
+
+        <?
+        if($case['Casemanagement']['user_id'] == $auth['id']){
+            ?>
+            <div class="panel panel-transparent">
+                <div class="panel-heading">
+                    <span class="panel-title"> 設定 </span>
+                </div>
+                <div class="list-group">
+                    <?
+                    if($case['Casemanagement']['closed'] != 1){
+                        echo $this->Form->postLink('<i class="fa fa-times" style="color: red"></i> 刪除個案', array('action' => 'delete', $case['Casemanagement']['id']), array('escape'=>false, "class"=>"list-group-item"), __('你確的要完全刪除個案 %s? 這個行動是不能復回的。', $case['Casemanagement']['code']));
+                    }
+                    ?>
+                    <?
+                        if(!$case['Casemanagement']['closed']){
+                            ?>
+                            <div class="btn-group" role="group">
+                                <?echo $this->Html->Link('<i class="fa fa-dot-circle-o" style="color: red"></i>  結束個案', array("action"=>'closecase', $case['Casemanagement']['id'],'redirect'=>urlencode($this->Html->url(null, true)), 'ajax'=>true), array("class" => "list-group-item", 'escape' => false, 'data-toggle'=>"modal", 'data-target'=>'#modal', 'data-backdrop'=>"static"));?>
+                            </div>
+                        <?
+                        }else{
+                            ?>
+                            <div class="btn-group" role="group">
+                                <?=$this->Form->postLink('<i class="fa fa-refresh" style="color: #4ab6d5"></i> 重開個案', array('action'=>"reactivecase", $case['Casemanagement']['id']), array("class" => "list-group-item", 'escape' => false), __('你確定重開個案？'));?>
+                            </div>
+                        <?
+                        }
+                    ?>
+                </div>
+            </div>
+        <?}?>
+        <?if(!empty($case_menu[$case['Casemanagement']['status']])){?>
+            <div class="panel panel-transparent">
+                <div class="panel-heading">
+                    <span class="panel-title"> 表格 </span>
+                </div>
+                <div class="list-group">
+                    <?
+                    foreach($case_menu[$case['Casemanagement']['status']] as $item){
+                        $action = $item['action'] + array($case['Casemanagement']['id'], 'redirect'=>urlencode($this->Html->url(null, true)), 'ajax'=>true);
+                        ?>
+                        <div class="btn-group" role="group">
+                            <?echo $this->Html->Link('<i class="fa fa-file-word-o text-info"></i> '.$item['name'], $action, array("class" => "list-group-item ", 'escape' => false, 'data-toggle'=>"modal", 'data-target'=>'#modal', 'data-backdrop'=>"static"));?>
+                        </div>
+                    <?}?>
+<!--                    <div class="btn-group" role="group">-->
+<!--                        --><?//echo $this->Html->Link('<i class="fa fa-file-word-o text-info"></i> 個案諮詢表', array("controller"=>"Servicerecords","action"=>'add', $case['Casemanagement']['id'],'redirect'=>urlencode($this->Html->url(null, true)), 'ajax'=>true), array("class" => "list-group-item ", 'escape' => false, 'data-toggle'=>"modal", 'data-target'=>'#modal', 'data-backdrop'=>"static"));?>
+<!--                    </div>-->
+<!--                    <div class="btn-group" role="group">-->
+<!--                        --><?//echo $this->Html->Link('<i class="fa fa-file-word-o text-info"></i> 個案諮詢表', array("controller"=>"caseenquiryforms","action"=>'add', $case['Casemanagement']['id'],'redirect'=>urlencode($this->Html->url(null, true)), 'ajax'=>true), array("class" => "list-group-item ", 'escape' => false, 'data-toggle'=>"modal", 'data-target'=>'#modal', 'data-backdrop'=>"static"));?>
+<!--                    </div>-->
+<!--                    <div class="btn-group" role="group">-->
+<!--                        --><?//echo $this->Html->Link('<i class="fa fa-file-word-o text-info"></i> 個案評估表', array("controller"=>"caseassessments","action"=>'add', $case['Casemanagement']['id'],'redirect'=>urlencode($this->Html->url(null, true)), 'ajax'=>true), array("class" => "list-group-item ", 'escape' => false, 'data-toggle'=>"modal", 'data-target'=>'#modal', 'data-backdrop'=>"static"));?>
+<!--                    </div>-->
+<!--                    <div class="btn-group" role="group">-->
+<!--                        --><?//echo $this->Html->Link('<i class="fa fa-file-word-o text-info"></i> 個案重檢表', array("controller"=>"Servicerecords","action"=>'add', $case['Casemanagement']['id'],'redirect'=>urlencode($this->Html->url(null, true)), 'ajax'=>true), array("class" => "list-group-item ", 'escape' => false, 'data-toggle'=>"modal", 'data-target'=>'#modal', 'data-backdrop'=>"static"));?>
+<!--                    </div>-->
+<!--                    <div class="btn-group" role="group">-->
+<!--                        --><?//echo $this->Html->Link('<i class="fa fa-file-word-o text-info"></i> 個案服務記錄', array("controller"=>"Servicerecords","action"=>'add', $case['Casemanagement']['id'],'redirect'=>urlencode($this->Html->url(null, true)), 'ajax'=>true), array("class" => "list-group-item ", 'escape' => false, 'data-toggle'=>"modal", 'data-target'=>'#modal', 'data-backdrop'=>"static"));?>
+<!--                    </div>-->
+<!--                    <div class="btn-group" role="group">-->
+<!--                        --><?//echo $this->Html->Link('<i class="fa fa-file-word-o text-info"></i> 轉介個案', array("controller"=>"casereferralforms","action"=>'add', $case['Casemanagement']['id'],'redirect'=>urlencode($this->Html->url(null, true)), 'ajax'=>true), array("class" => "list-group-item ", 'escape' => false, 'data-toggle'=>"modal", 'data-target'=>'#modal', 'data-backdrop'=>"static"));?>
+<!--                    </div>-->
+<!--                    <div class="btn-group" role="group">-->
+<!--                        --><?//echo $this->Html->Link('<i class="fa fa-file-word-o text-info"></i> 個案轉介跟進', array("controller"=>"casereferralforms","action"=>'add', $case['Casemanagement']['id'],'redirect'=>urlencode($this->Html->url(null, true)), 'ajax'=>true), array("class" => "list-group-item ", 'escape' => false, 'data-toggle'=>"modal", 'data-target'=>'#modal', 'data-backdrop'=>"static"));?>
+<!--                    </div>-->
+                </div>
+            </div>
+        <?}?>
+
+        <div class="panel panel-transparent">
+            <div class="panel-heading">
+                <span class="panel-title"> 匯出 </span>
+            </div>
+            <div class="list-group">
+                <div class="btn-group" role="group">
+                    <?echo $this->Html->Link('<i class="fa fa-file-word-o text-info"></i> 個案轉介表', array("controller"=>"casereferralforms","action"=>'add', $case['Casemanagement']['id'],'redirect'=>urlencode($this->Html->url(null, true)), 'ajax'=>true), array("class" => "list-group-item ", 'escape' => false, 'data-toggle'=>"modal", 'data-target'=>'#modal', 'data-backdrop'=>"static"));?>
+                </div>
+<!--                <div class="btn-group" role="group">-->
+<!--                    --><?//echo $this->Html->Link('<i class="fa fa-file-word-o text-info"></i> 個案轉介跟進', array("controller"=>"casereferralforms","action"=>'add', $case['Casemanagement']['id'],'redirect'=>urlencode($this->Html->url(null, true)), 'ajax'=>true), array("class" => "list-group-item ", 'escape' => false, 'data-toggle'=>"modal", 'data-target'=>'#modal', 'data-backdrop'=>"static"));?>
+<!--                </div>-->
+            </div>
+        </div>
+
+        <div class="panel panel-transparent profile-skills">
+            <div class="panel-heading">
+                <span class="panel-title"> 主要負責職員</span>
+            </div>
+            <div class="panel-body">
+                <?echo '<span class="label label-primary">'.$case['User']['name'].'</span>';?>
+            </div>
+        </div>
+
+    </div>
+<!--    <div class="right-col">-->
+<!--        <hr class="profile-content-hr no-grid-gutter-h">-->
+    <hr class="page-wide-block visible-xs visible-sm">
+    <div class="col-md-10">
+
+        <h1 class="font-size-20 m-y-4">
+            <i class="fa fa-folder-o page-header-icon"></i> 編號:<?= h($case['Casemanagement']['code']) ?>
+            <?php
+                $status =  $case_status[$case['Casemanagement']['status']];
+                echo "<span class='label label-".$status['class']."'>".$status['name']."</span>";
+            ?>
+            <span class="label label-info">
+            <?=h($case['Year']['name'])?>
+         </span>
+        </h1>
+
+
+        <div class="profile-content ">
+            <div class="panel">
+                <div class="panel-heading">
+                    <span class="panel-title">個案資料</span>
+                    <div class="panel-heading-controls">
+                        <?
+                        if(!$case['Casemanagement']['closed']){
+                            echo $this->Html->link('<span class="fa fa-pencil"></span>&nbsp;&nbsp;修改', array("action"=>"edit", $case['Casemanagement']['id']), array("class"=>"btn btn-xs btn-success btn-outline", "escape"=>false));
+                        }
+                        ?>
+                    </div> <!-- / .panel-heading-controls -->
+                </div> <!-- / .panel-heading -->
+                <div class="panel-body">
+                    <table class="table table-striped table-bordered">
+                        <tbody>
+                        <tr>
+                            <td width="30%"><strong><?php echo __('個案編號'); ?></strong></td>
+
+                            <td><?php echo h($case['Casemanagement']['code']); ?>&nbsp;</td>
+                        </tr>
+                        <?if($case['Casetype']['name']){?>
+                            <tr>
+                                <td width="30%"><strong><?php echo __('個案類別'); ?></strong></td>
+                                <td><?php echo h($case['Casetype']['name']); ?>&nbsp;</td>
+                            </tr>
+                        <?}?>
+
+                        <?if($case['Casenature']['name']){?>
+                            <tr>
+                                <td width="30%"><strong><?php echo __('個案性質'); ?></strong></td>
+                                <td><?php echo h($case['Casenature']['name']); ?>&nbsp;</td>
+                            </tr>
+                        <?}?>
+
+                        <?if($case['Notopencasereason']['name']){?>
+                            <tr>
+                                <td width="30%"><strong><?php echo __('不開案原因'); ?></strong></td>
+                                <td><?php echo h($case['Notopencasereason']['name']); ?>&nbsp;</td>
+                            </tr>
+                        <?}?>
+                        <tr>
+                            <td><strong><?php echo __('轉介自'); ?></strong></td>
+
+                            <td><?php echo $casefrom[$case['Casemanagement']['case_from']]; ?>&nbsp;</td>
+                        </tr>
+
+                        <?if($case['Casemanagement']['case_from'] >= 3){?>
+
+                            <tr>
+                                <td>轉介日期</td>
+                                <td><?=$case['Casemanagement']['referred_date']?></td>
+                            </tr>
+                            <tr>
+                                <td>轉介機構</td>
+                                <td><?=h($case['Casemanagement']['referred_org'])?></td>
+                            </tr>
+
+                            <tr>
+                                <td>職位</td>
+                                <td><?=h($case['Casemanagement']['referred_by_person_title'])?></td>
+                            </tr>
+
+                            <tr>
+                                <td>轉介人姓名</td>
+                                <td><?=h($case['Casemanagement']['referred_by_person'])?></td>
+                            </tr>
+
+                            <tr>
+                                <td>與申請人關係</td>
+                                <td><?=h($case['Casemanagement']['referred_by_person_relation'])?></td>
+                            </tr>
+
+                            <tr>
+                                <td>電話</td>
+                                <td><?=h($case['Casemanagement']['referred_by_person_contact'])?></td>
+                            </tr>
+
+                            <tr>
+                                <td>傳真</td>
+                                <td><?=h($case['Casemanagement']['referred_by_person_fax'])?></td>
+                            </tr>
+
+                            <tr>
+                                <td>轉介原因</td>
+                                <td><?=h($case['Casemanagement']['referral_reason'])?></td>
+                            </tr>
+
+                        <?}?>
+                        <tr>
+                            <td><strong>申請者</strong></td>
+                            <td>
+                                <?php echo h($case['Member']['displayname']); ?>&nbsp;
+                                <span class='<?=$case['Membership']['Membertype']['labelclass']?>'><?=$case['Membership']['Membertype']['name'].' '.h($case['Membership']['code'])?></span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="table table-striped table-bordered">
+
+
+                    </table>
+
+
+                    <?if(!empty($case['Casemanagement']['dateofapproval'])){?>
+                    <table class="table table-striped table-bordered">
+                        <tr>
+                            <td><strong><?php echo __('申請成功'); ?></strong></td>
+                            <td>
+                                <?php echo __("symboltick_".$case['Casemanagement']['application_success']); ?>&nbsp;
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong><?php echo __("批核日期"); ?></strong></td>
+
+                            <td><?php echo h($case['Casemanagement']['dateofapproval']); ?>&nbsp;</td>
+                        </tr>
+                    </table>
+                    <?}?>
+                </div>
+                <div class="panel-heading">
+                    <span class="panel-title">Timeline</span>
+                </div>
+                <div class="panel-body">
+                    <div class="widget-timeline">
+                        <div class="widget-timeline-section font-weight-semibold bg-primary">今天</div>
+
+                        <?if(!empty($case['Casemanagement']['closed'])){?>
+                            <div class="tl-entry">
+                                <div class="tl-time">
+                                </div>
+                                <div class="tl-icon bg-danger"><i class="fa fa-dot-circle-o"></i></div>
+                                <div class="panel tl-body">
+                                    <h4 class="text-danger">個案結束</h4>
+                                    日期: <?echo h($case['Casemanagement']['closedate']);?>
+
+                                </div> <!-- / .tl-body -->
+                            </div> <!-- / .tl-entry -->
+                        <?}?>
+
+                        <?if(!empty($timelines)){
+                            foreach($timelines as $k=>$timeline){
+                                ?>
+                                <?php echo $this->element('Casemanagement/'.strtolower($timeline['form_type']), array('timeline'=>$timeline)); ?>
+
+                            <?}
+                        }?>
+
+<!--                        --><?//if(!empty($case['Casemanagement']['dateofapproval'])){?>
+<!--                            <div class="widget-timeline-item">-->
+<!--                                <div class="widget-timeline-info">-->
+<!--                                    <div class="widget-timeline-bullet"></div>-->
+<!--                                    <div class="widget-timeline-time bg---><?//=$dateofapprovalclass?><!--">--><?//echo h($case['Casemanagement']['dateofapproval']);?><!--</div>-->
+<!--                                </div>-->
+<!---->
+<!--                                <div class="panel panel---><?//=$dateofapprovalclass?><!-- panel-body-colorful">-->
+<!--                                    <div class="panel-title"><i class="fa fa---><?//=$dateofapprovalicon?><!--"></i> 個案批核</div>-->
+<!--                                </div>-->
+<!---->
+<!--                            </div>-->
+<!---->
+<!--                        --><?//}?>
+                        <div class="widget-timeline-item">
+                            <div class="widget-timeline-info">
+                                <div class="widget-timeline-bullet"></div>
+                                <div class="widget-timeline-time bg-info"><?echo h($case['Casemanagement']['applicationdate']);?></div>
+                            </div>
+
+                            <div class="panel panel-info panel-body-colorful">
+                                <div class="panel-title"> <i class="fa fa-bullseye"></i> 個案申請</div>
+                            </div>
+                        </div>
+
+
+                    </div> <!-- / .timeline -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#modal').on('hidden.bs.modal', function () {
+            $('#modal').removeData('bs.modal')
+        });
+
+        $('#modal').on('loaded.bs.modal', function () {
+            $('.modalonly').show();
+            $('.modaloff').hide();
+        });
+
+        $("body").addClass("page-profile");
+
+    });
+</script>

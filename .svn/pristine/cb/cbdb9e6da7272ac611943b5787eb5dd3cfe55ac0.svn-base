@@ -1,0 +1,63 @@
+<?php
+App::uses('AppModel', 'Model');
+
+class Caseenquiryform extends AppModel {
+
+    public $form_name = "個案諮詢";
+
+    public $belongsTo = array(
+        'Casemanagementform'=> array(
+            'className' => 'Casemanagementform',
+            'foreignKey' => 'casemanagementform_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+        'User'=> array(
+            'className' => 'User',
+            'foreignKey' => 'user_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+    );
+
+//    public $actsAs = array('Search.Searchable', 'Linkable.Linkable');
+//
+//    public $filterArgs = array(
+//        'filter' => array('type' => 'query', 'method' => 'orConditions'),
+//    );
+//
+//
+//    public function orConditions($data = array()) {
+//        $display = trim($data['filter']);
+//        if($display == 1){
+//            $cond = array(
+//                'closed '=>0
+//            );
+//        }else if($display == 2){
+//            $cond = array(
+//                'closed '=>1
+//            );
+//        }else{
+//
+//        }
+//
+//        return $cond;
+//    }
+
+//    public function afterSave($created, $options = array()) {
+//        configure::Write('debug',2);
+//
+//        debug('here1');
+//        debug($created);
+//        if (!$created && isset($this->data['Caseenquiryform'])) {
+//            debug('here2');
+//
+//            $this->Casemanagementform->id = $this->data['Caseenquiryform']['casemanagementform_id'];
+//            $this->Casemanagementform->savefield('form_date', $this->data['Caseenquiryform']['date']);
+//        }
+//    }
+
+
+}

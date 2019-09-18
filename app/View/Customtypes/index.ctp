@@ -1,0 +1,88 @@
+
+<div class="page-header">
+	<div class="row">
+		<!-- Page header, center on small screens -->
+		<h1 class="col-xs-12 col-sm-4 text-left-sm flashMessage">
+			<?=__("Custom Type")?>
+		</h1>
+	</div>
+</div>
+
+<?php echo $this->Html->link('<button class="btn btn-info"><i class="fa fa-plus"></i>&nbsp;'.__('Add').'</button>', array('action' => 'add', 'ajax'=>true), array('class'=>' modalbtn', 'escape'=>false, 'data-toggle'=>"modal", 'data-target'=>'#modal'))." ";?>
+
+<br>
+<div class="row">
+	<div class="col-sm-12">
+
+		<div class="table-default">
+			<table cellspacing="0" class="table table-striped nowrap" id="jq-datatables" width="100%">
+				<thead>
+				<tr>
+					<!--                        <th >--><?//=__('ID')?><!--</th>-->
+					<th><?=__('Model')?></th>
+					<th><?=__('name')?></th>
+					<th><?=__('oname')?></th>
+					<th><?=__('Action')?></th>
+				</tr>
+				</thead>
+				<tbody>
+				<?php
+
+				if(!empty($objects)){
+					foreach ($objects as $object): ?>
+						<tr>
+							<!--                            <td >--><?//=$attribute['Attribute']['id']?><!--</td>-->
+							<td><?php echo h($object['Dbmodel']['oname']); ?></td>
+							<td><?php echo h($object['Customtype']['type_name']); ?></td>
+							<td><?php echo h($object['Customtype']['type_oname']); ?></td>
+							<td>
+								<?php echo $this->Html->link('<button class="btn btn-sm btn-success" style="width: 30px;"><i class="fa fa-info"></i></button>', array('action' => 'preview', $object['Customtype']['id']), array('escape'=>false));  ?>
+								<?php echo $this->Html->link('<button class="btn btn-sm btn-danger" style="width: 30px;"><i class="fa fa-eye"></i></button>', array('action' => 'previewlayout', $object['Customtype']['id']), array('escape'=>false ));  ?>
+								<?php echo $this->Html->link('<button class="btn btn-sm btn-info" style="width: 30px;"><i class="fa fa-pencil"></i></button>', array('action' => 'edit', $object['Customtype']['id'], 'ajax'=>true), array('class'=>' modalbtn', 'escape'=>false, 'data-toggle'=>"modal", 'data-target'=>'#modal'));  ?>
+								<?php echo $this->Html->link('<button class="btn btn-sm btn-warning" style="width: 30px;"><i class="fa fa-copy"></i></button>', array('action' => 'copy', $object['Customtype']['id'], 'ajax'=>true), array('class'=>' modalbtn', 'escape'=>false, 'data-toggle'=>"modal", 'data-target'=>'#modal'));  ?>
+								<?php echo $this->Form->postLink('<i class="fa fa-times"></i>', array('action' => 'delete', $object['Customtype']['id']), array('class' => 'btn btn-sm btn-danger', 'escape' => false), __('確定刪除該事項嗎?'));?>
+
+							</td>
+						</tr>
+
+					<?php endforeach;
+				}
+				?>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script>
+	$(document).ready(function() {
+
+		$('#modal').on('hidden.bs.modal', function () {
+			$('#modal').removeData('bs.modal')
+		});
+
+		$('#modal').on('loaded.bs.modal', function () {
+			$('.modalonly').show();
+			$('.modaloff').hide();
+		});
+
+		$('#jq-datatables tbody').on('click', 'td.details-control', function () {
+			var tr = $(this).attr('data-parent');
+			$('.'+tr).toggle();
+		} );
+
+
+	})
+
+
+</script>

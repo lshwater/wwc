@@ -1,0 +1,110 @@
+
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="modal-header">
+            <span class="modal-title"><?=__('轉介個案')?></span>
+            <button type="button" class="close modalonly" data-dismiss="modal" style="display:none"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        </div>
+
+        <div class="modal-body">
+            <table class="table table-bordered table-striped">
+                <caption>綜合家庭服務中心 / 綜合服務中心 / 保護家庭及兒童服務 / 醫務社會服務部 / 感化服務等</caption>
+                <colgroup>
+                    <col class="col-xs-3">
+                    <col class="col-xs-5">
+                </colgroup>
+                <tbody>
+
+                <tr>
+                    <td><?php echo __('口頭轉介'); ?></td>
+                    <td><?php echo h($form['Casereferralform']['followup_verbal']); ?></td>
+                </tr>
+                <tr>
+                    <td><?php echo __('書面轉介'); ?></td>
+                    <td><?php echo h($form['Casereferralform']['followup_written']); ?></td>
+                </tr>
+
+                </tbody>
+            </table>
+
+            <table class="table table-bordered table-striped">
+                <caption>綜合青少年服務中心 / 兒童及青年中心 / 社區中心 / 家庭支援網絡隊等</caption>
+                <colgroup>
+                    <col class="col-xs-3">
+                    <col class="col-xs-5">
+                </colgroup>
+                <tbody>
+
+                <tr>
+                    <td><?php echo __('口頭轉介'); ?></td>
+                    <td><?php echo h($form['Casereferralform']['support_verbal']); ?></td>
+                </tr>
+                <tr>
+                    <td><?php echo __('書面轉介'); ?></td>
+                    <td><?php echo h($form['Casereferralform']['support_written']); ?></td>
+                </tr>
+
+                </tbody>
+            </table>
+
+            <table class="table table-bordered table-striped">
+                <caption>長者地區中心 / 長者鄰舍中心 / 長者中心等</caption>
+                <colgroup>
+                    <col class="col-xs-3">
+                    <col class="col-xs-5">
+                </colgroup>
+                <tbody>
+
+                <tr>
+                    <td><?php echo __('口頭轉介'); ?></td>
+                    <td><?php echo h($form['Casereferralform']['elderly_verbal']); ?></td>
+                </tr>
+                <tr>
+                    <td><?php echo __('書面轉介'); ?></td>
+                    <td><?php echo h($form['Casereferralform']['elderly_written']); ?></td>
+                </tr>
+
+                </tbody>
+            </table>
+
+            <table class="table table-bordered table-striped">
+                <caption>其他</caption>
+                <colgroup>
+                    <col class="col-xs-3">
+                    <col class="col-xs-5">
+                </colgroup>
+                <tr>
+                    <td><?php echo __('轉介日期'); ?></td>
+                    <td><?php echo h($form['Casereferralform']['date']); ?></td>
+                </tr>
+                <tr>
+                    <td><?php echo __('備注'); ?></td>
+                    <td><?php echo h($form['Casereferralform']['remark']); ?></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function() {
+        $(".select2_modal").select2({
+            allowClear: true
+        });
+
+        validate_form();
+
+        $('.vd_isnumber').
+
+        $('._datepicker').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true,
+            todayBtn: "linked",
+            startDate:'<?=$case['Casemanagement']['dateofapproval']?>',
+            endDate: "+0d"
+        });
+    });
+</script>

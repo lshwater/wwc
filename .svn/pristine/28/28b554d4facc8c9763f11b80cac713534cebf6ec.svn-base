@@ -1,0 +1,292 @@
+<?
+//
+//Configure::write('debug', 2);
+//debug($relationship); exit();
+?>
+
+<div class="page-header">
+    <div class="row">
+        <!-- Page header, center on small screens -->
+        <h1 class="col-xs-12 col-sm-4 text-left-sm flashMessage">
+            <i class="fa fa-users page-header-icon"></i>&nbsp;&nbsp;<?=__("會員資料")?>
+        </h1>
+
+        <div class="col-xs-12 col-sm-8">
+            <div class="row">
+                <hr class="visible-xs no-grid-gutter-h">
+                <div class="text-right col-xs-12 col-sm-auto">
+                    <?php echo $this->Html->link('<span class="icon fa fa-pencil"></span> '.__('edit'), array("action"=>"edit", $member['Member']['id']), array('escape'=>false, 'class'=>'btn btn-warning btn-labeled')); ?>
+                </div>
+                <!-- "Create project" button, width=auto on desktops -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ul class="breadcrumb modaloff">
+    <li>
+        <?
+        $_refurl = Router::parse($this->request->referer('/', true));
+        if(stripos($_refurl["action"], "edit") === false && stripos($_refurl["action"], "update") === false && stripos($_refurl["action"], "add") === false){
+            echo $this->Html->link(__("返回"), "javascript:history.go(-1)");
+        }else{
+            echo $this->Html->link(__("返回"), array("controller"=>"members", "action"=>"index"));
+        }
+        ?>
+    </li>
+    <li class="active"><?=__("會員資料")?></li>
+</ul>
+
+<div class="modal-body">
+
+    <ul id="uidemo-tabs-default-demo" class="nav nav-tabs" data-tabs="tabs">
+        <li class="active">
+            <a href="#member_info" data-toggle="tab"><?=__("個人資料")?></a>
+        </li>
+        <li>
+            <a href="#membership_hist" data-toggle="tab"><?=__("會藉紀錄")?></a>
+        </li>
+        <li>
+            <a href="#relation_hist" data-toggle="tab"><?=__("相關會員")?></a>
+        </li>
+        <li>
+            <a href="#activity_hist" data-toggle="tab"><?=__("活動紀錄")?></a>
+        </li>
+
+
+    </ul>
+
+    <div class="tab-content tab-content-bordered">
+        <div class="tab-pane fade active in" id="member_info">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <colgroup>
+                        <col class="col-xs-3">
+                        <col class="col-xs-5">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th><?php echo __('table_content'); ?></th>
+                        <th><?php echo __('table_details'); ?></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><?php echo __('Name'); ?></td>
+                        <td><?php echo h($member['Member']['displayname']); ?></td>
+                    </tr>
+                    <tr>
+                        <td><?php echo h($member['Identitytype']['name']); ?></td>
+                        <td><?php echo h($member['Member']['identity']); ?></td>
+                    </tr>
+                    <tr>
+                        <td><?php echo __('newmember_title_7'); ?></td>
+                        <td><?php echo h($member['Member']['dob']); ?></td>
+                    </tr>
+                    <tr>
+                        <td><?php echo __('性別'); ?></td>
+                        <td><?php echo $genders[$member['Member']['gender']]; ?></td>
+                    </tr>
+                    <tr>
+                        <td><?php echo __('Age'); ?></td>
+                        <td><?php echo h($member['Member']['age']); ?></td>
+                    </tr>
+                    <tr>
+                        <td><?php echo __('電話(住宅)'); ?></td>
+                        <td><?php echo h($member['Member']['contact_tel_home']); ?></td>
+                    </tr>
+                    <tr>
+                        <td><?php echo __('電話(手提)'); ?></td>
+                        <td><?php echo h($member['Member']['contact_tel_mobile']); ?></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="panel-heading">
+                <?=__('會員會藉資料')?>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>會藉</th>
+                            <th>編號</th>
+                            <th>到期日</th>
+                            <th>狀態</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?if(!empty($member['Membership'])){
+                            foreach($member['Membership'] as $ms){
+                        ?>
+                          <tr>
+                              <td><?=h($ms['Membertype']['name'])?></td>
+                              <td><?=h($ms['code'])?></td>
+                              <td><?
+                                  if($ms['Membertype']['default_period'] == 0){
+                                      echo "";
+                                  }else{
+                                      echo date("Y年m月d日", strtotime($ms['enddate']));
+                                  }
+
+                                  ?>
+                              </td>
+                              <td><?
+                                  if($ms['valid'] && !$ms['expired']) {
+                                      echo "<span class='text-success'>有效</span>";
+                                  }else{
+                                      echo "<span class='text-danger'>已退出</span>";
+                                  }?>
+                              </td>
+                          </tr>
+                        <?}
+                        }?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="tab-pane" id="membership_hist">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th><?php echo __('會藉'); ?></th>
+                    <th>類別</th>
+                    <th><?php echo __('編號'); ?></th>
+                    <th ><?php echo __('開始日期'); ?></th>
+                    <th><?php echo __('完結日期'); ?></th>
+                    <th><?=__('有效')?></th>
+                </tr>
+                </thead>
+                <tbody>
+                <?
+                foreach($member['Membershiprecord'] as $msr){
+                ?>
+                    <tr class="active">
+                        <td><?=h($msr['Membertype']['name'])?></td>
+                        <td><?=h($msr['Membershiprecordtype']['name'])?></td>
+                        <td><?=h($msr['Membership']['code'])?></td>
+                        <td><?=date("Y年m月d日", strtotime($msr['startdate']))?></td>
+                        <td><?=($msr['enddate'] != "2099-12-31")?date("Y年m月d日", strtotime($msr['enddate'])):""?></td>
+                        <td><?=($msr['valid'])?"有效":"";?></td>
+                    </tr>
+                <?
+                }
+                ?>
+
+                </tbody>
+            </table>
+        </div>
+        <div class="tab-pane" id="relation_hist">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <colgroup>
+                        <col class="col-xs-2">
+                        <col class="col-xs-4">
+                        <col class="col-xs-2">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th><?php echo __('相關會員編號'); ?></th>
+                        <th><?php echo __('相關會員姓名'); ?></th>
+                        <th><?php echo __('關係'); ?></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?
+                    foreach($relationship as $relation){
+                        ?>
+                        <tr>
+                            <td><?php echo h($relation['Relatedmember']['code']) ?></td>
+                            <td>
+                                <?php echo $this->Html->link(h($relation['Relatedmember']['c_name'])." ".h($relation['Relatedmember']['e_name']), array("controller"=>"members", "action"=>"view", $relation['Relatedmember']['id']), array("class"=>"openmodal"))?></td>
+                            <td><?php echo __($relation['Memberrelation']['name']); ?>&nbsp;</td>
+                        </tr>
+                        <?
+                    }
+                    ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="tab-pane" id="activity_hist">
+            <?
+            if (empty($member['Activity'])){
+                echo __('沒有活動紀錄');
+            }else{
+            ?>
+
+                <table class="table table-bordered table-striped">
+                    <thead>
+                    <tr>
+                        <th style="width:20%"><?php echo __('活動名稱'); ?></th>
+                        <th style="width:10%"><?php echo __('日期/時間'); ?></th>
+                        <th style="width:10%"><?php echo __('收費'); ?></th>
+                        <th style="width:10%"><?php echo __('簽到'); ?></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr>    </tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                    <?
+                    foreach($member['Activity'] as $activity){
+                        ?>
+                        <tr>
+                            <td><?=$this->Html->link(h($activity['name'])."  <br />(".h($activity['activity_code']).")", array("controller"=>"activities", "action"=>"view", $activity['id'], "withoutmenu"=>1), array("class"=>"openasnew", "escape"=>false))?>&nbsp;</td>
+                            <td><?php echo $activity['startdate']; ?>&nbsp;</td>
+                            <td><?php echo $activity['enddate']; ?>&nbsp;</td>
+                        </tr>
+                    <?
+                    }
+                    ?>
+                    </tbody>
+                </table>
+            <?
+            }
+            ?>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    function draw(){
+        var index = 0;
+        var allval = [];
+        $('.chartpic:checked').each(function() {
+            allval[index] = $(this).val();
+            index++;
+        });
+        $.ajax({
+            url: "<?=$this->Html->url(array('controller'=>"Memberpoints",'action'=>'chartresult', "ajax"=>1));?>",
+            type: "POST",
+            data: {info: allval},
+            dataType: "Html"
+        }).done(function (msg) {
+                console.log(msg);
+                $("#chartcontent").html(msg);
+        });
+    }
+
+    $(document).ready(function () {
+        for (var i = 0; i < 50; i++) {
+            MakePID();
+        }
+
+
+
+    });
+
+    function MakePID(){
+        var id=parseInt((Math.random()*26)+1);
+        var sum=id*8;
+        id=String.fromCharCode(id+64);for(i=1;i<=6;i++){s=Math.round(Math.random()*9);sum=sum+s*(8-i);id=id+s.toString();}id=id+(11-(sum%11)).toString();return id;
+    }
+
+</script>
+

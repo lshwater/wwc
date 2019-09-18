@@ -1,0 +1,88 @@
+2019-05-14 20:32:04 Notice: Notice (8): Undefined index: ajax in [/var/www/html/nec/wwc/app/Controller/AppController.php, line 69]
+Trace:
+AppController::beforeFilter() - APP/Controller/AppController.php, line 69
+call_user_func - [internal], line ??
+CakeEventManager::dispatch() - CORE/Cake/Event/CakeEventManager.php, line 243
+Controller::startupProcess() - CORE/Cake/Controller/Controller.php, line 676
+Dispatcher::_invoke() - CORE/Cake/Routing/Dispatcher.php, line 189
+Dispatcher::dispatch() - CORE/Cake/Routing/Dispatcher.php, line 167
+require - APP/webroot/index.php, line 108
+[main] - ROOT/index.php, line 41
+
+2019-05-14 20:32:04 Notice: Notice (8): Undefined index: withoutmenu in [/var/www/html/nec/wwc/app/Controller/AppController.php, line 75]
+Trace:
+AppController::beforeFilter() - APP/Controller/AppController.php, line 75
+call_user_func - [internal], line ??
+CakeEventManager::dispatch() - CORE/Cake/Event/CakeEventManager.php, line 243
+Controller::startupProcess() - CORE/Cake/Controller/Controller.php, line 676
+Dispatcher::_invoke() - CORE/Cake/Routing/Dispatcher.php, line 189
+Dispatcher::dispatch() - CORE/Cake/Routing/Dispatcher.php, line 167
+require - APP/webroot/index.php, line 108
+[main] - ROOT/index.php, line 41
+
+2019-05-14 20:35:04 Notice: Notice (8): Undefined index: ajax in [/var/www/html/nec/wwc/app/Controller/AppController.php, line 69]
+Trace:
+AppController::beforeFilter() - APP/Controller/AppController.php, line 69
+call_user_func - [internal], line ??
+CakeEventManager::dispatch() - CORE/Cake/Event/CakeEventManager.php, line 243
+Controller::startupProcess() - CORE/Cake/Controller/Controller.php, line 676
+Dispatcher::_invoke() - CORE/Cake/Routing/Dispatcher.php, line 189
+Dispatcher::dispatch() - CORE/Cake/Routing/Dispatcher.php, line 167
+require - APP/webroot/index.php, line 108
+[main] - ROOT/index.php, line 41
+
+2019-05-14 20:35:04 Notice: Notice (8): Undefined index: withoutmenu in [/var/www/html/nec/wwc/app/Controller/AppController.php, line 75]
+Trace:
+AppController::beforeFilter() - APP/Controller/AppController.php, line 75
+call_user_func - [internal], line ??
+CakeEventManager::dispatch() - CORE/Cake/Event/CakeEventManager.php, line 243
+Controller::startupProcess() - CORE/Cake/Controller/Controller.php, line 676
+Dispatcher::_invoke() - CORE/Cake/Routing/Dispatcher.php, line 189
+Dispatcher::dispatch() - CORE/Cake/Routing/Dispatcher.php, line 167
+require - APP/webroot/index.php, line 108
+[main] - ROOT/index.php, line 41
+
+2019-05-23 16:52:23 Notice: Notice (8): Undefined index: ajax in [/var/www/html/nec/wwc/app/Controller/AppController.php, line 69]
+Trace:
+AppController::beforeFilter() - APP/Controller/AppController.php, line 69
+call_user_func - [internal], line ??
+CakeEventManager::dispatch() - CORE/Cake/Event/CakeEventManager.php, line 243
+Controller::startupProcess() - CORE/Cake/Controller/Controller.php, line 676
+Dispatcher::_invoke() - CORE/Cake/Routing/Dispatcher.php, line 189
+Dispatcher::dispatch() - CORE/Cake/Routing/Dispatcher.php, line 167
+require - APP/webroot/index.php, line 108
+[main] - ROOT/index.php, line 41
+
+2019-05-23 16:52:23 Notice: Notice (8): Undefined index: withoutmenu in [/var/www/html/nec/wwc/app/Controller/AppController.php, line 75]
+Trace:
+AppController::beforeFilter() - APP/Controller/AppController.php, line 75
+call_user_func - [internal], line ??
+CakeEventManager::dispatch() - CORE/Cake/Event/CakeEventManager.php, line 243
+Controller::startupProcess() - CORE/Cake/Controller/Controller.php, line 676
+Dispatcher::_invoke() - CORE/Cake/Routing/Dispatcher.php, line 189
+Dispatcher::dispatch() - CORE/Cake/Routing/Dispatcher.php, line 167
+require - APP/webroot/index.php, line 108
+[main] - ROOT/index.php, line 41
+
+2019-05-23 16:52:23 Notice: Notice (8): Undefined index: ajax in [/var/www/html/nec/wwc/app/Controller/AppController.php, line 69]
+Trace:
+AppController::beforeFilter() - APP/Controller/AppController.php, line 69
+call_user_func - [internal], line ??
+CakeEventManager::dispatch() - CORE/Cake/Event/CakeEventManager.php, line 243
+Controller::startupProcess() - CORE/Cake/Controller/Controller.php, line 676
+Dispatcher::_invoke() - CORE/Cake/Routing/Dispatcher.php, line 189
+Dispatcher::dispatch() - CORE/Cake/Routing/Dispatcher.php, line 167
+require - APP/webroot/index.php, line 108
+[main] - ROOT/index.php, line 41
+
+2019-05-23 16:52:23 Notice: Notice (8): Undefined index: withoutmenu in [/var/www/html/nec/wwc/app/Controller/AppController.php, line 75]
+Trace:
+AppController::beforeFilter() - APP/Controller/AppController.php, line 75
+call_user_func - [internal], line ??
+CakeEventManager::dispatch() - CORE/Cake/Event/CakeEventManager.php, line 243
+Controller::startupProcess() - CORE/Cake/Controller/Controller.php, line 676
+Dispatcher::_invoke() - CORE/Cake/Routing/Dispatcher.php, line 189
+Dispatcher::dispatch() - CORE/Cake/Routing/Dispatcher.php, line 167
+require - APP/webroot/index.php, line 108
+[main] - ROOT/index.php, line 41
+

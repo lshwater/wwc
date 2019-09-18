@@ -1,0 +1,376 @@
+<?php
+/**
+ * Application level Controller
+ *
+ * This file is application-wide controller file. You can put all
+ * application-wide controller-related methods here.
+ *
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
+ * @package       app.Controller
+ * @since         CakePHP(tm) v 0.2.9
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ */
+
+App::uses('Controller', 'Controller');
+/**
+ * Application Controller
+ *
+ * Add your application-wide methods in the class below, your controllers
+ * will inherit them.
+ *
+ * @package		app.Controller
+ * @link		http://book.cakephp.org/2.0/en/controllers.html#the-app-controller
+ */
+class AppController extends Controller {
+
+
+	public $candelete = false;
+    public $systemversion = "1.0";
+
+    public $gender = array(
+        1=>'M',
+        2=>'F'
+    );
+
+    public $district = array(
+        1=>"中西區",
+        2=>"灣仔區",
+        3=>"東區",
+        4=>"南區",
+        5=>"油尖旺區",
+        6=>"深水埗區",
+        7=>"九龍城區",
+        8=>"黃大仙區",
+        9=>"觀塘區",
+        10=>"葵青區",
+        11=>"荃灣區",
+        12=>"屯門區",
+        13=>"元朗區",
+        14=>"大埔區",
+        15=>"北區",
+        16=>"沙田區",
+        17=>"西貢區",
+        18=>"離島區"
+    );
+
+    public $stock_location = array(
+        3=>'中心 A',
+        4=>'中心 B',
+        5=>'中心 C',
+        6=>'D中心(2座1樓)',
+        7=>'D中心(3座2樓)',
+        8=>'D中心(3座4樓)',
+
+    );
+
+
+
+    public $components = array(
+        'Acl',
+        'Auth' => array(
+            'authenticate' => array(
+                'Form' => array(
+                    'passwordHasher' => array(
+                        'className' => 'Simple',
+                        'hashType' => 'sha256'
+                    )
+                )
+            ),
+            'authorize' => array(
+                'Actions' => array(
+                    'actionPath' => 'controllers'
+                ),
+                'Controller',
+            ),
+
+        ),
+        'Session',
+        'Security',
+        'RequestHandler'
+    );
+
+    public function get_groups($user = null){
+
+        $this->loadModel('GroupsUser');
+        $auth = $this->Session->read('Auth');
+        if(!$user){
+            $options = array(
+                'conditions' => array(
+                    'user_id' => $this->Auth->user("id")
+                ),
+                'order'=>array('group_id ASC')
+            );
+        }
+        else{
+            $options = array(
+                'conditions' => array('user_id' => $user['User']['id']),
+            );
+        }
+
+        $data = $this->GroupsUser->find('all',$options);
+
+        $auth['groupsusers'] = array();
+        $auth['viewunits'] = array();
+        $auth['superadmin'] = false;
+        $auth['viewlevel'] = "user";
+        foreach($data as $val){
+            $auth['groupsusers'][] = $val['GroupsUser']['group_id'];
+            if( $val['Group']['superadmin'] == 1){
+                $auth['superadmin'] = true;
+            }else{
+                $auth['superadmin'] = false;
+            }
+            if($val['Group']['viewlevel']== "all"){
+                $auth['viewlevel'] = "all";
+            }
+            if($auth['viewlevel'] != "agency" || $val['Group']['viewlevel']== "all"){
+                if($val['Group']['viewlevel'] == "unit"){
+                    $auth['viewlevel'] = "unit";
+                }else if($val['Group']['viewlevel'] == "agency"){
+                    $auth['viewlevel'] = "agency";
+                }
+            }
+        }
+        //Set session
+        $this->Session->write('Auth',$auth);
+
+        if($this->Auth->User('id')){
+            $this->GroupsUser->User->Behaviors->load('Containable');
+            $user_data = $this->GroupsUser->User->find('first', array(
+                    'conditions'=>array($this->GroupsUser->User->alias.'.id'=>$this->Auth->User('id')),
+                    "contain"=>array(
+                        "Viewunit",
+                        "Unit",
+                        'Group.Action'
+                    )
+                )
+            );
+
+
+            $this->GroupsUser->User->Unit->id = $user_data['User']['unit_id'];
+            if($auth['viewlevel'] == "all"){
+                $auth['viewunits'] = array_keys($this->GroupsUser->User->Unit->find('list'));
+            }
+//            else if($auth['viewlevel'] == "agency"){
+//                $this->GroupsUser->User->Unit->id = $user_data['User']['unit_id'];
+//
+//                $auth['viewunits'] = array_keys($this->GroupsUser->User->Unit->find('list', array('conditions'=>array('agency_id'=> $this->GroupsUser->User->Unit->field('agency_id')))));
+//
+//
+//            }
+            else{
+                if(!empty($user_data["Viewunit"])){
+                    foreach($user_data["Viewunit"] as $_u){
+                        $auth['viewunits'][] = $_u['id'];
+                    }
+                }
+
+            }
+
+            $actions = array();
+            foreach($user_data['Group'] as $group){
+                foreach ($group['Action'] as $action){
+                    $actions[$action['model']][$action['action']] = 1;
+                }
+            }
+            unset($user_data['Group']);
+            //=========
+            $user_data['User']['agency_id'] =  $this->GroupsUser->User->Unit->field('agency_id');
+            $user_data['User']['Unit'] = $user_data['Unit'];
+            $user_data['User']['superadmin'] =  $auth['superadmin'];
+            $user_data['User']['viewlevel'] =  $auth['viewlevel'];
+            $user_data['User']['groupsusers'] =  $auth['groupsusers'];
+            $user_data['User']['viewunits'] =  $auth['viewunits'];
+            $user_data['User']['allow_action'] =  $actions;
+
+            $this->Session->write('Auth.User', $user_data['User']);
+        }
+
+    }
+
+    public function group_in_use(){
+        $groupsinuse = $this->Session->read('Auth.groupsinuse');
+
+        if(empty($groupsinuse)){
+            $auth = $this->Session->read('Auth');
+            $groupsusers = $auth['groupsusers'];
+            reset($groupsusers);
+
+            $auth['groupsinuse'] = current($groupsusers);
+            $this->Session->write('Auth',$auth);
+        }
+
+        return;
+    }
+
+	public function beforeFilter() {
+//        Configure::write('debug', 2);
+        header("Strict-Transport-Security:max-age=63072000");
+
+	    $this->loadModel('Updatelog');
+	    $this->loadModel('Customtype');
+	    $this->loadModel('Customlayout');
+	    $this->loadModel('Customfield');
+	    $this->loadModel('Dbmodel');
+
+        if(preg_match('/(?i)msie [1-8]/',$_SERVER['HTTP_USER_AGENT']))
+        {
+            // if IE<=8
+            $this->Session->setFlash(__('本網站只支援 Internet Explorer 9 或以上版本，或建議使用其他瀏覽器 （如 Chrome / Firefox）。'), 'default', array('class'=>'alert alert-danger'));
+        }
+        if ($this->request->params['named']['ajax']) {
+            $this->layout = "ajax";
+            $this->set("isajax", 1);
+        } else {
+            $this->set("isajax", 0);
+        }
+        if ($this->request->params['named']['withoutmenu']) {
+            $this->layout = "withoutmenu";
+            $this->set("withoutmenu", 1);
+        } else {
+            $this->set("withoutmenu", 0);
+        }
+
+        Configure::write('Config.language', 'zh_tw');
+        $this->Session->write('Config.language', 'zh_tw');
+        setlocale(LC_TIME, "zh_TW.utf8");
+		$this->Security->blackHoleCallback = 'blackhole';
+
+        if ($this->Auth->loggedIn()) {
+//            echo "HI";exit();
+			$this->loadModel('User');
+
+
+            //get getpendingcount
+            $pendingcountofeventproposal = $this->User->getpendingcountofeventproposal();
+//
+            $pendingapproval = $this->User->getpendingapproval();
+//            Configure::write('debug',2);
+//            debug($pendingcountofeventproposal);exit();
+            $this->get_groups();
+            $this->group_in_use();
+            $this->set('auth', $this->Auth->user());
+            $this->set('groupsinuse', $this->Session->read('Auth.groupsinuse'));
+            $this->set('viewlevel', $this->Session->read('Auth.viewlevel'));
+            $this->set('superadmin', $this->Session->read('Auth.superadmin'));
+            $this->checkactive();
+
+            $this->loadModel("Notification");
+            $this->set('_notices', $this->Notification->getunreadnotices());
+            $this->loadModel("Message");
+            $this->set('_messages', $this->Message->getunreadmsgs());
+            $this->set("pendingcountofeventproposal", $pendingcountofeventproposal);
+            $this->set("pendingapproval", $pendingapproval);
+
+            //Save Log
+            if(Configure::read("modulus.Actionlog")){
+                $this->loadModel('Actionlog');
+                $this->Actionlog->addlog($this->request);
+            }
+
+            //Cutoffdate
+            if(Configure::read("modulus.Cutoffdate")){
+                $this->loadModel("Cutoffdate");
+                $cutoffdate = $this->Cutoffdate->getlastdate();
+                $this->set('_cutoffdate', $cutoffdate);
+                Configure::write('cutoffdate', $cutoffdate);
+            }
+		}
+
+        $this->Auth->allow('login','logout');
+        $this->loadModel('Menu');
+        $this->set('top_menus',$this->Menu->get_topmenus());
+        $this->set('top_menus_view_controllers',$this->Menu->get_view_controller());
+
+        $this->set('mainmenus', $this->Menu->getmenu());
+
+        $this->Auth->loginAction = array('controller' => 'users', 'action' => 'login');
+        $this->Auth->logoutRedirect = array('controller' => 'users', 'action' => 'login');
+        $this->Auth->loginRedirect = array('controller' => 'users', 'action' => 'dashboard');
+        $this->Auth->unauthorizedRedirect = array('controller' => 'users', 'action' => 'dashboard');
+        $this->Auth->authError = __('你必須登入。');
+	}
+
+    public function allowtoken(){
+        $this->Auth->authenticate = array(
+            'Authenticate.Token' => array(
+                'parameter' => '_token',
+                'header' => 'token',
+                'userModel' => 'Users',
+                'fields' => array(
+                    'token' => 'token',
+                ),
+                'continue' => true
+            )
+        );
+
+    }
+
+    public function ajax_checkunique(){
+
+        $this->autoRender = false;
+        $this->RequestHandler->respondAs('json');
+        if ($this->request->is('post') || $this->request->is('put')) {
+            $controller = $this->request['controller'];
+            $this->loadModel($controller);
+            $field = $this->request->data['field'];
+            $value = $this->request->data['value'];
+            if(empty($value)){
+                echo json_encode(__('必須填寫'));
+                exit();
+            }
+            $recordid = $this->request->data['recordid'];
+
+            if ($field == 'identity') {
+                $field = "identityhash";
+                $value = $this->{$controller}->datahash(strtoupper($value));
+            }
+
+            if($this->{$controller}->find('count', array(
+                    'conditions'=>array(
+                        $this->{$controller}->alias.'.'.$field=>$value,
+                        $this->{$controller}->alias.".id != "=>$recordid
+                    )
+                )) == 0){
+                echo json_encode(true);
+            }else{
+                echo json_encode(__('Already Token'));
+            }
+        }
+    }
+
+	public function blackhole($type) {
+		// handle errors.
+//        Configure::write('debug', 2);
+		//print_r($type);
+		//throw new NotFoundException(__('保安問題，請重新嘗試！'));
+
+	}
+
+    public function checkactive() {
+        if ($this->Auth->loggedIn()) {
+            if ($this->Auth->user('active') == 1) {
+                return true;
+            }
+            $this->Session->destroy();
+            $this->Session->setFlash('You account is inactive!');
+            $this->redirect($this->Auth->logout());
+            // Default deny
+        }
+    }
+
+    function isAuthorized($user) {
+        //ACL mamager update need to uncomemnt
+        return $this->Auth->loggedIn();
+        return false;
+
+    }
+}

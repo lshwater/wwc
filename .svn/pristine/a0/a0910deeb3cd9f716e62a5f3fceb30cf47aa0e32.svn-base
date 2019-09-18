@@ -1,0 +1,31 @@
+<?php
+App::uses('AppModel', 'Model');
+/**
+ * Agency Model
+ *
+ * @property Unit $Unit
+ */
+class Dynamicstructattribute extends AppModel {
+
+	public $recursive = -1;
+//	public $useDbConfig = 'mysql';
+
+	private $type_int = 'int';
+	private $type_float = 'float';
+	private $type_string = 'string';
+	private $type_longtext = 'longtext';
+	private $type_bool = 'bool';
+	private $type_date = 'date';
+	private $type_array = 'array';
+	private $type_select = 'select';
+	private $type_select_item = 'select_item';
+	private $type_image = 'image';
+
+
+	/**
+ * Validation rules
+ *
+ * @var array
+ */
+
+}

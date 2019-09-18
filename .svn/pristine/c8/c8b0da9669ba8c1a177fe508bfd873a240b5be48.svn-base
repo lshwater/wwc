@@ -1,0 +1,182 @@
+<?php
+App::uses('AppController', 'Controller');
+
+class MembershipsController extends AppController
+{
+    public function edit($id = null){
+
+        if (!$this->Membership->exists($id)) {
+            throw new NotFoundException(__('Invalid Membership'));
+        }
+
+        $options = array('conditions' => array('Membership.' . $this->Membership->primaryKey => $id));
+        $membership =  $this->Membership->find('first', $options);
+
+        if ($this->request->is(array('post', 'put'))) {
+            if ($this->Membership->save($this->request->data)) {
+                $this->Session->setFlash(__('成功儲存'), 'default', array('class'=>'alert alert-success'));
+                return $this->redirect(array('controller'=>'members', 'action' => 'view', $membership['Membership']['member_id']));
+            } else {
+                $this->Session->setFlash(__('儲存失敗'), 'default', array('class'=>'alert alert-danger'));
+            }
+        } else {
+            $this->request->data = $membership;
+
+        }
+
+        $this->set("membership", $membership);
+
+    }
+
+    public function ajax_membershiplist(){
+        $this->autoRender = false;
+        $this->RequestHandler->respondAs('json');
+        $output = array();
+
+        $options = array();
+
+        $input =& $_GET;
+
+// Number of columns being displayed (useful for getting individual column search info)
+        $iColumns = $input['iColumns'];
+
+// Get mDataProp values assigned for each table column
+        $dataProps = array();
+        for ($i = 0; $i < $iColumns; $i++) {
+            $var = 'mDataProp_'.$i;
+            if (!empty($input[$var]) && $input[$var] != 'null') {
+                $dataProps[$i] = $input[$var];
+//                $options['fields'][] = $input[$var];
+            }
+        }
+
+        /**
+         * Ordering
+         */
+        if ( isset($input['iSortCol_0']) ) {
+            $sort_fields = array();
+            for ( $i=0 ; $i<intval( $input['iSortingCols'] ) ; $i++ ) {
+                if ( $input[ 'bSortable_'.intval($input['iSortCol_'.$i]) ] == 'true' ) {
+                    $field = $dataProps[ intval( $input['iSortCol_'.$i] ) ];
+
+                    $order = ( $input['sSortDir_'.$i]=='desc' ? "DESC" : "ASC" );
+
+//                    if($field == "displayname"){
+//                        $options['order'][] = array('Member.displayname'=>$order);
+//                    }else if($field == "gender"){
+//                        $options['order'][] = array('Member.gender'=>$order);
+//                    }else if($field == "membershipdate"){
+//                        $options['order'][] = array('Member.membershipdate'=>$order);
+//                    }else if($field == "modified"){
+//                        $options['order'][] = array('Member.modified'=>$order);
+//                    }else if($field == "status"){
+//                        $options['order'][] = array('Member.valid'=>$order);
+//                        $options['order'][] = array('Member.active'=>$order);
+//                    }
+                }
+            }
+        }
+
+        /**
+         * Paging
+         */
+        if ( isset( $input['iDisplayStart'] ) && $input['iDisplayLength'] != '-1' ) {
+            $options['limit'] = $input['iDisplayLength'];
+            $options['offset'] = $input['iDisplayStart'];
+        }
+        $options['conditions']['Membership.valid'] = 1;
+        //Filter
+        if(!empty($input['code'])){
+            $options['conditions']['Membership.code Like'] = "%".trim($input['code'])."%";
+        }
+
+        if(!empty($input['identity'])){
+            $options['conditions']['Member.identityhash'] = $this->Member->datahash(strtoupper(trim($input['identity'])));
+        }
+
+        if(!empty($input['name'])){
+            $options['conditions']['Member.displayname Like'] = "%".trim($input['name'])."%";
+        }
+
+        if(!empty($input['tel'])){
+            $options['conditions']['AND']['OR']['Member.contact_tel_home Like'] = "%".trim($input['tel'])."%";
+            $options['conditions']['AND']['OR']['Member.contact_tel_mobile Like'] = "%".trim($input['tel'])."%";
+        }
+
+        if(!empty($input['membercard'])){
+            $codefilter_ids = $this->Member->Membership->find("list", array(
+                "conditions"=>array(
+                    "Membership.membercard"=>trim($input['membercard'])
+                ),
+                "fields"=>array("member_id", "member_id")
+            ));
+            if(!empty($options['conditions']['Member.id'])){
+                $options['conditions']['Member.id'] = array_merge($options['conditions']['Member.id'], $codefilter_ids);
+            }else{
+                $options['conditions']['Member.id'] = $codefilter_ids;
+            }
+
+        }
+
+        $this->Membership->Behaviors->load('Containable');
+        $options['contain'] = array(
+            'Member',
+            "Membertype",
+        );
+
+
+        $result = $this->Membership->find('all',$options);
+        unset($options['limit']);
+        unset($options['offset']);
+        $result_count = $this->Membership->find('count',$options);
+        $all_count = $this->Membership->find('count');
+
+        $output = array(
+            "sEcho" => intval($input['sEcho']),
+            "iTotalRecords" => $all_count,
+            "iTotalDisplayRecords" => $result_count,
+            "aaData" => array(),
+        );
+
+        foreach ( $result as $doc ) {
+            $doc['Memberoutput'] = array();
+            $doc['Memberoutput']['id'] = $doc['Member']['id'];
+            $doc['Memberoutput']['displayname'] = $doc['Member']['displayname'];
+            $doc['Memberoutput']['identity'] = $doc['Member']['identity'];
+            $doc['Memberoutput']['contact_tel_home'] = $doc['Member']['contact_tel_home'];
+            $doc['Memberoutput']['contact_tel_mobile'] = $doc['Member']['contact_tel_mobile'];
+            $doc['Memberoutput']['gender'] = $this->Member->gender[$doc['Member']['gender']];
+
+            $doc['Memberoutput']['membership'] = "<span class='membershiplabel'>";
+            if(!$doc['Membership']['expired']){
+                $doc['Memberoutput']['membership'] .=  ' <span class="'.$doc['Membertype']['labelclass'].'">'.h($doc['Membertype']['name']).' '.h($doc['Membership']['code']).'</span>';
+            }else{
+                $doc['Memberoutput']['membership'] .=  ' <span class="label label-danger">'.h($doc['Membertype']['name']).' '.h($doc['Membership']['code']).'</span>';
+            }
+            $doc['Memberoutput']['membership'] .= "</span>";
+
+
+            if (!$doc['Member']['valid']) {
+                $doc['Memberoutput']['status'] = "無效";
+            } else {
+                $doc['Memberoutput']['status'] = "有效";
+            }
+            $doc['Memberoutput']['modified'] = $doc['Member']['modified']."<br>".$doc['User']['name'];
+
+            $doc['Memberoutput']['action'] = "";
+
+            App::import('Helper', 'Html');
+            $html = new HtmlHelper(new View());
+            App::import('Helper','Form');
+            $form = new FormHelper(new View());
+
+
+            $doc['Memberoutput']['action'] = " ".$html->link('<button class="btn btn-info btn-sm">選擇</button>', "javascript:void(0)", array('class' =>'selectmember', 'data-identity'=>h($doc['Member']['identity']), 'data-displayname'=>h($doc['Member']['displayname']), 'data-msid'=>$doc['Membership']['id'], 'escape' => false));
+
+
+            $output['aaData'][] = $doc['Memberoutput'];
+        }
+
+        echo json_encode( $output );
+    }
+}

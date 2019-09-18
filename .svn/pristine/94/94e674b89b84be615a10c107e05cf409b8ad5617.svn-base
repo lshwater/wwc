@@ -1,0 +1,223 @@
+<?if(!empty($clone)){
+    $title = "複製活動/小組";
+}else{
+    $title = "新增活動/小組";
+}?>
+
+<ul class="breadcrumb">
+    <li>
+        <?=$this->Html->link("查看活動計劃 - ".h($eventproposal['Eventproposal']['name'])."( 編號: ".h($eventproposal['Eventproposal']['event_code'])." )", array("controller"=>"Eventproposals","action"=>"view", $eventproposal['Eventproposal']['id']))?>
+    </li>
+    <li class="active">
+        <?=$title?>
+    </li>
+</ul>
+
+<div class="panel">
+    <div class="panel-heading">
+        <h2>
+            <?=$title?>
+        </h2>
+    </div>
+    <?php echo $this->Form->create('Activity', array('class'=>'validate_form preventDoubleSubmission')); ?>
+    <?php echo $this->Form->hidden('eventproposal_id', array('value'=>$eventproposal['Eventproposal']['id']));?>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-sm-5">
+                <div class="form-group no-margin-hr">
+                <?php echo $this->Form->label('name', __('活動/服務 名稱'), 'control-label'); ?>
+                    <?php echo $this->Form->input('name', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>'活動名稱', 'required'=>"required", "default"=>$clone['Activity']['name']));?>
+                </div>
+            </div>
+            <div class="col-sm-7">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('startdate', __('日期'), 'control-label'); ?>
+                    <div class="input-daterange input-group bs-datepicker-range">
+                        <?php echo $this->Form->input('startdate', array('type' => 'text', 'div' => false, 'label' => false, 'class' => 'form-control input-sm datecount', 'required' => 'required', 'id' => 'startdate', 'placeholder'=>'開始日期')); ?>
+                        <span class="input-group-addon">to</span>
+                        <?php echo $this->Form->input('enddate', array('type' => 'text', 'div' => false, 'label' => false, 'class' => 'form-control input-sm datecount', 'required' => 'required', 'id' => 'enddate', 'placeholder'=>'結束日期')); ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('target', __('服務對象'), 'control-label'); ?>
+                    <?php echo $this->Form->input('target', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>'服務對象', "default"=>$clone['Activity']['target']));?>
+                </div>
+            </div><!-- col-sm-6 -->
+            <div class="col-sm-4">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('quota', __('名額'), 'control-label'); ?>
+                    <?php echo $this->Form->input('quota', array('div'=>false, 'label'=>false, 'class'=>'form-control vd_number', 'placeholder'=>'eg: 2', 'required'=>"required", "default"=>$clone['Activity']['quota']));?>
+                </div>
+            </div><!-- col-sm-6 -->
+
+        </div>
+
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('place', __('地點'), 'control-label'); ?>
+                    <?php echo $this->Form->input('place', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>'地點', "default"=>$clone['Activity']['place']));?>
+                </div>
+            </div><!-- col-sm-6 -->
+            <div class="col-sm-4">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('tutor', __('導師'), 'control-label'); ?>
+                    <?php echo $this->Form->input('tutor', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>'導師', "default"=>$clone['Activity']['tutor']));?>
+                </div>
+            </div><!-- col-sm-6 -->
+            <div class="col-sm-4">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('incharge', __('負責職員'), 'control-label'); ?>
+                    <?php echo $this->Form->input('incharge', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>'負責職員', "default"=>$clone['Activity']['incharge']));?>
+                </div>
+            </div><!-- col-sm-6 -->
+        </div>
+        <h3>統計設定</h3>
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('countuser_id', __('預設職員'), 'control-label'); ?>
+                    <?php echo $this->Form->input('countuser_id', array('div'=>false, 'label'=>false, 'class'=>'form-control select2', 'required'=>"required", "empty"=>true));?>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('Unit', __('單位 (如不用統計，（例如：興趣班）請留空。)'), 'control-label'); ?>
+                    <?php echo $this->Form->input('Unit', array('div'=>false, 'label'=>false, 'class'=>'form-control select2', "empty"=>true));?>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('activitytype_id', __('類型'), 'control-label'); ?>
+                    <?php echo $this->Form->input('activitytype_id', array('div'=>false, 'label'=>false, 'class'=>'form-control select2', 'required'=>"required", "empty"=>true, "default"=>$clone['Activity']['activitytype_id']));?>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('activitygroup_id', __('類別'), 'control-label'); ?>
+                    <?php echo $this->Form->input('activitygroup_id', array('div'=>false, 'label'=>false, 'class'=>'form-control select2', 'required'=>"required", "empty"=>true, "default"=>$clone['Activity']['activitygroup_id']));?>
+                </div>
+            </div>
+        </div>
+        <h3>報名設定</h3>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('enrolstart', __('報名日期'), 'control-label'); ?>
+                    <div class="input-daterange input-group bs-datepicker-range">
+                        <?php echo $this->Form->input('enrolstart', array('type' => 'text', 'div' => false, 'label' => false, 'class' => 'form-control input-sm datecount', 'placeholder'=>'開始日期', 'required'=>"required")); ?>
+                        <span class="input-group-addon">to</span>
+                        <?php echo $this->Form->input('enrolend', array('type' => 'text', 'div' => false, 'label' => false, 'class' => 'form-control input-sm datecount', 'placeholder'=>'結束日期', 'required'=>"required")); ?>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('memberonly', __('只限會員'), 'control-label'); ?>
+                    <?php echo $this->Form->input('memberonly', array('div'=>false, 'label'=>false, 'class'=>'form-control', "checked"=>"checked"));?>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('membershipcheck', __('會籍必須至 (可留空)'), 'control-label'); ?>
+                    <?php echo $this->Form->input('membershipcheck', array('div'=>false, "type"=>"text",'label'=>false, 'class'=>'form-control', "id"=>"datepicker"));?>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <?php echo $this->Form->label('trafficgroup', __('交通分組 (如有)'), 'control-label'); ?>
+                <?php echo $this->Form->input('trafficgroup', array('div'=>false, 'label'=>false, 'default'=>'A,B,C,D,E,F,G', 'class'=>'form-control'));?>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <?php echo $this->Form->label('mealgroup', __('飯食分組 (如有)'), 'control-label'); ?>
+                <?php echo $this->Form->input('mealgroup', array('div'=>false, 'label'=>false,  'default'=>'1,2,3,4,5,6,7','class'=>'form-control'));?>
+            </div>
+        </div>
+        <h3>收費</h3>
+        <hr>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('fee', __('基本收費 ／ 非會員費用 (HKD)'), 'control-label'); ?>
+                    <?php echo $this->Form->input('fee', array('div'=>false, 'label'=>false, "type"=>'text','class'=>'form-control vd_isnumber', 'placeholder'=>'基本收費', 'required'=>"required", "default"=>$clone['Activity']['fee']));?>
+                </div>
+            </div>
+        </div>
+        <?if(!empty($membertypes)){
+        ?>
+            <p>其他會員類別</p>
+            <div class="row">
+        <?
+           foreach($membertypes as $key=>$type){
+        ?>
+
+                   <div class="col-sm-6">
+                       <div class="form-group no-margin-hr">
+                           <?=$this->Form->hidden("Activityfee.".$key.".membertype_id", array("value"=>$key));?>
+                           <?php echo $this->Form->label("Activityfee.".$key.".fee", h($type).__('的費用 (HKD)'), 'control-label'); ?>
+                           <?php echo $this->Form->input("Activityfee.".$key.".fee", array('div'=>false, 'label'=>false, "type"=>'text','class'=>'form-control vd_isnumber', 'placeholder'=>'(留空會自動填為基本收費)'));?>
+                       </div>
+                   </div>
+
+        <?
+           }
+        ?>
+            </div>
+        <?
+        }?>
+        <h3>其他</h3>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group no-margin-hr">
+                    <?php echo $this->Form->label('remarks', __('活動備註'), 'control-label'); ?>
+                    <?php echo $this->Form->input('remarks', array('div'=>false, 'label'=>false,'class'=>'form-control', 'placeholder'=>'活動備註'));?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer text-right">
+        <button type="submit" class="btn btn-primary btn-block" ><i class="glyphicon glyphicon-ok-sign"></i><? echo ' '.__('新增');?></button>
+    </div>
+    <?php echo $this->Form->end(); ?>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var options = {
+            orientation: $('body').hasClass('right-to-left') ? "auto right" : 'auto auto',
+            autoclose: true,
+            format: 'yyyy-mm-dd',
+            todayBtn: "linked"
+            <?
+                if(!empty($_cutoffdate)){
+            ?>
+            ,startDate:'<?=h($_cutoffdate['Cutoffdate']['name'])?>'
+            <?
+                }
+            ?>
+        }
+        $('.bs-datepicker-range').datepicker(options);
+        $('#datepicker').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true,
+            todayBtn: "linked"
+            <?
+                if(!empty($_cutoffdate)){
+            ?>
+            ,startDate:'<?=h($_cutoffdate['Cutoffdate']['name'])?>'
+            <?
+                }
+            ?>
+        });
+    });
+</script>
+

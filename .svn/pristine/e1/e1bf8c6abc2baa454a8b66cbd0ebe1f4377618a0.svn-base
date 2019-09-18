@@ -1,0 +1,271 @@
+<?php $this->Html->script("barcode/jquery.scannerdetection.compatibility", array("inline"=>false)); ?>
+<?php $this->Html->script('barcode/jquery.scannerdetection', array("inline"=>false)); ?>
+
+<div class="page-header">
+    <h1 class="doc-header"><?php echo __('收款'); ?></h1>
+</div>
+<?php echo $this->Form->create('Payment', array('class'=>'panel validate_form preventDoubleSubmission', 'id'=>"form2submit")); ?>
+<div style="display:none">
+    <?php echo $this->Form->input("membership_id", array("id"=>"membership_input"));?>
+</div>
+
+<div class="row  m-a-0">
+<div class="col-md-5 col-xl-4 m-a-0">
+    <div class="panel bg-transparent">
+        <div class="panel-heading p-x-1 bg-transparent">
+            <span class="panel-title">付款人</span>
+        </div>
+        <div class="panel-body p-a-1">
+            <table class="table table-striped table-bordered table-condensed table-hover" id="paidperson">
+                <thead>
+                <tr>
+                    <th>姓名</th>
+                    <th>相關會藉</th>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="form-group">
+                            <div class="input-group">
+                                <?php echo $this->Form->input("Membership.membercard", array('div'=>false, 'label'=>false, 'class'=>'form-control', 'required'=>"required", 'id'=>'paidname', "readonly"=>"readonly"));?>
+                                <span class="input-group-btn">
+                                <?=$this->Html->link('<i class="fa fa-search"></i>', array('controller'=>"members", 'action' => 'popupsearch', 1, 'ajax' => true), array('class' => 'btn ', 'escape' => false, 'data-toggle' => "modal", 'data-target' => '#modal'));?>
+                            </span>
+                            </div>
+
+                        </div>
+
+                    </td>
+                    <td><span id="paidmembership"></span></td>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <div class="panel bg-transparent">
+        <div class="panel-heading p-x-1 bg-transparent">
+            <span class="panel-title">付款項目</span>
+        </div>
+        <div class="panel-body p-a-1">
+            <table class="table table-striped table-bordered table-condensed table-hover" id="boughtitemstable">
+                <thead>
+                    <tr>
+                        <th>項目</th>
+                        <th width="60px">數量</th>
+                        <th width="100px">費用</th>
+                        <th></th>
+                    </tr>
+                </thead>
+            </table>
+
+            <div class="row m-t-1">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-success btn-lg btn-block" style="display:none;" id="paybtn">確認付款</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<hr class="page-wide-block visible-xs visible-sm">
+<div class="col-md-7 col-xl-8  m-a-0">
+
+    <ul class="nav nav-lg nav-tabs nav-tabs-simple" id="profile-tabs">
+        <?
+           for($i = 0; $i < sizeof($paymentitemcategories); $i++){
+               $active_tab = "";
+                if($i == 0){
+                    $active_tab = "active";
+                }
+        ?>
+                <li class="<?=$active_tab?>">
+                    <a href="#paymentitemcategory_tab<?=$i?>" data-toggle="tab">
+                        <?=h($paymentitemcategories[$i]['Paymentitemcategory']['name'])?>
+                    </a>
+                </li>
+        <?  }
+        ?>
+
+    </ul>
+
+    <div class="tab-content p-y-0">
+        <?
+        for($i = 0; $i < sizeof($paymentitemcategories); $i++){
+            $active_tab = "";
+            if($i == 0){
+                $active_tab = "in active";
+            }
+            ?>
+            <div class="tab-pane fade <?=$active_tab?>" id="paymentitemcategory_tab<?=$i?>">
+                <div class="row p-t-4">
+                    <div class="clearfix">
+                        <?php
+                            for($k = 0; $k < sizeof($paymentitemcategories[$i]['Paymentitem']); $k++){?>
+                                <div class="col-md-4 col-xs-6">
+                                    <div class="widget-pricing-item">
+                                        <h2 class="widget-pricing-plan"><?=$paymentitemcategories[$i]['Paymentitem'][$k]['name']?>
+                                        <?if($paymentitemcategories[$i]['Paymentitem'][$k]['paymentitemcategory_id'] == 3){?>
+                                            <a href="#" class="fa fa-exclamation-circle"></a>
+                                        <?}?>
+                                        </h2>
+                                        <div class="widget-pricing-section p-y-2 bg-white darker">
+                                            <div class="font-size-24"><small>$</small><?=money_format("%i", $paymentitemcategories[$i]['Paymentitem'][$k]['unitprice'])?></div>
+                                        </div>
+                                        <div class="widget-pricing-section">
+                                            <div class="row">
+                                                <?if($paymentitemcategories[$i]['Paymentitem'][$k]['multiple']){?>
+                                                <div class="col-md-6 m-t-1">
+                                                    <button type="button" class="btn btn-lg btn-success addtocart btn-block " data-name="<?=$paymentitemcategories[$i]['Paymentitem'][$k]['name']?>" data-price="<?=h($paymentitemcategories[$i]['Paymentitem'][$k]['unitprice'])?>"><i class="fa fa-plus"></i> 1件</button>
+                                                </div>
+                                                <div class="col-md-6 m-t-1">
+                                                    <button type="button" class="btn btn-lg btn-warning popupcart btn-block col-md-6" data-name="<?=$paymentitemcategories[$i]['Paymentitem'][$k]['name']?>" data-price="<?=h($paymentitemcategories[$i]['Paymentitem'][$k]['unitprice'])?>"><i class="fa fa-plus"></i> 多件</button>
+                                                </div>
+                                                <?}else{?>
+                                                    <div class="col-sm-offset-3 col-md-6 m-t-1">
+                                                        <button type="button" class="btn btn-lg btn-success addtocart btn-block " data-name="<?=$paymentitemcategories[$i]['Paymentitem'][$k]['name']?>" data-price="<?=h($paymentitemcategories[$i]['Paymentitem'][$k]['unitprice'])?>"><i class="fa fa-plus"></i> 1件</button>
+                                                    </div>
+                                                <?}?>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                        <?  }
+                        ?>
+                    </div>
+                </div>
+            </div>
+        <?  }
+        ?>
+    </div>
+
+</div>
+</div>
+<?php echo $this->Form->end(); ?>
+
+<table id="itemclone" style="display:none">
+
+    <tr class="itemdiv">
+        <td>
+            <?php echo $this->Form->input("Paymentrecord.__TMP__.name", array('label'=>false ,'div'=>false, 'class'=>'form-control', 'id'=>'item_name__TMP__','required'=>'required','type'=>'text', 'readonly'=>'readonly')); ?>
+        </td>
+        <td width="60px">
+            <?php echo $this->Form->input("Paymentrecord.__TMP__.quantity", array('label'=>false ,'div'=>false, 'class'=>'form-control quantity', 'id'=>'item_quantity__TMP__', 'value'=>1, "type"=>"number", 'required'=>'required', 'min'=>1, 'readonly'=>'readonly')); ?>
+        </td>
+        <td>
+            <?php echo $this->Form->input("Paymentrecord.__TMP__.price", array('label'=>false ,'div'=>false, 'class'=>'form-control', 'id'=>'item_price__TMP__','required'=>'required','type'=>'number', 'readonly'=>'readonly')); ?>
+        </td>
+        <td> <a href="javascript:void(0)" class="btn btn-danger btn-xs fbdeletebtn"><i class="fa fa-close"></i></a></td>
+    </tr>
+
+</table>
+
+<div class="modal fade" id="modal_popupcart" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4 class="modal-title" id="myModalLabel">選擇數量</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                <?php
+                    for($i=1;$i<=10;$i++){?>
+                        <div class="col-md-3 col-xs-6 m-t-1">
+                            <button class="btn btn-success btn-lg btn-block" onclick="additem(<?=$i?>);  $('#modal_popupcart').modal('hide');"><?=$i?></button>
+                        </div>
+                <?  }
+                ?>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modal">
+    <div class="modal-dialog  modal-lg">
+        <div class="modal-content">
+
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<script>
+    var currentitemadded = 0;
+    var itemcount = 0;
+    var itemclone = $("#itemclone").html();
+
+    var clicked_name;
+    var clicked_price;
+
+    function additem(quantity){
+
+
+        var thishtmclone = itemclone.replace(/__TMP__/g, itemcount);
+        $("#boughtitemstable").append(thishtmclone);
+
+        var total_price = parseFloat(clicked_price)*quantity;
+
+        $('#item_name'+itemcount).val(clicked_name);
+        $('#item_price'+itemcount).val(total_price.toFixed(1));
+        $('#item_quantity'+itemcount).val(quantity);
+
+        itemcount++;
+        currentitemadded++;
+
+        $("#paybtn").show();
+
+    }
+
+    $(document).ready(function () {
+        $(".addtocart").click(function(){
+            clicked_price = $(this).data('price');
+            clicked_name = $(this).data('name');
+
+            additem(1);
+        });
+
+        $('.popupcart').on('click', function() {
+            clicked_price = $(this).data('price');
+            clicked_name = $(this).data('name');
+
+            $("#modal_popupcart").modal("show");
+        });
+
+        $("#boughtitemstable").on( "click", ".fbdeletebtn", function(){
+            $(this).closest('.itemdiv').remove();
+            currentitemadded--;
+            if(currentitemadded == 0){
+                $("#paybtn").hide();
+            }
+        });
+
+        $('#modal').on('hidden.bs.modal', function () {
+            $('#modal').removeData('bs.modal')
+        });
+
+        $('#modal').on('loaded.bs.modal', function () {
+            $('.modalonly').show();
+            $('.modaloff').hide();
+        });
+
+        $("#modal").on("click", ".selectmember", function(){
+            $("#paidname").val($(this).data("displayname"));
+            $("#paidmembership").html($(this).closest('tr').find(".membershiplabel").html());
+            $("#modal").modal("hide");
+        });
+    });
+</script>
+
+<style>
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+</style>

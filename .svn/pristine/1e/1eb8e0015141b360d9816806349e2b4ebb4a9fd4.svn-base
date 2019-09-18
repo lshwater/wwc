@@ -1,0 +1,7 @@
+.no-search .select2-search {
+    display:none
+}
+
+.note-editor .note-editable p { margin-bottom: 0 !important; }
+
+.proposalbox p { margin-bottom: 0 !important; }

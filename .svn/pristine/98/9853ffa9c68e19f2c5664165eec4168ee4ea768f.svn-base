@@ -1,0 +1,244 @@
+<?php
+App::uses('AppController', 'Controller');
+/**
+ * Groups Controller
+ *
+ * @property Group $Group
+ * @property PaginatorComponent $Paginator
+ */
+class CustomfieldsController extends AppController {
+
+
+
+/**
+ * Components
+ *
+ * @var array
+ */
+	public $components = array('Paginator');
+
+/**
+ * index method
+ *
+ * @return void
+ */
+	public function index() {
+		$this->Group->recursive = 0;
+		$this->set('groups', $this->Paginator->paginate());
+	}
+
+/**
+ * view method
+ *
+ * @throws NotFoundException
+ * @param string $id
+ * @return void
+ */
+	public function view($id = null) {
+		if (!$this->Group->exists($id)) {
+			throw new NotFoundException(__('Invalid group'));
+		}
+		$options = array('conditions' => array('Group.' . $this->Group->primaryKey => $id));
+		$this->set('group', $this->Group->find('first', $options));
+	}
+
+/**
+ * add method
+ *
+ * @return void
+ */
+	public function add($id) {
+//
+		if ($this->request->is('post')) {
+
+            $order = $this->Customfield->find('count',array(
+                'conditions'=>array(
+                    'Customfield.model_id'=>$this->request->data['Customfield']['model_id'],
+                ),
+                'recursive'=>-1
+            ));
+
+            $this->request->data['Customfield']['default_order'] = $order +1;
+
+            $this->Customfield->create();
+
+			if($this->Customfield->save($this->request->data)){
+				$this->Session->setFlash(__('The Customfield has been saved.'));
+				return $this->redirect(array('controller'=>'dbmodels','action' => 'preview',$id));
+
+			}else{
+				$this->Session->setFlash(__('The Customfield failed to saved.'));
+				return $this->redirect(array('controller'=>'dbmodels','action' => 'preview',$id));
+			}
+		}
+		$this->set('model_id',$id);
+		$this->set('type', $this->Customfield->type);
+//		if(!empty($main_struct_id)){
+//
+//			$this->set('main_struct',$this->Customfield->read(null,$main_struct_id));
+//		}
+
+	}
+
+/**
+ * edit method
+ *
+ * @throws NotFoundException
+ * @param string $id
+ * @return void
+ */
+	public function edit($id = null) {
+//		configure::write('debug',2);
+		if (!$this->Customfield->exists($id)) {
+			throw new NotFoundException(__('Invalid group'));
+		}
+		$struct = $this->Customfield->read(null,$id);
+
+		if ($this->request->is(array('post', 'put'))) {
+			if ($this->Customfield->save($this->request->data)) {
+				$this->Session->setFlash(__('The Customfield has been saved.'));
+				return $this->redirect(array('controller'=>'dbmodels','action' => 'preview',$struct['Customfield']['model_id']));
+			} else {
+				$this->Session->setFlash(__('The Customfield could not be saved. Please, try again.'));
+			}
+		} else {
+			$options = array('conditions' => array('Customfield.' . $this->Customfield->primaryKey => $id));
+			$this->request->data = $struct;
+
+			if($struct['Customfield']['type'] == 'select'){
+//				$list = $this->Customfield->find('all',array(
+//					'conditions'=>array(
+//						'main_struct_id'=>$id
+//					),
+//                    'order'=>array('order'=>'ASC'),
+//					'field'=>array(
+//						'id','label','name'
+//					)
+//				));
+//				$this->set('select_item',$list);
+			}
+		}
+	}
+
+
+/**
+ * delete method
+ *
+ * @throws NotFoundException
+ * @param string $id
+ * @return void
+ */
+	public function delete($id = null) {
+		$this->Customfield->id = $id;
+		$struct = $this->Customfield->read(null, $id);
+		if (!$this->Customfield->exists()) {
+			throw new NotFoundException(__('Invalid group'));
+		}
+		$this->request->allowMethod('post', 'delete');
+		if ($this->Customfield->delete()) {
+
+//			if(in_array($struct['Customfield']['type'], array('image','array','select'))){
+//				$this->Customfield->deleteAll(array('main_struct_id' => $id));
+//			}
+
+			$this->Session->setFlash(__('The Customfield has been deleted.'));
+
+			$all_field = $this->Customfield->find('all',array(
+			    'conditions'=>array(
+                    'model_id'=>$struct['Customfield']['model_id']
+                ),
+                'order'=>array(
+                    'order'=>'ASC'
+                ),
+                'recursive'=>-1
+            ));
+			foreach($all_field as $k=>$field){
+			    $this->Customfield->id = $field['Customfield']['id'],
+                $this->Customfield->saveField('order', $k+1);
+            }
+		} else {
+			$this->Session->setFlash(__('The Customfield could not be deleted. Please, try again.'));
+		}
+		return $this->redirect(array('controller'=>'dbmodels','action' => 'preview',$struct['Customfield']['model_id']));
+	}
+
+	public function moveup($id = null) {
+//        configure::write('debug',2);
+		$this->Customfield->id = $id;
+		$struct = $this->Customfield->read(null, $id);
+		if (!$this->Customfield->exists()) {
+			throw new NotFoundException(__('Invalid group'));
+		}
+		$order = $struct['Customfield']['default_order'];
+
+        $options = array();
+        $options['conditions']['model_id'] = $struct['Customfield']['model_id'];
+        $options['conditions']['default_order <'] = $struct['Customfield']['default_order'];
+
+//        if($struct['Customfield']['main_struct_id']){
+//            $options['conditions']['main_struct_id'] = $struct['Customfield']['main_struct_id'];
+//            $options['conditions']['hidden'] = 0;
+//        }else{
+//            $options['conditions']['main_struct_id'] = null;
+//        }
+
+        $options['order']['default_order'] = 'DESC';
+
+		$upper = $this->Customfield->find('first',$options);
+//        debug($upper);exit();
+        if(!empty($upper)){
+            $this->Customfield->id = $id;
+            $this->Customfield->saveField('default_order',$upper['Customfield']['default_order']);
+
+            $this->Customfield->id = $upper['Customfield']['id'];
+            $this->Customfield->saveField('default_order',$order);
+        }
+
+        $this->Session->setFlash(__('The Customfield is updated.'));
+
+		return $this->redirect(array('controller'=>'dbmodels','action' => 'preview',$struct['Customfield']['model_id']));
+	}
+
+    public function movedown($id = null) {
+        $this->Customfield->id = $id;
+        $struct = $this->Customfield->read(null, $id);
+        if (!$this->Customfield->exists()) {
+            throw new NotFoundException(__('Invalid group'));
+        }
+        $order = $struct['Customfield']['default_order'];
+
+        $options = array();
+        $options['conditions']['model_id'] = $struct['Customfield']['model_id'];
+        $options['conditions']['default_order >'] = $struct['Customfield']['default_order'];
+//
+//        if($struct['Customfield']['main_struct_id']){
+//            $options['conditions']['main_struct_id'] = $struct['Customfield']['main_struct_id'];
+//            $options['conditions']['hidden'] = 0;
+//        }else{
+//            $options['conditions']['main_struct_id'] = null;
+//        }
+
+        $options['order']['default_order'] = 'ASC';
+
+        $upper = $this->Customfield->find('first',$options);
+
+        if(!empty($upper)){
+            $this->Customfield->id = $id;
+            $this->Customfield->saveField('default_order',$upper['Customfield']['default_order']);
+
+            $this->Customfield->id = $upper['Customfield']['id'];
+            $this->Customfield->saveField('default_order',$order);
+        }
+
+        $this->Session->setFlash(__('The Customfield is updated.'));
+
+        return $this->redirect(array('controller'=>'dbmodels','action' => 'preview',$struct['Customfield']['model_id']));
+    }
+
+
+
+
+	public function beforeFilter(){
+        $this->Auth->allow('test', 'test2');
+    }
+}

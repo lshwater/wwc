@@ -1,0 +1,121 @@
+<?php
+App::uses('AppModel', 'Model');
+/**
+ * Agency Model
+ *
+ * @property Unit $Unit
+ */
+class Custominputnumber extends AppModel {
+
+    public $recursive = -1;
+//    public $useDbConfig = 'mysql';
+
+    public $belongsTo = array(
+        'Dbmodel' => array(
+            'className' => 'Dbmodel',
+            'foreignKey' => 'model_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+        "Customtype"=> array(
+            'className' => 'Customtype',
+            'foreignKey' => 'type_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+        "Customfield"=> array(
+            'className' => 'Customfield',
+            'foreignKey' => 'field_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        )
+    );
+
+    public function beforeSave($options = array()) {
+        if (isset($this->data[$this->alias]['value'])) {
+
+            $this->Behaviors->load('Containable');
+            $struct = $this->Customfield->find('first',array(
+                'conditions'=>array(
+                    'Customfield.id'=>$this->data[$this->alias]['field_id']
+                ),
+                'contain'=>array(
+                    'Customtypedropdown'
+                )
+            ));
+
+            if($struct['Customfield']['type'] != "float"){
+                $this->data[$this->alias]['value'] = intval($this->data[$this->alias]['value']);
+            }
+
+            if($struct['Customfield']['type'] == "select"){
+                $options = array();
+                if($struct['Customtypedropdown']){
+                    foreach($struct['Customtypedropdown'] as $list){
+                        $index = intval($list['value']);
+                        $options[$index] = $list['oname'];
+                    }
+                }
+
+                $this->data[$this->alias]['dropdown_list'] = json_encode($options);
+            }
+
+
+        }
+
+
+        return true;
+    }
+
+    public function afterFind($results, $primary = false) {
+        foreach ($results as $key => $val) {
+
+            $this->Behaviors->load('Containable');
+            $struct = $this->Customfield->find('first',array(
+                'conditions'=>array(
+                    'Customfield.id'=>$val[$this->alias]['field_id']
+                )
+            ));
+
+            if($struct['Customfield']['type'] == "int"){
+                if (isset($val[$this->alias]['value'])) {
+                    $results[$key][$this->alias]['value'] = intval($val[$this->alias]['value']);
+                }
+                $results[$key][$this->alias]['value_text'] = $results[$key][$this->alias]['value'];
+            }
+
+            if($struct['Customfield']['type'] == "float"){
+                $results[$key][$this->alias]['value_text'] = $results[$key][$this->alias]['value'];
+            }
+
+            if($struct['Customfield']['type'] == "select"){
+                if (isset($val[$this->alias]['dropdown_list'])) {
+                    $results[$key][$this->alias]['dropdown_list'] = json_decode($val[$this->alias]['dropdown_list'], true);
+                    $results[$key][$this->alias]['value_text'] = $results[$key][$this->alias]['dropdown_list'][$results[$key][$this->alias]['value']];
+                }
+            }else{
+                unset($results[$key][$this->alias]['dropdown_list']);
+            }
+
+            if($struct['Customfield']['type'] == "bool"){
+                if (isset($val[$this->alias]['value'])) {
+                    $results[$key][$this->alias]['value'] = intval($val[$this->alias]['value']);
+                    $results[$key][$this->alias]['value_text'] = ($results[$key][$this->alias]['value'])?"是":"否";
+                }
+            }
+
+        }
+
+        return $results;
+    }
+
+
+    public function beforeFind($queryData) {
+
+        return $queryData;
+    }
+
+}

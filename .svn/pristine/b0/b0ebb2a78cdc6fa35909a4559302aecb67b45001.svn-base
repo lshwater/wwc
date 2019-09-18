@@ -1,0 +1,135 @@
+<!-- 5. $INVOICE_PAGE ==============================================================================
+
+		Invoice page
+-->
+<?
+//Configure::write('debug', 2);
+//debug($activityapplication);
+?>
+<?php $this->layout='receipt-print';?>
+
+<div style="min-width: 768px;">
+    <div class="panel-body p-l-2 p-r-2 p-b-1 p-t-1 b-b-1">
+        <div class="box m-a-0">
+            <div class="box-row valign-middle">
+
+                <div class="box-cell col-xs-8">
+                    <div class="display-inline-block p-l-1 valign-middle font-size-15">
+                        <div><?=h($payment['Unit']['name'])?></div>
+                        <div><?=h($payment['Unit']['address'])?></div>
+                        <div><?=h($payment['Unit']['tel'])?></div>
+                    </div>
+                </div>
+
+                <div class="box-cell col-xs-4">
+                    <div class="pull-xs-right font-size-15">
+                        <?
+                        if($payment['Payment']['printed']){
+                            ?>
+                            <strong>收據重印</strong><br><br>
+                            <?
+                        }
+                        ?>
+                        <div class="font-size-15 line-height-1">發出日期</div>
+                        <strong><?=date("Y年m月d日", strtotime($payment['Payment']['paymentdate']))?></strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="panel-body p-t-2 p-b-0">
+        <div class="box m-a-0 text-center">
+            <div class="font-size-28 font-weight-bold line-height-1"><?=h($payment['Payment']['title'])?></div>
+        </div>
+    </div>
+
+    <div class="panel-body p-l-4 p-r-4 p-t-0 p-b-0 m-a-0">
+        <div class="box">
+            <div class="box-cell col-xs-8 font-size-20 text-left">
+                <strong>收據號碼: <?=$payment['Payment']['code']?></strong>
+            </div>
+            <div class="box-cell col-xs-4 ">
+                <div class="pull-xs-right font-size-20">
+                    <strong>總收費: $<?=money_format("%i", $payment['Payment']['sellingprice'])?> ( <?=h($payment['Paymentmethod']['name'])?> )</strong>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-body p-l-4 p-r-4 p-t-0 p-b-0 m-a-0 font-size-20">
+        <table class="table m-a-0">
+            <thead>
+            <tr>
+                <th class="p-x-1">
+                    會員姓名
+                </th>
+                <th class="p-x-1">
+                    會員編號
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="p-a-1">
+                    <div class="font-weight-semibold"><?=h($payment['Payment']['payer'])?></div>
+                </td>
+                <td class="p-a-1">
+                    <div class="font-weight-semibold"><?=h($payment['Membership']['code'])?></div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="panel-body p-a-4 font-size-20">
+        <table class="table m-a-0">
+            <thead>
+            <tr>
+                <th class="p-x-1">
+                    項目
+                </th>
+                <th class="p-x-1">
+                    數量
+                </th>
+                <th class="p-x-1">
+                    費用
+                </th>
+            </tr>
+            </thead>
+            <tbody class="">
+
+            <?php
+            foreach ($payment['Paymentrecord'] as $rd){?>
+            <tr>
+                <td class="p-a-1">
+                    <div class="font-weight-semibold"><?=h($rd['name'])?></div>
+                </td>
+                <td class="p-a-1">
+                    <strong><?=h($rd['quantity'])?></strong>
+                </td>
+                <td class="p-a-1">
+                    <strong>$<?=money_format("%i", $rd['price'])?></strong>
+                </td>
+            </tr>
+                <?php
+            }
+            ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-sm-12" style="font-size: 15px;">
+        <br>
+        備註:<br>
+
+        1) 已繳交之報名費及手續費一概不予退還。<br>
+        2) 上述開課日期及時間如因事更改，本中心將另行通知。<br>
+        3) 請保留收據直至課程完結為止。<br>
+        4) 所有已收取之課程/活動費用一概不獲發還並不得轉換其他課程/活動。唯因課程取消或延期而導致參加者未能參與及無法接受安排，本中心將安排退款。請於開課日期三個月內攜同收據正本到中心退款，逾期作廢，敬請留意。<br>
+        5) 興趣課程會為舊生提供優先報名期。凡8堂為一期者，舊生需於第5堂或之前繳交；而4堂為期者則需於第2堂之前繳交，否則視為放棄學位。
+    </div>
+</div>

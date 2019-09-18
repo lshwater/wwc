@@ -1,0 +1,491 @@
+<?php
+App::uses('AppModel', 'Model');
+/**
+ * Group Model
+ *
+ * @property User $User
+ */
+class Eventproposal extends AppModel {
+
+    var $target = array(
+        "護老者",
+        "被護老者",
+        "有需要護老者",
+        "確診為認知障礙症長者",
+        "蒙特利爾認知評估(MoCA)__分以下者",
+        "簡易智能測驗(MMSE)__分以下者",
+        "老人抑鬱短量表(GDS)__分以上",
+        "患有抑鬱症長者",
+        "義工",
+    );
+
+    public $hasAndBelongsToMany = array(
+        'UserIncharge' => array(
+            'className' => 'User',
+            'joinTable' => 'eventproposal_users',
+            'foreignKey' => 'eventproposal_id',
+            'associationForeignKey' => 'user_id',
+            'unique' => 'keepExisting',
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'finderQuery' => '',
+        ),
+        'Supervisors' => array(
+            'className' => 'User',
+            'joinTable' => 'eventproposalsupervisors',
+            'foreignKey' => 'eventproposal_id',
+            'associationForeignKey' => 'user_id',
+            'unique' => 'keepExisting',
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'finderQuery' => '',
+        ),
+        "Eventproposalpromotion"=>array(
+            'className' => 'Eventproposalpromotion',
+            'joinTable' => 'eventproposal_eventproposalpromotions',
+            'foreignKey' => 'eventproposal_id',
+            'associationForeignKey' => 'eventproposalpromotion_id',
+            'unique' => 'keepExisting',
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'finderQuery' => '',
+        ),
+    );
+
+    public $belongsTo = array(
+        'Approvalrecordstatus' => array(
+            'className' => 'Approvalrecordstatus',
+            'foreignKey' => 'approvalrecordstatus_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+        'User'=> array(
+            'className' => 'User',
+            'foreignKey' => 'user_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+        'Year'=> array(
+            'className' => 'Year',
+            'foreignKey' => 'year_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+        "Closereason"=> array(
+            'className' => 'Closereason',
+            'foreignKey' => 'closereason_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+        "Eventproposalcode"=> array(
+            'className' => 'Eventproposalcode',
+            'foreignKey' => 'eventproposalcode_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+    );
+
+    public $hasOne =  array(
+        'Financialbudget' => array(
+            'className' => 'Financialbudget',
+            'foreignKey' => 'model_id',
+            'dependent' => true,
+            'conditions' => array('Financialbudget.model'=>'Eventproposal'),
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        ),
+//        'Financialbalance' => array(
+//            'className' => 'Financialbalance',
+//            'foreignKey' => 'model_id',
+//            'dependent' => true,
+//            'conditions' => array('Financialbalance.model'=>'Eventproposal'),
+//            'fields' => '',
+//            'order' => '',
+//            'limit' => '',
+//            'offset' => '',
+//            'exclusive' => '',
+//            'finderQuery' => '',
+//            'counterQuery' => ''
+//        ),
+        'Eventfinalreport'=> array(
+            'className' => 'Eventfinalreport',
+            'foreignKey' => 'eventproposal_id',
+            'dependent' => true,
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        ),
+    );
+
+    public $hasMany = array(
+        'Attachment' => array(
+            'className' => 'Attachment',
+            'foreignKey' => 'model_id',
+            'dependent' => true,
+            'conditions' => array('model'=>'Eventproposal'),
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        ),
+        "Approvalrecord"=> array(
+            'className' => 'Approvalrecord',
+            'foreignKey' => 'model_id',
+            'dependent' => true,
+            'conditions' => array('model'=>'Eventproposal'),
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        ),
+        "Activity"=> array(
+            'className' => 'Activity',
+            'foreignKey' => 'eventproposal_id',
+            'dependent' => true,
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        ),
+        'Eventarrangement' => array(
+            'className' => 'Eventarrangement',
+            'foreignKey' => 'model_id',
+            'dependent' => true,
+            'conditions' => array('model'=>'Eventproposal'),
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        ),
+        "Eventproposalprocedure" => array(
+            'className' => 'Eventproposalprocedure',
+            'foreignKey' => 'eventproposal_id',
+            'dependent' => true,
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        ),
+    );
+
+    //check Access Right
+    public function isAuth($id = null, $user_id = null){
+        if(!$id){
+            return false;
+        }
+        if(!$user_id){
+            $user_id = CakeSession::read("Auth.User.id");
+        }
+
+        if($this->issupervisor($id, $user_id)){
+            return true;
+        }
+//        Configure::write('debug', 2);
+        $this->Behaviors->load('Containable');
+
+        $rs = $this->find("first", array(
+            "contain"=>array(
+                'UserIncharge'=>array(
+                    'conditions'=>array(
+                        "user_id"=>$user_id
+                    )
+                )
+            ),
+            'conditions'=>array(
+                "Eventproposal.id"=>$id,
+            )
+        ));
+        if($rs['Eventproposal']['user_id'] == $user_id){
+            return true;
+        }
+
+        if(sizeof($rs['UserIncharge'])>0){
+            return true;
+        }
+        return false;
+    }
+
+    public function getallevent($user_id = null, $activeonly = true){
+        if(!$user_id){
+            $user_id = CakeSession::read("Auth.User.id");
+        }
+
+        $myevent = array();
+
+        $cond = array(
+            $this->alias.".user_id"=>$user_id
+        );
+
+        if($activeonly){
+            $option = array(
+                "closed"=>0
+            );
+        }else{
+            $option = array(
+                "closed"=>1
+            );
+        }
+
+        $cond = array_merge($cond, $option);
+
+        $events = $this->find('all', array(
+            "conditions"=>array(
+                $cond
+            ),
+            "recursive"=>-1
+        ));
+
+        if(!empty($events)){
+            foreach($events as $ev){
+                $myevent[$ev['Eventproposal']['id']] = $ev;
+            }
+        }
+
+        $this->UserIncharge->Behaviors->load('Containable');
+
+        $share = $this->UserIncharge->find('first', array(
+            "conditions"=>array(
+                $this->UserIncharge->alias.".id"=>$user_id
+            ),
+            "contain"=>array(
+                "EventproposalIncharge"=>array(
+                    "conditions"=>$option
+                ),
+                "EventproposalSupervisors"=>array(
+                    "conditions"=>$option
+                )
+            )
+        ));
+//        Configure::write('debug', 2);
+
+        if(!empty($share['EventproposalIncharge'])){
+            foreach($share['EventproposalIncharge'] as $ein){
+                $ein['share'] = 1;
+                $myevent[$ein['id']]['Eventproposal'] = $ein;
+            }
+        }
+        if(!empty($share['EventproposalSupervisors'])){
+            foreach($share['EventproposalSupervisors'] as $esu){
+                if(isset($myevent[$esu['id']]['Eventproposal'])){
+                    $myevent[$esu['id']]['Eventproposal']['supervisor'] = 1;
+                }else{
+                    $esu['supervisor'] = 1;
+                    $myevent[$esu['id']]['Eventproposal'] = $esu;
+                }
+
+            }
+        }
+        return $myevent;
+    }
+
+    public function issupervisor($eventproposal_id = null, $user_id = null){
+        if(!$user_id){
+            $user_id = CakeSession::read("Auth.User.id");
+        }
+        if(CakeSession::read('Auth.superadmin')){
+            return true;
+        }
+        $this->Behaviors->load('Containable');
+
+        $rs = $this->find("first", array(
+            "contain"=>array(
+                "Supervisors"=>array(
+                    'conditions'=>array(
+                        "Supervisors.id"=>$user_id
+                    )
+                )
+            ),
+            'conditions'=>array(
+                "Eventproposal.id"=>$eventproposal_id,
+            )
+        ));
+
+        if(sizeof($rs['Supervisors'])>0){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    public function getuserlist($eventproposal_id = null){
+        if(!$this->exists($eventproposal_id)){
+            return false;
+        }
+        $this->Behaviors->load('Containable');
+        $rs = $this->find("first", array(
+            "contain"=>array(
+                "User",
+                "Supervisors",
+                'UserIncharge'
+            ),
+            'conditions'=>array(
+                "Eventproposal.id"=>$eventproposal_id,
+            )
+        ));
+        $lists = array();
+        if(!empty($rs['User'])){
+            $lists[$rs['User']['id']] = $rs['User']['name'];
+        }
+        if(!empty($rs['UserIncharge'])){
+            foreach($rs['UserIncharge'] as $incharge){
+                $lists[$incharge['id']] = $incharge['name'];
+            }
+        }
+        if(!empty($rs['Supervisors'])){
+            foreach($rs['Supervisors'] as $su){
+                $lists[$su['id']] = $su['name'];
+            }
+        }
+
+        return $lists;
+    }
+
+    public function genevent_code($id, $cuscode=null){
+
+
+        if(!$this->exists($id)){
+            return false;
+        }
+        $this->id = $id;
+        $event_code = $this->field("event_code");
+
+        if(empty($event_code)){
+            if(!empty($cuscode)){
+                //check code exist or not
+                $check = $this->find("count", array(
+                    "conditions"=>array(
+                        $this->alias.".event_code"=>$cuscode
+                    )
+                ));
+                if($check < 1){
+                    $this->saveField("event_code", $cuscode);
+                }else{
+                    return false;
+                }
+            }else{
+                $this->Behaviors->load('Containable');
+                $rs = $this->find("first", array(
+
+                    "conditions" =>array(
+                        $this->alias.".id"=>$id
+                    )
+                ));
+                $code = $this->Eventproposalcode->Eventproposalnextcode->getnextcode($rs['Eventproposal']['year_id'], $rs['Eventproposal']['eventproposalcode_id']);
+                if(!$code){
+                    return false;
+                }
+//            $code = $rs['Eventproposaltype']['prefix'].$id;
+                $this->saveField("event_code", $code);
+            }
+
+            return true;
+        }
+
+        return true;
+    }
+
+    public $actsAs = array('Search.Searchable', 'Linkable.Linkable');
+
+    public $filterArgs = array(
+        'filter' => array('type' => 'query', 'method' => 'orConditions'),
+    );
+
+
+    public function orConditions($data = array()) {
+        $display = trim($data['filter']);
+        if($display == 1){
+            $cond = array(
+                'closed '=>0
+            );
+        }else if($display == 2){
+            $cond = array(
+                'closed '=>1
+            );
+        }else{
+
+        }
+
+        return $cond;
+    }
+
+    public function beforeSave($options = array()) {
+
+        $stringallow = '<span contenteditable="false" ><input type="checkbox"></span>';
+        $stringreplace = "__CHECKBOX__";
+
+        App::import('Vendor', 'HTMLPurifier', array('file' => 'htmlpurifier/library/HTMLPurifier.auto.php'));
+        $config = HTMLPurifier_Config::createDefault();
+        $config->set('URI.AllowedSchemes', array('data'));
+        $purifier = new HTMLPurifier($config);
+//        Configure::write('debug', 2);
+        if (!empty($this->data[$this->alias]['volunteerdetail'])) {
+//            $this->data[$this->alias]['volunteerdetail'] = str_replace($stringallow,  $stringreplace, $this->data[$this->alias]['volunteerdetail']);
+//            debug($this->data);
+//            $this->data[$this->alias]['volunteerdetail'] = $purifier->purify($this->data[$this->alias]['volunteerdetail']);
+//            $this->data[$this->alias]['volunteerdetail'] = str_replace($stringreplace, $stringallow, $this->data[$this->alias]['volunteerdetail']);
+            $this->data[$this->alias]['volunteerdetail'] = base64_encode($this->data[$this->alias]['volunteerdetail']);
+            $this->data[$this->alias]['proposal_content'] = base64_encode($this->data[$this->alias]['proposal_content']);
+
+        }
+//        debug($this->data);
+//        exit();
+        return true;
+    }
+
+    public function afterFind($results, $primary = false) {
+        foreach ($results as $key => $val) {
+            if(isset($results[$key][$this->alias]['volunteerdetail'])){
+                $results[$key][$this->alias]['volunteerdetail'] = base64_decode($results[$key][$this->alias]['volunteerdetail']);
+                $results[$key][$this->alias]['proposal_content'] = base64_decode($results[$key][$this->alias]['proposal_content']);
+            }
+
+        }
+//        Configure::write('debug', 2);
+//        debug($results);
+//        exit();
+        return $results;
+    }
+
+}

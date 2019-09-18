@@ -1,0 +1,134 @@
+<? if(!empty($layout['nogroup'])){?>
+
+
+        <?
+
+        foreach($layout['nogroup'] as $k=>$field){
+
+            if(!$field['hidden']){?>
+                <tr>
+                    <td><?php echo h($field['label']); ?></td>
+                    <td>
+                        <?php echo h($custom_field[$field['field_id']]['value_text']); ?>
+                    </td>
+                </tr>
+                <?
+            }
+        }?>
+<?}?>
+<?
+
+foreach($layout['group'] as $j=>$group){?>
+    <?if(!empty($group['fields'])){?>
+        <tr>
+            <th colspan="2"><?=$group['name']?></th>
+        </tr>
+            <?foreach($group['fields'] as $k=>$field){
+
+                if(!$field['hidden']){?>
+
+                    <tr>
+                        <td><?php echo h($field['label']); ?></td>
+                        <td>
+                            <?php echo h($custom_field[$field['field_id']]['value_text']);?>
+                        </td>
+                    </tr>
+
+
+                    <?
+                }
+            }?>
+    <?}?>
+<?}?>
+
+<script>
+
+    $(document).ready(function() {
+        // Multiselect
+        $(".select2-multiple").select2({
+        });
+        validate_form();
+
+        $('#modal').on('hidden.bs.modal', function () {
+            $('#modal').removeData('bs.modal')
+        });
+
+        $('#modal').on('loaded.bs.modal', function () {
+            $('.modalonly').show();
+            $('.modaloff').hide();
+        });
+
+        <!--        --><?//
+        //
+        //        if(!empty($timestamp)){
+        //            foreach($timestamp as $counter=>$item){
+        //                $format = "YYYY-MM-DD";
+        //                if($item['type'] == 'datetime'){
+        //                    $format = "YYYY-MM-DD HH:mm";
+        //                }
+        //                ?>
+//                console.log('<?//=$item['id']?>//');
+//                $('#<?//=$item['id']?>//').datepicker({
+//                    format:"<?//=$format?>//"
+//                });
+//                <?//
+        //            }
+        //        }
+        //        ?>
+
+        $('.timepicker').timepicker({
+            template: 'dropdown',
+            minuteStep: 1,
+            showSeconds: false,
+            showMeridian: false,
+            // explicitMode: true
+        });
+
+        $('.bs_datetimepicker').daterangepicker({
+            timePicker: true,
+            locale: {
+                format: 'YYYY-MM-DD HH:mm'
+            },
+            singleDatePicker: true,
+            showDropdowns: true,
+            drops: "down",
+        });
+
+        $(".bs_daterangepicker").daterangepicker(
+            {
+                autoUpdateInput: false,
+                ranges: {
+                    '<?=__('today')?>': [moment(), moment()],
+                    '<?=__('yesterday')?>': [moment().subtract('days', 1), moment().subtract('days', 1)],
+                    '<?=__('last_7')?>': [moment().subtract('days', 6), moment()],
+                    '<?=__('last_30')?>': [moment().subtract('days', 29), moment()],
+                    '<?=__('this_month')?>': [moment().startOf('month'), moment().endOf('month')],
+                    '<?=__('prev_month')?>': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+                },
+                // dateLimit: { months: 2 },
+                separator: " - ",
+                locale: {
+                    applyLabel: '<?=__('submit')?>',
+                    cancelLabel: '<?=__('cancel')?>',
+                    fromLabel: '<?=__('from')?>',
+                    toLabel: '<?=__('to')?>',
+                    format: 'YYYY-MM-DD',
+                    customRangeLabel: '<?=__('custom')?>'
+                }
+            }
+        );
+
+        $('.bs_daterangepicker').on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
+        });
+
+        $('.bs_daterangepicker').on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('');
+
+        });
+
+
+
+    });
+
+</script>

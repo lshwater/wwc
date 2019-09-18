@@ -1,0 +1,176 @@
+<?php $this->Html->script('membercard', array("inline"=>false)); ?>
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title">搜尋會員</h4>
+</div>
+<div class="modal-body">
+    <div class="row">
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <?php echo $this->Form->label("membercard", __('會員卡'), 'col-sm-3 control-label'); ?>
+                <div class="col-sm-9">
+                    <?php echo $this->Form->input("membercard", array('div'=>false, 'label'=>false,  'id'=>"filter-membercard", 'class'=>'form-control membercard', "readonly"=>"readonly"));?>
+                </div>
+            </div> <!-- / .form-group -->
+        </div>
+
+
+        <div class="col-md-2">
+            <?php echo $this->Form->input('code', array(
+                    'div'=>false, 'label'=>false,
+                    'class'=>'form-control filterauto',
+                    'id'=>"filter-code",
+                    'placeholder'=>__("會藉編號")
+                )
+            ); ?>
+        </div>
+
+        <div class="col-md-2">
+            <?php echo $this->Form->input('displayname', array(
+                    'div'=>false, 'label'=>false,
+                    'class'=>'form-control filterauto',
+                    'id'=>"filter-displayname",
+                    'placeholder'=>__("姓名")
+                )
+            ); ?>
+        </div>
+
+        <div class="col-md-2">
+            <div class="input-group">
+                <?php echo $this->Form->input('identity', array(
+                        'div'=>false, 'label'=>false,
+                        'class'=>'form-control filterauto',
+                        'id'=>"filter-identity",
+                        'placeholder'=>__("完整身份証明號碼")
+                    )
+                ); ?>
+                <span class="input-group-btn">
+                          <button type="submit" class="btn btn-default" style="font-size: 13px;"><i class="fa fa-search"></i></button>
+                        </span>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <?php echo $this->Form->input('tel', array(
+                    'div'=>false, 'label'=>false,
+                    'class'=>'form-control filterauto',
+                    'id'=>"filter-tel",
+                    'placeholder'=>__("電話號碼")
+                )
+            ); ?>
+        </div>
+
+    </div>
+    <hr/>
+    <table class="table table-striped table-bordered table-condensed table-hover" id="datatables">
+        <thead>
+        <tr>
+            <th><?php echo __('姓名'); ?></th>
+            <th>身份証明號碼</th>
+            <th>性別</th>
+            <th>電話(住宅)</th>
+            <th>電話(手提)</th>
+            <th><?php echo __('會藉'); ?></th>
+            <th class="actions"><?=__('Actions')?></th>
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+
+    </table>
+</div>
+
+<script>
+    $(document).ready(function() {
+        var table = table = $('#datatables').dataTable({
+            dom: '<"top"<"toolbar"><"clear">>rt<"bottom"lip<"clear">>',
+
+            columnDefs: [
+                {
+                    className: 'control',
+                    orderable: false,
+                    targets:   1
+                },
+                {
+                    className: 'control',
+                    orderable: false,
+                    targets:   3
+                },
+                {
+                    className: 'control',
+                    orderable: false,
+                    targets:   4
+                },
+                {
+                    className: 'control',
+                    orderable: false,
+                    targets:   5
+                },
+                {
+                    className: 'control',
+                    orderable: false,
+                    targets:   6
+                }
+
+            ],
+            order: [ 1, 'asc' ],
+            language: {
+                "sProcessing":   "<?=__('sProcessing')?>",
+                "sLengthMenu":   "<?=__('sLengthMenu')?>",
+                "sZeroRecords":  "<?=__('sZeroRecords')?>",
+                "sInfo":         "<?=__('sInfo')?>",
+                "sSearch":         "<?=__('sSearch')?>",
+                "sInfoEmpty":    "<?=__('sInfoEmpty')?>",
+                "sInfoFiltered": "<?=__('sInfoFiltered')?>",
+                "oPaginate": {
+                    "sFirst":    "<?=__('sFirst')?>",
+                    "sPrevious": "<?=__('sPrevious')?>",
+                    "sNext":     "<?=__('sNext')?>",
+                    "sLast":     "<?=__('sLast')?>"
+                }
+            },
+            "bProcessing": true,
+            "searching":true,
+            "bServerSide": true,
+            "sAjaxSource": "<?=$this->Html->url(array("action"=>"ajax_newmembershiplist"))?>",
+            fnServerParams: function ( aoData ) {
+                aoData.push(
+                    { "name": "code", "value": $("#filter-code").val() } ,
+                    { "name": "name", "value": $("#filter-displayname").val() } ,
+                    { "name": "tel", "value": $("#filter-tel").val() } ,
+                    { "name": "identity", "value": $("#filter-identity").val() } ,
+                );
+            },
+
+            "aoColumns": [
+                {mData:"displayname"},
+                {mData:"identity"},
+                {mData:"gender"},
+                {mData:"contact_tel_home"},
+                {mData:"contact_tel_mobile"},
+                {mData:"membership"},
+                {mData:"action"}
+            ],
+        });
+
+        $('.membercard').scannerdevice();
+
+        $("#filter-membercard").on("change", function() {
+            table.fnDraw();  // In your case this would be 'tblOrders.fnDraw();'
+        });
+        $("#filter-code").on("keyup", function() {
+            table.fnDraw();  // In your case this would be 'tblOrders.fnDraw();'
+        });
+        $("#filter-displayname").on("keyup", function() {
+            table.fnDraw();  // In your case this would be 'tblOrders.fnDraw();'
+        });
+        $("#filter-tel").on("keyup", function() {
+            table.fnDraw();  // In your case this would be 'tblOrders.fnDraw();'
+        });
+        $("#filter-identity").on("change", function() {
+            table.fnDraw();  // In your case this would be 'tblOrders.fnDraw();'
+        });
+    });
+</script>

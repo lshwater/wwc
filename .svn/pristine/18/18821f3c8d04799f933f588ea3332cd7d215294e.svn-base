@@ -1,0 +1,14 @@
+<div class="widget-timeline-item">
+    <div class="widget-timeline-info">
+        <div class="widget-timeline-bullet"></div>
+        <div class="widget-timeline-time bg-info"><?echo h($timeline['date']);?></div>
+    </div>
+
+    <div class="panel panel-info panel-body-colorful">
+        <div class="panel-title"> <i class="fa fa-file-word-o"></i> <?=h($timeline['form_name'])?></div>
+        <div class="panel-body">
+            <?=$this->Html->link('<span class="btn btn-info">檢視</span>', array("controller"=>$timeline['form_controller'], "action"=>"view", $timeline['form_id'], 'ajax'=>true), array("class"=>"", "escape"=>false, 'data-toggle'=>"modal", 'data-target'=>'#modal'));?>&nbsp;&nbsp;
+            <?= $this->Form->postLink('<span class="btn btn-danger">刪除</span>', array("controller"=>$timeline['form_controller'], "action"=>"delete", $timeline['form_id']), array("class" => "", 'escape' => false), __('你確定要刪除此表格 （ %s ）？', h($timeline['form_name'])));?>
+        </div>
+    </div>
+</div>

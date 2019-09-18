@@ -1,0 +1,163 @@
+<div class="page-header">
+    <div class="row">
+        <!-- Page header, center on small screens -->
+        <h1 class="col-xs-12 col-sm-4 text-left-sm flashMessage">
+            <i class="fa fa-usd page-header-icon"></i>&nbsp;&nbsp;<?=__("收據記錄")?>
+        </h1>
+
+        <div class="col-xs-12 col-sm-8">
+            <div class="row">
+                <hr class="visible-xs no-grid-gutter-h">
+                <!-- "Create project" button, width=auto on desktops -->
+                <!-- "Create project" button, width=auto on desktops -->
+                <div class="text-right col-xs-12 col-sm-auto">
+                    <?php echo $this->Html->link('<span class="icon fa fa-print"></span> '.__('匯出紀錄'), array("action"=>"export", 'ajax'=>true), array('escape'=>false, 'class'=>'btn btn-info btn-labeled', 'data-toggle'=>"modal", 'data-target'=>'#modal')); ?>
+                </div>
+
+                <!-- Margin -->
+                <div class="visible-xs clearfix form-group-margin"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-2">
+        <?php echo $this->Form->input('code', array(
+                'div'=>false, 'label'=>false,
+                'class'=>'form-control filterauto',
+                'id'=>"filter-code",
+                'placeholder'=>__("收據編號")
+            )
+        ); ?>
+    </div>
+
+    <div class="col-md-2">
+        <?php echo $this->Form->input('name', array(
+                'div'=>false, 'label'=>false,
+                'class'=>'form-control filterauto',
+                'id'=>"filter-name",
+                'placeholder'=>__("會員編號")
+            )
+        ); ?>
+    </div>
+
+    <div class="col-md-2">
+        <?php echo $this->Form->input('name', array(
+                'div'=>false, 'label'=>false,
+                'class'=>'form-control filterauto',
+                'id'=>"filter-name",
+                'placeholder'=>__("會員姓名")
+            )
+        ); ?>
+    </div>
+
+    <div class="col-md-2">
+        <div class="form-group">
+            <div class="input-group">
+                <span class="input-group-addon no-border"><i class="fa fa-calendar"></i></span>
+                <?php echo $this->Form->input('range', array('class'=>'form-control', 'placeholder'=>'選擇發出日期','type'=>'text', 'label'=>false ,'div'=>false, "default"=>"", "id"=>"datetimepicker")); ?>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <?php echo $this->Form->input('paymentmethod', array(
+                'div'=>false, 'label'=>false,
+                'class'=>'form-control filterauto select2 allowClear', "empty"=>true,
+                'id'=>"filter-paymentmethod",
+                "options"=>$paymentmethods,
+                'placeholder'=>__("付款方式")
+            )
+        ); ?>
+    </div>
+
+    <div class="col-md-2">
+        <?php echo $this->Form->input('valid', array(
+                'div'=>false, 'label'=>false,
+                'class'=>'form-control filterauto select2 allowClear', "empty"=>true,
+                'id'=>"filter-valid",
+                "options"=>array("有效", "已退款"),
+                'placeholder'=>__("狀態")
+            )
+        ); ?>
+    </div>
+
+</div>
+<hr>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered table-condensed table-hover" id="datatables">
+        <thead>
+        <tr>
+            <th><?=__('收據編號')?></th>
+            <th><?=__('付款人')?></th>
+            <th><?=__('發出日期')?></th>
+            <th><?=__('方式')?></th>
+            <th><?=__('總費用')?></th>
+            <th><?=__('狀態')?></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+
+<script>
+
+    $(document).ready(function() {
+        var table = table = $('#datatables').dataTable({
+            dom: '<"top"<"toolbar"><"clear">>rt<"bottom"lip<"clear">>',
+
+            columnDefs: [
+                {
+                    className: 'control',
+                    orderable: false,
+                    targets:   5
+                },
+            ],
+            order: [ 1, 'asc' ],
+            language: {
+                "sProcessing":   "<?=__('sProcessing')?>",
+                "sLengthMenu":   "<?=__('sLengthMenu')?>",
+                "sZeroRecords":  "<?=__('sZeroRecords')?>",
+                "sInfo":         "<?=__('sInfo')?>",
+                "sSearch":         "<?=__('sSearch')?>",
+                "sInfoEmpty":    "<?=__('sInfoEmpty')?>",
+                "sInfoFiltered": "<?=__('sInfoFiltered')?>",
+                "oPaginate": {
+                    "sFirst":    "<?=__('sFirst')?>",
+                    "sPrevious": "<?=__('sPrevious')?>",
+                    "sNext":     "<?=__('sNext')?>",
+                    "sLast":     "<?=__('sLast')?>"
+                }
+            },
+            "bProcessing": true,
+            "searching":true,
+            "bServerSide": true,
+            "sAjaxSource": "<?=$this->Html->url(array("action"=>"ajax_list"))?>",
+            fnServerParams: function ( aoData ) {
+                aoData.push(
+                    // { "name": "code", "value": $("#filter-code").val() } ,
+                    // { "name": "name", "value": $("#filter-displayname").val() } ,
+                    // { "name": "tel", "value": $("#filter-tel").val() } ,
+                    // { "name": "identity", "value": $("#filter-identity").val() } ,
+                    // { "name": "membercard", "value": $("#filter-membercard").val() } ,
+                );
+            },
+
+            "aoColumns": [
+                {mData:"Payment.code"},
+                {mData:"Payment.payer"},
+                {mData:"Payment.paymentdate"},
+                {mData:"Paymentmethod.name"},
+                {mData:"Payment.sellingprice"},
+                {mData:"Payment.refunded"},
+                {mData:"action"}
+            ],
+        });
+    });
+
+</script>

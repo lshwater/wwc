@@ -1,0 +1,74 @@
+<?php
+App::uses('AppModel', 'Model');
+/**
+ * Agency Model
+ *
+ * @property Unit $Unit
+ */
+class Custominputdaterange extends AppModel {
+
+    public $recursive = -1;
+//    public $useDbConfig = 'mysql';
+
+    public $belongsTo = array(
+        'Dbmodel' => array(
+            'className' => 'Dbmodel',
+            'foreignKey' => 'model_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+        "Customtype"=> array(
+            'className' => 'Customtype',
+            'foreignKey' => 'type_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+        "Customfield"=> array(
+            'className' => 'Customfield',
+            'foreignKey' => 'field_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        )
+
+    );
+
+
+    public function beforeSave($options = array()) {
+        if (isset($this->data[$this->alias]['value'])) {
+            list($this->data[$this->alias]['start_date'], $this->data[$this->alias]['end_date']) = explode(' - ', $this->data[$this->alias]['value']);
+        }
+
+        return true;
+    }
+
+    public function afterFind($results, $primary = false) {
+        foreach ($results as $key => $val) {
+            if (isset($val[$this->alias]['start_date']) && isset($val[$this->alias]['end_date'])) {
+
+                $results[$key][$this->alias]['value_text'] = $val[$this->alias]['start_date']." - ".$val[$this->alias]['end_date'];
+
+
+            }
+
+        }
+
+        return $results;
+    }
+
+    public function beforeFind($queryData) {
+
+        list($startdate, $enddate)  = explode(' - ', $queryData['conditions']['value']);
+
+
+        $queryData['conditions']['start_date'] = $startdate;
+        $queryData['conditions']['end_date'] = $enddate;
+        unset($queryData['conditions']['value']);
+
+
+        return $queryData;
+    }
+
+}

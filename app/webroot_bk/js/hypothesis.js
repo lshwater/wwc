@@ -1,0 +1,359 @@
+var domain = "";
+
+//message
+function ajax_updatemessage(){
+    var timestamp = $("#messages-list").attr('data-updatetime');
+    var url = domain+"/messages/ajax_getunmsgs";
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: {timestamp: timestamp},
+        dataType: 'json'
+    })
+    .done(function (data) {
+        if (data.update) {
+            updatemsghtml(data);
+        }
+    });
+}
+
+function updatemsghtml(data){
+    var lastunread = parseInt($("#unreadmessagenumber").html());
+    $("#unreadmessagenumber").html(lastunread+parseInt(data.unread));
+    $("#messages-list").attr('data-updatetime', data.lastupdatetime);
+    var html = '';
+    $.each(data.msg, function (key, value) {
+        html += '<div class="message checklink" data-href="'+domain+'/Messages/view/' + value.Message.id + '" onmouseover="JavaScript:this.style.cursor=\'pointer\' ">';
+        html += '<a href="#" class="message-subject">' + escapeHtml(value.Message.title) + '</a>';
+        html += '<div class="message-description"> from <a href="#">'+escapeHtml(value.Message.from_name)+'</a>&nbsp;&nbsp;·&nbsp;&nbsp;'+escapeHtml(value.Message.created)+'</div></div>';
+        $.growl.notice({ title: "新訊息", message: escapeHtml(value.Message.title)});
+    });
+
+    $("#messages-list").prepend(html);
+}
+
+function ajax_updatenotification() {
+
+    var timestamp = $("#notifications-list").attr('data-updatetime');
+    var url = domain+"/Notifications/ajax_getunreadnotices";
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: {timestamp: timestamp},
+        dataType: 'json'
+    })
+    .done(function (data) {
+        if (data.update) {
+            updatenotificationhtml(data);
+        }
+
+    });
+}
+
+function updatenotificationhtml(data) {
+    var lastunread = parseInt($("#unreadnoticenumber").html());
+    $("#unreadnoticenumber").html(lastunread+parseInt(data.unread));
+    $("#notifications-list").attr('data-updatetime', data.lastupdatetime);
+    var html = '';
+    $.each(data.msg, function (key, value) {
+        html += '<div class="notification checklink" data-href="'+domain+'/Notifications/view/' + value.Notification.id + '" onmouseover="JavaScript:this.style.cursor=\'pointer\' ">';
+        html += '<div class="notification-title text-info">' + escapeHtml(value.Notification.title) + '</div>';
+        //html += '<div class="notification-description">' + escapeHtml(value.Notification.msg_less) + '</div>';
+        html += '<div class="notification-ago">' + escapeHtml(value.Notification.created) + '</div>';
+        html += '<div class="notification-icon fa fa-hdd-o bg-info"></div></div>';
+        $.growl.notice({ title: "新通知", message: escapeHtml(value.Notification.title)});
+    });
+
+    $("#notifications-list").prepend(html);
+}
+
+function phonemask(obj){
+
+    var mask = '(999) 9999-9999';
+
+    if(obj.attr('applymask') != 'applymask'){
+        obj.attr('applymask', 'applymask');
+
+        obj.focus(function() {
+            $(this).val()===''?$(this).val('(852)'):$(this).val();
+        });
+
+        obj.bind(
+            'change', function(){
+                $(this).unmask();
+                var maskval = $(this).val().replace("_", "");
+
+                if(maskval.length != mask.length){
+                    $(this).val('');
+                }
+                obj.mask(mask, {autoclear: false} );
+            }
+        );
+        obj.mask(mask, {autoclear: false} );
+    }
+}
+
+function formatmask(obj, format){
+    var mask = format;
+    obj.mask(mask, {autoclear: false} );
+}
+
+var entityMap = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': '&quot;',
+    "'": '&#39;',
+    "/": '&#x2F;'
+};
+
+function escapeHtml(string) {
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
+        return entityMap[s];
+    });
+}
+
+function validate_form() {
+    $(".validate_form").validate({
+        ignore: '.ignore, .select2-input',
+        focusInvalid: false,
+        submitHandler: function(form) {
+
+            //prevent double submit
+            if($(form).hasClass("preventDoubleSubmission")){
+                if ($(form).data('submitted') === true) {
+                    $.growl.warning({ title: "系統", message: "正在提交中....", size: 'small' });
+                } else {
+                    $(form).data('submitted', true);
+                    form.submit();
+                }
+            }else{
+                form.submit();
+            }
+        },
+        invalidHandler: function(event, validator) {
+            // 'this' refers to the form
+            var errors = validator.numberOfInvalids();
+            if (errors) {
+                var message = '未能提交。有 ('+errors+') 地方不正確。';
+                $.growl.error({ title: "系統", message: message, size: 'small' });
+            }
+        }
+    });
+
+    $.validator.addMethod(
+        "phone_format",
+        function (value, element) {
+            var check = false;
+//            return this.optional(element) || /^\(\d{3}\)[ ]\d{4}\-\d{4}$/.test(value);
+            return this.optional(element) || /^(\+[1-9][0-9]*(\([0-9]*\)|-[0-9]*-))?[0]?[1-9][0-9\- ]*$/.test(value);
+        },
+        "請輸入有效的電話／傳真號碼"
+    );
+
+    $.validator.addMethod(
+        "code_format",
+        function (value, element) {
+            var check = false;
+            return this.optional(element) || /^[a-zA-Z0-9\w?!\.;:,@#$%^&*\/\[\]\(\)=\+-]*$/.test(value);
+        },
+        "編號格式錯誤"
+    );
+
+    $.validator.addMethod("maxLen", function (value, element, param) {
+        //console.log('element= ' + $(element).attr('name') + ' param= ' + param )
+        if ($(element).val().length > param) {
+            return false;
+        } else {
+            return true;
+        }
+    }, "You have reached the maximum number of characters allowed for this field.");
+
+    $.validator.addMethod("greaterThan",
+        function(value, element, params) {
+
+        if(value == ''){
+            return true;
+        }
+
+        if (!/Invalid|NaN/.test(new Date(value))) {
+            return new Date(value) > new Date($(params[0]).val());
+        }
+
+        return isNaN(value) && isNaN($(params[0]).val())
+            || (Number(value) > Number($(params[0]).val()));
+    },'必須大於{1}.');
+
+    $.validator.addClassRules("vd_phone", {
+        phone_format: true
+    });
+
+    $.validator.addClassRules("vd_password", {
+        required: true,
+        minlength: 6,
+        maxlength: 20
+    });
+
+    $.validator.addClassRules("vd_password2", {
+        equalTo: ".vd_password"
+    });
+
+    $.validator.addClassRules("vd_username", {
+        required: true,
+        minlength: 4,
+        maxlength: 30
+    });
+
+    $.validator.addClassRules("vd_code", {
+        code_format: true
+    });
+
+    $.validator.addClassRules("vd_name", {
+        required: true,
+        minlength: 6,
+        maxLen: 50
+    });
+
+    $.validator.addMethod("cEmail", $.validator.methods.email, "請輸入有效電郵");
+    $.validator.addClassRules("vd_email", {
+        cEmail: true
+    });
+
+    $.validator.addMethod("cAddress", $.validator.methods.required, "必須輸入地址");
+    $.validator.addClassRules("vd_address", {
+        cAddress: true
+    });
+
+    $.validator.addMethod("cConfirm", $.validator.methods.required, "必須確認項目");
+    $.validator.addClassRules("vd_confirm", {
+        cConfirm: true
+    });
+
+    $.validator.addMethod("cDigits", $.validator.methods.digits, "只接受數字輸入");
+    $.validator.addClassRules("vd_number", {
+        cDigits: true
+    });
+
+    $.validator.addMethod("cNumber", $.validator.methods.number, "請輸入有效數字");
+    $.validator.addClassRules("vd_isnumber", {
+        cNumber: true
+    });
+
+
+    $.fn.datepicker.dates['zh_tw'] = {
+        days: ["日", "一", "二", "三", "四", "五", "六"],
+        daysShort: ["日", "一", "二", "三", "四", "五", "六"],
+        daysMin: ["日", "一", "二", "三", "四", "五", "六"],
+        months: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+        monthsShort: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+        today: "今日",
+        clear: "清除",
+        format: "mm/dd/yyyy",
+        titleFormat: "MM yyyy", /* Leverages same syntax as 'format' */
+        weekStart: 0
+    };
+
+    $(".bs_datepicker").datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true,
+        todayBtn: "linked",
+        language: 'zh_tw'
+    });
+    $(".datepicker").datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true,
+        todayBtn: "linked",
+        language: 'zh_tw'
+    });
+    //phonemask($(".vd_phone"));
+
+    $.extend($.validator.messages, {
+        required: "此欄為必填項目",
+        equalTo: "與首次輸入的密碼不符",
+        maxlength: jQuery.validator.format("請輸入最多 {0} 個字符"),
+        minlength: jQuery.validator.format("請輸入最少 {0} 個字符")
+    });
+
+}
+
+function getAge(dateString) {
+    var today = new Date();
+    var birthDate = new Date(dateString);
+    var age = today.getFullYear() - birthDate.getFullYear();
+    var m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+}
+
+$(document).ready(function () {
+    //select2
+    $(".select2").each(function(){
+
+        var placeholder = $(this).attr('placeholder');
+        if(placeholder == null){
+            placeholder = "選擇";
+        }
+        if($(this).hasClass('allowClear')){
+            $(this).select2({
+                placeholder: placeholder,
+                allowClear: true,
+                minimumResultsForSearch: -1,
+                dropdownCssClass : 'no-search'
+            });
+        }else{
+            $(this).select2({
+                placeholder: placeholder,
+                allowClear: false,
+                minimumResultsForSearch: -1,
+                dropdownCssClass : 'no-search'
+            });
+        }
+
+
+        //$(this).val(null).trigger('change');
+    });
+
+
+    $(".select2-multiple").each(function(){
+        var placeholder = $(this).attr('placeholder');
+        if(placeholder == null){
+            placeholder = "選擇";
+        }
+
+        $(this).select2({
+            placeholder: placeholder,
+            allowClear: true,
+            minimumResultsForSearch: -1,
+            dropdownCssClass : 'no-search'
+        });
+        //$(this).val(null).trigger('change');
+    });
+
+
+
+    $(document).on("click",".openasnew", function(e){
+        e.preventDefault(); // this will prevent the browser to redirect to the href
+            // if js is disabled nothing should change and the link will work normally
+        var url = $(this).attr('href');
+        var windowName = $(this).attr('id');
+        window.open(url,windowName,'toolbar=no, width=1366, height=768');
+    });
+
+    $("input").attr("autocomplete", "off");
+
+    $(document).on("keypress", 'form input', function (e) {
+
+        if (!$(this).closest('form').hasClass('allowentersubmit')) {
+            //alert($(this).attr("type"));
+            var code = e.keyCode || e.which;
+            if (code == 13) {
+                e.preventDefault();
+                return false;
+            }
+        }
+    });
+
+    validate_form();
+});

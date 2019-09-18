@@ -1,0 +1,298 @@
+<?php
+App::uses('AppModel', 'Model');
+/**
+ * Agency Model
+ *
+ * @property Unit $Unit
+ */
+class Dynamicmodelstruct extends AppModel {
+
+    public $recursive = -1;
+//    public $useDbConfig = 'mysql';
+
+    public $type_int = 'int';
+    public $type_float = 'float';
+    public $type_string = 'string';
+    public $type_longtext = 'longtext';
+    public $type_bool = 'bool';
+    public $type_date = 'date';
+    public $type_datetime = 'datetime';
+    public $type_array = 'array';
+    public $type_select = 'select';
+    public $type_select_item = 'select_item';
+    public $type_image = 'image';
+
+
+    private $parent_array = 'self';
+
+    public $type = array(
+		'int',
+		'float',
+        'string',
+        'longtext',
+        'bool',
+        'date',
+        'datetime',
+        'array',
+        'select',
+        'select_item',
+        'image'
+	);
+/**
+ * Validation rules
+ *
+ * @var array
+ */
+	public $validate = array(
+		'model_id' => array(
+			'notEmpty' => array(
+				'rule' => array('notEmpty'),
+				'message' => 'This field cannot be empty',
+			),
+		),
+		'name' => array(
+			'notEmpty' => array(
+				'rule' => array('notEmpty'),
+				'message' => 'This field cannot be empty',
+				//'allowEmpty' => false,
+				//'required' => false,
+				//'last' => false, // Stop validation after this rule
+				//'on' => 'create', // Limit validation to 'create' or 'update' operations
+			),
+		),
+		'required' => array(
+			'notEmpty' => array(
+				'rule' => array('notEmpty'),
+				'message' => 'This field cannot be empty',
+				//'allowEmpty' => false,
+				//'required' => false,
+				//'last' => false, // Stop validation after this rule
+				//'on' => 'create', // Limit validation to 'create' or 'update' operations
+			),
+		),
+		'type' => array(
+			'notEmpty' => array(
+				'rule' => array('notEmpty'),
+				'message' => 'This field cannot be empty',
+				//'allowEmpty' => false,
+				//'required' => false,
+				//'last' => false, // Stop validation after this rule
+				//'on' => 'create', // Limit validation to 'create' or 'update' operations
+			),
+		)
+    );
+
+    public $hasMany = array(
+        'Dynamicstructattribute' => array(
+            'className' => 'Dynamicstructattribute',
+            'dependent' => false
+        )
+    );
+
+	//The Associations below have been created with all possible keys, those that are not needed can be removed
+
+    public function create_struct($model_id, $name, $type, $required=0, $label=null, $default=null, $attribute=null, $placeholder=null, $main_struct_id=null){
+
+        if(empty($model_id)|| empty($name) || empty($type)){
+            debug(1);
+            return false;
+        }
+
+        if(!$required){
+            $required = 0;
+        }
+
+        if(!in_array($type, $this->type)){
+            debug(2);
+            return false;
+        }
+
+
+        if(!empty($main_struct_id)){
+
+            if($type == $this->type_image){
+                debug(3);
+                return false;
+            }
+            $main = $this->read(null, $main_struct_id);
+            if(empty($main)){
+                debug(4);
+                return false;
+            }
+
+            if(!in_array($main['Dynamicmodelstruct']['type'], array($this->type_select, $this->type_array))){
+                debug(5);
+                return false;
+            }
+
+            if($type == $this->type_select_item && $main['Dynamicmodelstruct']['type'] != $this->type_select){
+                debug(5);
+                return false;
+            }
+
+            if($type == $this->type_select){
+                debug(5);
+                return false;
+            }
+
+            if($type == $this->type_image){
+                debug(7);
+                return false;
+            }
+        }
+
+        if($type == $this->type_select_item && empty($main_struct_id)){
+            debug(8);
+            return false;
+        }
+
+
+        if($type == $this->type_select_item ){
+            $required = 0;
+            $attribute = null;
+            $placeholder = null;
+            $default = null;
+        }
+
+        if(!empty($attribute)){
+            if(!is_array($attribute)){
+                debug(9);
+                return false;
+            }else{
+                $list =$this->Dynamicstructattribute->find('list',array('conditions'=>array('type'=>$type),'fields'=>array('attribute')));
+                foreach($attribute as $k=>$item){
+                    if(!in_array($k, $list)){
+                        debug(10);
+                        return false;
+                    }
+                }
+                $attribute = json_encode($attribute);
+            }
+        }
+
+        $order = $this->find('count',array(
+            'conditions'=>array(
+                'model_id'=>$model_id,
+            )
+        ));
+
+        $this->begin();
+
+        $new_struct = array(
+            'name'=>$name,
+            'model_id'=>$model_id,
+            'required'=>$required,
+            'type'=>$type,
+            'label'=>$label,
+            'order'=>$order + 1,
+            'attribute'=>$attribute,
+            'default'=>$default,
+            'placeholder'=>$placeholder,
+            'main_struct_id'=>$main_struct_id
+        );
+
+        $this->create();
+        if($this->save($new_struct)){
+
+            if($type == $this->type_array){
+
+                $new_child_struct = array(
+                    'name'=>$name."_id",
+                    'model_id'=>$model_id,
+                    'required'=>1,
+                    'type'=>$this->type_string,
+                    'label'=>null,
+                    'order'=>$order + 1,
+                    'attribute'=>null,
+                    'default'=>null,
+                    'placeholder'=>null,
+                    'hidden'=>1,
+                    'main_struct_id'=>$this->getLastInsertID()
+                );
+
+                $this->create();
+                if($this->save($new_child_struct)){
+                    $this->commit();
+                    return true;
+                }else{
+                    debug(11);
+                    return false;
+                }
+            }else if($type == $this->type_image){
+                $main_id = $this->getLastInsertID();
+
+                $new_child_struct1 = array(
+                    'name'=>"image_id",
+                    'model_id'=>$model_id,
+                    'required'=>1,
+                    'type'=>$this->type_string,
+                    'label'=>null,
+                    'order'=>$order + 1,
+                    'attribute'=>null,
+                    'default'=>null,
+                    'placeholder'=>null,
+                    'hidden'=>1,
+                    'main_struct_id'=>$main_id,
+                );
+
+                $new_child_struct2 = array(
+                    'name'=>"thumburl",
+                    'model_id'=>$model_id,
+                    'required'=>1,
+                    'type'=>$this->type_string,
+                    'label'=>null,
+                    'order'=>$order + 1,
+                    'attribute'=>null,
+                    'default'=>null,
+                    'placeholder'=>null,
+                    'hidden'=>1,
+                    'main_struct_id'=>$main_id,
+                );
+
+                $new_child_struct3 = array(
+                    'name'=>"url",
+                    'model_id'=>$model_id,
+                    'required'=>1,
+                    'type'=>$this->type_string,
+                    'label'=>null,
+                    'order'=>$order + 1,
+                    'attribute'=>null,
+                    'default'=>null,
+                    'placeholder'=>null,
+                    'hidden'=>1,
+                    'main_struct_id'=>$main_id,
+                );
+
+                $this->create();
+                if(!$this->save($new_child_struct1)){
+                    debug(12);
+                    return false;
+                }
+
+                $this->create();
+                if(!$this->save($new_child_struct2)){
+                    debug(13);
+                    return false;
+                }
+
+                $this->create();
+                if(!$this->save($new_child_struct3)){
+                    debug(14);
+                    return false;
+                }
+                $this->commit();
+                return true;
+            }else{
+                $this->commit();
+                return true;
+            }
+
+        }else{
+            debug(15);
+            return false;
+        }
+    }
+
+
+
+}

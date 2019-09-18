@@ -1,0 +1,394 @@
+<?php
+App::uses('AppController', 'Controller');
+/**
+ * Groups Controller
+ *
+ * @property Group $Group
+ * @property PaginatorComponent $Paginator
+ */
+class DbfieldsController extends AppController {
+
+
+/**
+ * Components
+ *
+ *
+ * @var array
+ */
+	public $components = array('Paginator');
+
+	public function test(){
+
+	    configure::write('debug',2);
+        $this->loadModel('Dbmodel');
+        exit();
+//
+//        App::import('Model', 'ConnectionManager');
+//        $con = new ConnectionManager;
+//        $cn = $con->getDataSource('default');
+//        $test = $cn->query("SHOW COLUMNS FROM `members`;");
+
+//	    $test = $this->Member->query("ALTER TABLE `members` CHANGE `membercard` `membercard` VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;");
+//	    $test = $this->Member->query("ALTER TABLE `members` CHANGE `e_name` `e_name` VARCHAR(1024) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;");
+//	    $test = $this->Member->query("ALTER TABLE `members` CHANGE `e_name` `e_name` VARCHAR(1024) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;");
+
+        $this->Dbmodel->Behaviors->load('Containable');
+        $model = $this->Dbmodel->find('first',array(
+            'conditions'=>array(
+                'Dbmodel.name'=>"Member"
+            ),
+            'contain'=>array(
+                'Dbfield'=>array(
+                    'conditions'=>array(
+                        'Dbfield.log'=>1
+                    ),
+                    'fields'=>array('db_field')
+                )
+            )
+        ));
+
+        $field = array();
+        if($model){
+            $field = Set::combine($model['Dbfield'], '{n}.db_field', '{n}');
+        }
+
+	    debug($model);
+	    debug($field);
+
+	    exit();
+    }
+/**
+ * index method
+ *
+ * @return void
+ */
+	public function index() {
+		$this->Dbfield->recursive = 0;
+		$this->set('models', $this->Paginator->paginate());
+	}
+
+/**
+ * add method
+ *
+ * @return void
+ */
+	public function add($model_id = null) {
+        if (!$this->Dbfield->Dbmodel->exists($model_id)) {
+            throw new NotFoundException(__('Invalid group'));
+        }
+
+		if ($this->request->is('post')) {
+
+            $last = $this->Dbfield->find('first',array(
+                'conditions'=>array(
+                    'Dbfield.model_id'=>$model_id,
+                ),
+                'order'=>array(
+                    'Dbfield.order'=>"DESC"
+                ),
+                'recursive'=>-1
+            ));
+
+            $this->request->data['Dbfield']['order'] = $last['Dbfield']['order'] + 1;
+
+            $model = $this->Dbfield->Dbmodel->find('first',array(
+                'conditions'=>array(
+                    'Dbmodel.id'=>$model_id,
+                ),
+                'recursive'=>-1
+            ));
+
+            $this->loadModel($model['Dbmodel']['name']);
+            $sql = $this->{$model['Dbmodel']['name']}->query("SHOW COLUMNS FROM `".$model['Dbmodel']['db_table']."` LIKE '".$this->request->data['Dbfield']['db_field']."';");
+
+            if(!empty($sql)){
+                $this->request->data['Dbfield']['connected'] = 1;
+
+                $this->request->data['Dbfield']['type'] = $sql[0]['COLUMNS']['Type'];
+
+                $str = $sql[0]['COLUMNS']['Type'];
+                $start  = strpos($str, '(');
+                $end    = strpos($str, ')', $start + 1);
+                $length = $end - $start;
+                if($start && $end){
+                    $this->request->data['Dbfield']['type'] = substr($str, 0, $start);
+                    $this->request->data['Dbfield']['length'] = intval(substr($str, $start + 1, $length - 1));
+                }
+
+                if($sql[0]['COLUMNS']['Null'] == 'NO'){
+                    $this->request->data['Dbfield']['required'] = 1;
+                }
+
+                if($sql[0]['COLUMNS']['Default'] != null){
+                    $this->request->data['Dbfield']['default'] = $sql[0]['COLUMNS']['Default'];
+                }
+
+                $this->request->data['Dbfield']['sync'] = 1;
+                $this->request->data['Dbfield']['is_dropdown'] = 1;
+            }
+
+            if(empty($this->request->data['Dbfield']['default'])){
+                unset($this->request->data['Dbfield']['default']);
+            }
+
+            if(empty($this->request->data['Dbfield']['cus_id'])){
+                unset($this->request->data['Dbfield']['cus_id']);
+            }
+
+            if(empty($this->request->data['Dbfield']['cus_class'])){
+                unset($this->request->data['Dbfield']['cus_class']);
+            }
+
+            $this->Dbfield->create();
+			if ($this->Dbfield->save($this->request->data)) {
+
+			    $this->Session->setFlash(__('The Dbfield has been saved.'));
+                if(!empty($redirecturl)){
+                    $this->redirect($redirecturl);
+                }else{
+                    $this->redirect(array('controller'=>'Dbmodels', 'action'=>'view', $this->request->data['Dbfield']['model_id']));
+                }
+			} else {
+				$this->Session->setFlash(__('The Dbfield could not be saved. Please, try again.'));
+			}
+		}
+		$this->set('model_id', $model_id);
+	}
+
+/**
+ * edit method
+ *
+ * @throws NotFoundException
+ * @param string $id
+ * @return void
+ */
+	public function edit($id = null) {
+		if (!$this->Dbfield->exists($id)) {
+			throw new NotFoundException(__('Invalid group'));
+		}
+		if ($this->request->is(array('post', 'put'))) {
+//            configure::write('debug',2);
+		    if($this->request->data['Dbfield']['default_value'] == ''){
+//		        debug('here');
+                $this->request->data['Dbfield']['default_value'] = null;
+            }
+
+            if($this->request->data['Dbfield']['hidden']){
+                $this->request->data['Dbfield']['required'] = 0;
+            }
+
+			if ($this->Dbfield->save($this->request->data)) {
+
+			    $this->Dbfield->Behaviors->load('Containable');
+                $field = $this->Dbfield->find('first',array(
+                    'conditions'=>array(
+                        'Dbfield.id'=>$this->request->data['Dbfield']['id'],
+                    ),
+                    'contain'=>array(
+                        'Dbmodel'
+                    )
+                ));
+
+                $this->loadModel($field['Dbmodel']['name']);
+                $sql = $this->{$field['Dbmodel']['name']}->query("SHOW COLUMNS FROM `".$field['Dbmodel']['db_table']."` LIKE '".$field['Dbfield']['db_field']."';");
+
+                $this->Dbfield->id = $field['Dbfield']['id'];
+                if($sql){
+
+                    $this->Dbfield->saveField('sync', 0);
+
+                    if($field['Dbfield']['required']){
+                        $required = "NOT NULL";
+                    }else{
+                        $required = "NULL";
+                    }
+
+                    if(!empty($field['Dbfield']['default_value'])){
+                        $required .= " DEFAULT '".$field['Dbfield']['default_value']."'";
+                    }else{
+                        if(!$field['Dbfield']['required']){
+                            $required .= " DEFAULT NULL";
+                        }
+                    }
+
+
+                    if($field['Dbfield']['length']){
+                        $length = "(".$field['Dbfield']['length'].")";
+                    }else{
+                        $length = '';
+                    }
+
+                    $query = "ALTER TABLE `".$field['Dbmodel']['db_table']."` CHANGE `".$field['Dbfield']['db_field']."` `".$field['Dbfield']['db_field']."` ".$field['Dbfield']['type'].$length." ".$required.";";
+                    $sql1 = $this->{$field['Dbmodel']['name']}->query($query);
+
+
+                    $sql = $this->{$field['Dbmodel']['name']}->query("SHOW COLUMNS FROM `".$field['Dbmodel']['db_table']."` LIKE '".$field['Dbfield']['db_field']."';");
+
+                    if($sql){
+                        $this->Dbfield->saveField('connected', 1);
+
+                        $db_type  = $sql[0]['COLUMNS']['Type'];
+
+                        $str = $sql[0]['COLUMNS']['Type'];
+                        $start  = strpos($str, '(');
+                        $end    = strpos($str, ')', $start + 1);
+                        $length = $end - $start;
+                        if($start && $end){
+                            $db_type = substr($str, 0, $start);
+                            $db_length = intval(substr($str, $start + 1, $length - 1));
+                        }
+
+                        if($sql[0]['COLUMNS']['Null'] == 'NO'){
+                            $db_required = 1;
+                        }else{
+                            $db_required = 0;
+                        }
+
+                        if($sql[0]['COLUMNS']['Default'] != null){
+                            $db_default = $sql[0]['COLUMNS']['Default'];
+                        }else{
+                            $db_default = null;
+                        }
+
+                        $sync = 1;
+                        if($db_type != $field['Dbfield']['type']){
+                            $sync = 0;
+                        }
+
+                        if($db_length != $field['Dbfield']['length']){
+                            $sync = 0;
+                        }
+
+                        if($db_required != $field['Dbfield']['required']){
+                            $sync = 0;
+                        }
+
+                        if($db_default != $field['Dbfield']['default_value']){
+                            $sync = 0;
+                        }
+
+                        $this->Dbfield->saveField('sync', $sync);
+
+                    }
+
+
+                }else{
+                    $this->Dbfield->saveField('connected', 0);
+                }
+
+
+                $this->Session->setFlash(__('The Dbfield has been saved.'));
+                $redirecturl = urldecode($this->request->params['named']['redirect']);
+                if(!empty($redirecturl)){
+                    $this->redirect($redirecturl);
+                }else{
+                    $this->redirect(array('controller'=>'Dbmodels', 'action'=>'view', $this->request->data['Dbfield']['model_id']));
+                }
+			} else {
+				$this->Session->setFlash(__('The Dbfield could not be saved. Please, try again.'));
+			}
+		} else {
+			$options = array('conditions' => array('Dbfield.' . $this->Dbfield->primaryKey => $id));
+			$this->request->data = $this->Dbfield->find('first', $options);
+		}
+
+	}
+
+
+/**
+ * delete method
+ *
+ * @throws NotFoundException
+ * @param string $id
+ * @return void
+ */
+	public function delete($id = null) {
+		$this->Dbfield->id = $id;
+		if (!$this->Dbfield->exists()) {
+			throw new NotFoundException(__('Invalid group'));
+		}
+		$this->request->allowMethod('post', 'delete');
+		$field = $this->Dbfield->find('first',array(
+		    'conditions'=>array(
+		        'Dbfield.id'=>$id
+            )
+        ));
+		if ($this->Dbfield->delete()) {
+
+			$this->Session->setFlash(__('The Dbfield has been deleted.'));
+		} else {
+			$this->Session->setFlash(__('The Dbfield could not be deleted. Please, try again.'));
+		}
+		return $this->redirect(array('controller'=>'Dbmodels', 'action'=>'view', $field['Dbfield']['model_id']));
+
+    }
+
+    public function moveup($id = null) {
+
+        if (!$this->Dbfield->exists($id)) {
+            throw new NotFoundException(__('Invalid group'));
+        }
+
+        $struct = $this->Dbfield->read(null, $id);
+
+        $order = $struct['Dbfield']['order'];
+
+        $options = array();
+        $options['conditions']['model_id'] = $struct['Dbfield']['model_id'];
+        $options['conditions']['order <'] = $struct['Dbfield']['order'];
+        $options['conditions']['order !='] = 0;
+
+        $options['order']['order'] = 'DESC';
+
+        $upper = $this->Dbfield->find('first',$options);
+
+        if(!empty($upper)){
+            $this->Dbfield->id = $id;
+            $this->Dbfield->saveField('order',$upper['Dbfield']['order']);
+
+            $this->Dbfield->id = $upper['Dbfield']['id'];
+            $this->Dbfield->saveField('order',$order);
+        }
+
+        $this->Session->setFlash(__('The Dbfield is updated.'));
+
+        return $this->redirect(array('controller'=>'dbmodels','action' => 'view',$struct['Dbfield']['model_id']));
+    }
+
+
+    public function movedown($id = null) {
+
+        if (!$this->Dbfield->exists($id)) {
+            throw new NotFoundException(__('Invalid group'));
+        }
+        $struct = $this->Dbfield->read(null, $id);
+
+        $order = $struct['Dbfield']['order'];
+
+        $options = array();
+        $options['conditions']['model_id'] = $struct['Dbfield']['model_id'];
+        $options['conditions']['order >'] = $struct['Dbfield']['order'];
+
+        $options['order']['order'] = 'ASC';
+
+        $upper = $this->Dbfield->find('first',$options);
+
+        if(!empty($upper)){
+            $this->Dbfield->id = $id;
+            $this->Dbfield->saveField('order',$upper['Dbfield']['order']);
+
+            $this->Dbfield->id = $upper['Dbfield']['id'];
+            $this->Dbfield->saveField('order',$order);
+        }
+
+        $this->Session->setFlash(__('The Dbfield is updated.'));
+
+        return $this->redirect(array('controller'=>'dbmodels','action' => 'view',$struct['Dbfield']['model_id']));
+
+    }
+    
+	public function beforeFilter(){
+
+		parent::beforeFilter();
+	}
+}

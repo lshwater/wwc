@@ -1,0 +1,68 @@
+<div class="row">
+    <div class="col-sm-12">
+        <?php echo $this->Form->create('Servicerecord', array('class'=>'form-horizontal panel validate_form preventDoubleSubmission')); ?>
+        <div class="modal-header">
+            <span class="modal-title"><?=__('會面資料')?></span>
+            <button type="button" class="close modalonly" data-dismiss="modal" style="display:none"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        </div>
+        <?php echo $this->Form->hidden('user_id', array('value'=>$auth['id']));?>
+        <div class="modal-body">
+
+            <div class="form-group">
+                <?php echo $this->Form->label('type', __('類別')."*", 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('type', array('div'=>false, 'label'=>false, 'class'=>'form-control select2_modal', "options"=>$types, 'required'=>"required"));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+            <div class="form-group">
+                <?php echo $this->Form->label('date', __('會面日期')."*", 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('date', array('div'=>false, 'label'=>false, 'class'=>'form-control a_datepicker', "type"=>"text", 'required'=>"required"));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+            <div class="form-group">
+                <?php echo $this->Form->label('place', __('會面地點(如有)'), 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('place', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>__('會面地點')));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+            <div class="form-group">
+                <?php echo $this->Form->label('remark', __('會面備注'), 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('remark', array('type'=>'textarea','div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>__('會面備注')));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+        </div>
+        <div class="modal-footer text-right">
+            <button type="submit" class="btn btn-primary" ><i class="glyphicon glyphicon-ok-sign"></i><? echo ' '.__('Submit');?></button>
+        </div>
+
+
+        <?php echo $this->Form->end(); ?>
+
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function() {
+
+        $(".select2_modal").select2({
+            allowClear: true
+        });
+
+        validate_form();
+
+        $('.a_datepicker').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true,
+            todayBtn: "linked",
+            startDate:'<?=$case['Casemanagement']['dateofapproval']?>',
+            endDate: "+0d"
+        });
+    });
+</script>

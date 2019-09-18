@@ -1,0 +1,101 @@
+
+
+<div class="row">
+    <div class="col-sm-12">
+        <?php echo $this->Form->create('Casereferralform', array('class'=>'form-horizontal panel validate_form preventDoubleSubmission')); ?>
+        <div class="modal-header">
+            <span class="modal-title"><?=__('轉介個案')?></span>
+            <button type="button" class="close modalonly" data-dismiss="modal" style="display:none"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        </div>
+        <?php echo $this->Form->hidden('user_id', array('value'=>$auth['id']));?>
+        <div class="modal-body">
+            <? echo $this->Form->label('', __('綜合家庭服務中心 / 綜合服務中心 / 保護家庭及兒童服務 / 醫務社會服務部 / 感化服務等').__(''));?><br>
+
+            <div class="form-group">
+                <?php echo $this->Form->label('followup_verbal', __('口頭轉介'), 'col-sm-2 control-label text-muted'); ?>
+                <div class="col-sm-3">
+                    <? echo $this->Form->input('followup_verbal', array('default'=>0, "min"=>0, 'div'=>false,'class'=>'form-control vd_isnumber','label'=>false, "type"=>"text", "required"=>"required"));?>
+                </div>
+            </div> <!-- / .form-group -->
+            <div class="form-group">
+                <?php echo $this->Form->label('followup_written', __('書面轉介'), 'col-sm-2 control-label text-muted'); ?>
+                <div class="col-sm-3">
+                    <? echo $this->Form->input('followup_written', array('default'=>0, "min"=>0, 'div'=>false,'class'=>'form-control vd_isnumber','label'=>false, "type"=>"text", "required"=>"required"));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+            <? echo $this->Form->label('', __('綜合青少年服務中心 / 兒童及青年中心 / 社區中心 / 家庭支援網絡隊等').__(''));?><br>
+
+            <div class="form-group">
+                <?php echo $this->Form->label('support_verbal', __('口頭轉介'), 'col-sm-2 control-label text-muted'); ?>
+                <div class="col-sm-3">
+                    <? echo $this->Form->input('support_verbal', array('default'=>0, "min"=>0, 'div'=>false,'class'=>'form-control vd_isnumber','label'=>false, "type"=>"text", "required"=>"required"));?>
+                </div>
+            </div> <!-- / .form-group -->
+            <div class="form-group">
+                <?php echo $this->Form->label('support_written', __('書面轉介'), 'col-sm-2 control-label text-muted'); ?>
+                <div class="col-sm-3">
+                    <? echo $this->Form->input('support_written', array('default'=>0, "min"=>0, 'div'=>false,'class'=>'form-control vd_isnumber','label'=>false, "type"=>"text", "required"=>"required"));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+            <? echo $this->Form->label('', __('長者地區中心 / 長者鄰舍中心 / 長者中心等').__(''));?><br>
+
+            <div class="form-group">
+                <?php echo $this->Form->label('elderly_verbal', __('口頭轉介'), 'col-sm-2 control-label text-muted'); ?>
+                <div class="col-sm-3">
+                    <? echo $this->Form->input('elderly_verbal', array('default'=>0, "min"=>0, 'div'=>false,'class'=>'form-control vd_isnumber','label'=>false, "type"=>"text", "required"=>"required"));?>
+                </div>
+            </div> <!-- / .form-group -->
+            <div class="form-group">
+                <?php echo $this->Form->label('elderly_written', __('書面轉介'), 'col-sm-2 control-label text-muted'); ?>
+                <div class="col-sm-3">
+                    <? echo $this->Form->input('elderly_written', array('default'=>0, "min"=>0, 'div'=>false,'class'=>'form-control vd_isnumber','label'=>false, "type"=>"text", "required"=>"required"));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+            <div class="form-group">
+                <?php echo $this->Form->label('date', __('轉介日期')."*", 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('date', array('div'=>false, 'label'=>false, 'class'=>'form-control _datepicker', "type"=>"text", 'required'=>"required"));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+
+            <div class="form-group">
+                <?php echo $this->Form->label('remark', __('備注'), 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('remark', array('type'=>'textarea','div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>__('備注')));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+        </div>
+        <div class="modal-footer text-right">
+            <button type="submit" class="btn btn-primary" ><i class="glyphicon glyphicon-ok-sign"></i><? echo ' '.__('Submit');?></button>
+        </div>
+
+
+        <?php echo $this->Form->end(); ?>
+
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function() {
+        $(".select2_modal").select2({
+            allowClear: true
+        });
+
+        validate_form();
+
+
+        $('._datepicker').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true,
+            todayBtn: "linked",
+            startDate:'<?=$case['Casemanagement']['dateofapproval']?>',
+            endDate: "+0d"
+        });
+    });
+</script>

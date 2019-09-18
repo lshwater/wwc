@@ -1,0 +1,1024 @@
+#: General
+
+
+msgid "CSSA_code"
+msgstr "綜援編號"
+
+msgid "All Cases"
+msgstr "全部個案"
+
+msgid "My Cases"
+msgstr "我的個案"
+
+msgid "Already Token"
+msgstr "已經存在"
+
+msgid "Are you sure you want to delete # %s?"
+msgstr "你確定要刪除 # %s?"
+
+msgid " has been saved."
+msgstr "已成功儲存"
+
+msgid " could not be saved. Please, try again."
+msgstr "儲存失敗。請再嘗試"
+
+msgid " has been deleted."
+msgstr "已刪除儲存"
+
+msgid " could not be deleted. Please, try again."
+msgstr "刪除失敗。請再嘗試"
+
+msgid "Add"
+msgstr "新增"
+
+msgid "Edit"
+msgstr "編輯"
+
+msgid "export"
+msgstr "匯出"
+
+msgid "notification"
+msgstr "通知"
+
+msgid "table_details"
+msgstr "內容"
+
+msgid "table_content"
+msgstr "項目"
+
+msgid "user"
+msgstr "職員"
+
+msgid "detail"
+msgstr "內容"
+
+msgid "username"
+msgstr "使用者名稱"
+
+msgid "code"
+msgstr "帳號"
+
+msgid "active"
+msgstr "生效中"
+
+msgid "Actions"
+msgstr "行動"
+
+msgid "dob"
+msgstr "出生日期"
+
+msgid "Address"
+msgstr "地址"
+
+msgid "receive_newsletter"
+msgstr "接收電子報"
+
+msgid "ph_phone"
+msgstr "電話"
+
+msgid "ph_address"
+msgstr "請輸入你的郵寄地址"
+
+msgid "ph_remark"
+msgstr "備註"
+
+msgid "Male"
+msgstr "男性"
+
+msgid "Female"
+msgstr "女性"
+
+msgid "Standard Member"
+msgstr "普通會員"
+
+msgid "Privilege Member"
+msgstr "高級會員"
+
+msgid "Code"
+msgstr "編號"
+
+msgid "Username"
+msgstr "用戶名稱"
+
+msgid "Name"
+msgstr "名稱"
+
+msgid "Email"
+msgstr "電郵"
+
+msgid "Gender"
+msgstr "性別"
+
+msgid "vip"
+msgstr "VIP"
+
+msgid "Phone"
+msgstr "電話號碼"
+
+msgid "Group"
+msgstr "組別"
+
+msgid "Unit"
+msgstr "單位"
+
+msgid "Units"
+msgstr "單位"
+
+msgid "name"
+msgstr "名稱"
+
+msgid "type"
+msgstr "類別"
+
+msgid "Fax"
+msgstr "傳真號碼"
+
+msgid "Parameters"
+msgstr "系統參數"
+
+msgid "Remark"
+msgstr "備注"
+
+msgid "Age"
+msgstr "年齡"
+
+msgid "Agency"
+msgstr "機構"
+
+msgid "Agencies"
+msgstr "機構"
+
+msgid "Membertype"
+msgstr "會員類別"
+
+msgid "active"
+msgstr "生效"
+
+msgid "Members"
+msgstr "會員"
+
+msgid "Users"
+msgstr "職員"
+
+msgid "Create New Member"
+msgstr "新增會員"
+
+msgid "Create New User"
+msgstr "新增職員"
+
+msgid "Create New Agency"
+msgstr "新增機構"
+
+msgid "Create New Unit"
+msgstr "新增單位"
+
+msgid "Search..."
+msgstr "搜尋..."
+
+msgid "Date"
+msgstr "日期"
+
+msgid "Filesize"
+msgstr "檔案大小"
+
+msgid "Backup Records"
+msgstr "備份記錄"
+
+msgid "Daily"
+msgstr "每日備份"
+
+msgid "Weekly"
+msgstr "每周備份"
+
+msgid "Backup Setting"
+msgstr "備份設定"
+
+msgid "Submit"
+msgstr "提交"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "Save"
+msgstr "儲存"
+
+msgid "Add User"
+msgstr "新增會員"
+
+msgid "Add Agency"
+msgstr "新增機構"
+
+msgid "Add Unit"
+msgstr "新增單位"
+
+msgid "Add Member"
+msgstr "新增會員"
+
+msgid "password"
+msgstr "密碼"
+
+msgid "confirm_password"
+msgstr "確認密碼"
+
+msgid "reset_pwd"
+msgstr "重設密碼"
+
+msgid "symboltick_"
+msgstr "✖"
+
+msgid "symboltick_1"
+msgstr "✔"
+
+#: Controller - menus
+#: View - main_menu
+
+msgid "menucategories_item_1"
+msgstr "職員管理"
+
+msgid "menucategories_item_2"
+msgstr "單位管理"
+
+msgid "menucategories_item_3"
+msgstr "會員管理"
+
+msgid "menucategories_item_4"
+msgstr "系統管理"
+
+msgid "menucategories_item_5"
+msgstr "活動計劃管理"
+
+msgid "menucategories_item_6"
+msgstr "義工管理"
+
+msgid "menucategories_item_7"
+msgstr "統計"
+
+msgid "menucategories_item_8"
+msgstr "備份管理"
+
+msgid "menus_item_1"
+msgstr "職員名單"
+
+msgid "menus_item_2"
+msgstr "新增職員"
+
+msgid "menus_item_3"
+msgstr "職員登入記錄"
+
+msgid "menus_item_4"
+msgstr "構機清單"
+
+msgid "menus_item_5"
+msgstr "新增構機"
+
+msgid "menus_item_6"
+msgstr "單位清單"
+
+msgid "menus_item_7"
+msgstr "新增單位"
+
+msgid "menus_item_8"
+msgstr "備份記錄"
+
+msgid "menus_item_9"
+msgstr "備份設定"
+
+msgid "menus_item_10"
+msgstr "會員名單"
+
+msgid "menus_item_11"
+msgstr "會員搜尋"
+
+msgid "menus_item_12"
+msgstr "年度"
+
+msgid "menus_item_13"
+msgstr "新會員"
+
+msgid "menus_item_14"
+msgstr "會員續期"
+
+msgid "menus_item_15"
+msgstr "我的計劃"
+
+msgid "menus_item_16"
+msgstr "新增計劃"
+
+msgid "menus_item_17"
+msgstr "義工名單"
+
+msgid "menus_item_18"
+msgstr "新增義工"
+
+msgid "menus_item_19"
+msgstr "匯出報告"
+
+msgid "menus_item_20"
+msgstr "須要批閱計劃"
+
+
+#: Controller - members
+#: View - index
+
+msgid "members_index_txt_1"
+msgstr "會員管理"
+
+msgid "members_index_txt_2"
+msgstr "會員名稱"
+
+msgid "members_index_txt_3"
+msgstr "負責中心"
+
+msgid "members_index_txt_4"
+msgstr "Level"
+
+msgid "members_index_txt_5"
+msgstr "會員狀態"
+
+msgid "members_index_table_title"
+msgstr "會員名單"
+
+msgid "members_index_table_placeholder"
+msgstr "搜尋會員"
+
+msgid ""
+msgstr ""
+
+msgid ""
+msgstr ""
+
+#: Controller - members
+#: View - newmembertype
+
+msgid "members_newmembertype_txt_1"
+msgstr "選擇會員類別"
+
+msgid "members_newmembertype_txt_2"
+msgstr "個人會員申請"
+
+msgid "members_newmembertype_txt_3"
+msgstr "家庭會員申請"
+
+#: Controller - members
+#: View - newmemberfamily, newmemberindividual
+
+msgid "newmember_title_1"
+msgstr "新增會員"
+
+msgid "newmember_title_2"
+msgstr "個人會員申請"
+
+msgid "newmember_title_3"
+msgstr "會員資料"
+
+msgid "newmember_title_4"
+msgstr "active"
+
+msgid "newmember_title_5"
+msgstr "姓名(中)"
+
+msgid "newmember_title_6"
+msgstr "姓名(英)*"
+
+msgid "newmember_title_7"
+msgstr "出生日期"
+
+msgid "hkid"
+msgstr "身份証/出世紙號碼*"
+
+msgid "gender"
+msgstr "性別"
+
+msgid "marriage_status"
+msgstr "婚姻狀況"
+
+msgid "address"
+msgstr "地址"
+
+msgid "email"
+msgstr "電郵地址"
+
+msgid "phone_main"
+msgstr "電話(主要)"
+
+msgid "phone_other"
+msgstr "電話(其他)"
+
+msgid "newmember_title_16"
+msgstr "在學(學校名稱)"
+
+msgid "newmember_title_17"
+msgstr "年級"
+
+msgid "occupation"
+msgstr "職業"
+
+msgid "education_level"
+msgstr "教育程度"
+
+msgid "newmember_title_20"
+msgstr "與主會員關係"
+
+msgid "newmember_title_21"
+msgstr "家庭會員申請"
+
+msgid "newmember_title_22"
+msgstr "主申請會員"
+
+msgid "newmember_title_23"
+msgstr "附屬會員"
+
+msgid "newmember_title_24"
+msgstr "Add Family Member"
+
+msgid "newmember_title_25"
+msgstr "會藉資料"
+
+msgid "newmember_title_26"
+msgstr "希望服務對象"
+
+msgid "newmember_placeholder_1"
+msgstr "姓名(中)"
+
+msgid "newmember_placeholder_2"
+msgstr "姓名(英)"
+
+msgid "newmember_placeholder_3"
+msgstr "dd-mm-yyyy"
+
+msgid "newmember_placeholder_4"
+msgstr "年齡"
+
+msgid "newmember_placeholder_5"
+msgstr "身份証/出世紙號碼"
+
+msgid "newmember_placeholder_6"
+msgstr "地址(中文)"
+
+msgid "newmember_placeholder_7"
+msgstr "電郵地址"
+
+msgid "newmember_placeholder_8"
+msgstr "電話(主要)"
+
+msgid "newmember_placeholder_9"
+msgstr "電話(其他)"
+
+msgid "newmember_placeholder_10"
+msgstr "在學(學校名稱)"
+
+msgid "newmember_placeholder_11"
+msgstr "年級"
+
+msgid "newmember_placeholder_12"
+msgstr "職業"
+
+msgid "c_name"
+msgstr "姓名(中)"
+
+msgid "e_name"
+msgstr "姓名"
+
+msgid "e_name_first"
+msgstr "名(英)"
+
+msgid "e_name_last"
+msgstr "姓(英)"
+
+msgid "payment_code"
+msgstr "收據編號"
+
+#: Controller - volunteers
+#: View - index
+
+msgid "volunteers_index_txt_1"
+msgstr "義工管理"
+
+msgid "volunteers_index_table_title"
+msgstr "義工名單"
+
+msgid "volunteers_index_table_placeholder"
+msgstr "搜尋義工"
+
+msgid "volunteers_index_txt_2"
+msgstr "中文姓名"
+
+msgid "volunteers_index_txt_3"
+msgstr "義工類別"
+
+msgid "volunteers_index_txt_4"
+msgstr "性別"
+
+msgid "volunteers_index_txt_5"
+msgstr "年齡"
+
+msgid "volunteers_index_txt_6"
+msgstr "工作狀態"
+
+msgid "volunteers_index_txt_7"
+msgstr "學歷"
+
+msgid "volunteers_index_txt_8"
+msgstr "義工証號碼"
+
+msgid "volunteers_index_txt_9"
+msgstr "電話 (手提)"
+
+msgid "volunteers_matching_txt_1"
+msgstr "活動義工配對"
+
+msgid "volunteers_matching_table_title"
+msgstr "義工服務對象"
+
+msgid ""
+msgstr ""
+
+msgid ""
+msgstr ""
+
+#: Controller - volunteers
+#: View - add
+
+msgid "volunteers_add_txt_1"
+msgstr "新增義工"
+
+msgid "volunteers_add_txt_2"
+msgstr "義工個人資料"
+
+msgid "volunteers_add_txt_3"
+msgstr "義工類別"
+
+msgid "volunteers_add_txt_4"
+msgstr "中文姓名"
+
+msgid "volunteers_add_txt_5"
+msgstr "別名"
+
+msgid "volunteers_add_txt_6"
+msgstr "性別"
+
+msgid "volunteers_add_txt_7"
+msgstr "出生日期*"
+
+msgid "volunteers_add_txt_8"
+msgstr "年齡"
+
+msgid "volunteers_add_txt_9"
+msgstr "電話 (住址)"
+
+msgid "volunteers_add_txt_10"
+msgstr "電話 (手提)"
+
+msgid "volunteers_add_txt_11"
+msgstr "地址*"
+
+msgid "volunteers_add_txt_12"
+msgstr "電子郵箱"
+
+msgid "volunteers_add_txt_13"
+msgstr "Facebook"
+
+msgid "volunteers_add_txt_14"
+msgstr "工作狀態"
+
+msgid "volunteers_add_txt_15"
+msgstr "學歷"
+
+msgid "volunteers_add_txt_16"
+msgstr "義工服務資料"
+
+msgid "volunteers_add_txt_17"
+msgstr "希望服務對象"
+
+msgid ""
+msgstr ""
+
+msgid ""
+msgstr ""
+
+#: Controller - eventproposals
+#: View - index
+
+msgid "eventproposals_index_txt_1"
+msgstr "活動管理"
+
+msgid "eventproposals_index_table_title"
+msgstr "我的活動計劃"
+
+msgid "eventproposals_index_table_placeholder"
+msgstr "搜尋活動計劃"
+
+msgid ""
+msgstr ""
+
+msgid ""
+msgstr ""
+
+#: Controller - eventproposals
+#: View - viewdetails
+
+msgid "eventproposals_viewdetail_tab_txt_1"
+msgstr "關於"
+
+msgid "eventproposals_viewdetail_tab_txt_2"
+msgstr "已上傳附件"
+
+msgid "eventproposals_viewdetail_tab_txt_3"
+msgstr "批閱記錄"
+
+msgid "eventproposals_viewdetail_tab_txt_4"
+msgstr "tab4"
+
+msgid "eventproposals_viewdetail_txt_1"
+msgstr "查看活動計劃 - "
+
+msgid "eventproposals_viewdetail_txt_2"
+msgstr "活動計劃書"
+
+msgid "eventproposals_viewdetail_txt_3"
+msgstr "活動種類"
+
+msgid "eventproposals_viewdetail_txt_4"
+msgstr "年度目標"
+
+msgid "eventproposals_viewdetail_txt_5"
+msgstr "理念架構"
+
+msgid "eventproposals_viewdetail_txt_6"
+msgstr "活動目標"
+
+msgid "eventproposals_viewdetail_txt_7"
+msgstr "備註"
+
+msgid "eventproposals_viewdetail_txt_8"
+msgstr "已上傳附件"
+
+msgid "eventproposals_viewdetail_txt_9"
+msgstr ""
+
+#: Controller - eventproposals
+#: View - viewpending
+
+msgid "eventproposals_viewpending_table_title"
+msgstr "批閱活動計劃"
+
+msgid "eventproposals_viewpending_table_placeholder"
+msgstr "搜尋活動計劃"
+
+msgid "eventproposals_viewpending_txt_1"
+msgstr "活動計劃名稱"
+
+msgid "eventproposals_viewpending_txt_2"
+msgstr "狀態"
+
+msgid "eventproposals_viewpending_txt_3"
+msgstr ""
+
+msgid ""
+msgstr ""
+
+msgid ""
+msgstr ""
+
+#: Controller - eventproposals
+#: View - viewpending
+
+msgid "eventproposals_add_txt_1"
+msgstr "新增計劃"
+
+msgid "eventproposals_add_txt_2"
+msgstr "活動名稱"
+
+msgid "eventproposals_add_txt_3"
+msgstr "活動種類"
+
+msgid "eventproposals_add_txt_4"
+msgstr "主要負責同事"
+
+msgid "eventproposals_add_txt_5"
+msgstr "Supervisor"
+
+msgid "eventproposals_add_txt_6"
+msgstr "其他負責同事"
+
+msgid ""
+msgstr ""
+
+msgid ""
+msgstr ""
+
+#: Controller - units
+#: View - index
+
+msgid "units_index_txt_1"
+msgstr "單位管理"
+
+msgid "units_index_txt_2"
+msgstr "單位編號"
+
+msgid "units_index_table_title"
+msgstr "單位名單"
+
+msgid "units_index_table_placeholder"
+msgstr "搜尋單位"
+
+msgid ""
+msgstr ""
+
+#: Controller - units
+#: View - add
+
+msgid "units_add_txt_1"
+msgstr "新增單位"
+
+msgid "units_add_txt_2"
+msgstr "單位編號"
+
+msgid "units_add_txt_3"
+msgstr "機構"
+
+msgid "units_add_txt_4"
+msgstr "備註"
+
+msgid ""
+msgstr ""
+
+msgid ""
+msgstr ""
+
+msgid ""
+msgstr ""
+
+msgid ""
+msgstr ""
+
+msgid ""
+msgstr ""
+
+msgid ""
+msgstr ""
+
+
+msgid "activity_enroll_header_1"
+msgstr "報名"
+
+#: Controller - reports
+#: View - export
+
+msgid "reports_export_txt_1"
+msgstr "統計"
+
+msgid "reports_export_txt_2"
+msgstr "匯出報告"
+
+msgid "reports_export_txt_3"
+msgstr "開始日期"
+
+msgid "reports_export_txt_4"
+msgstr "至"
+
+msgid "reports_export_txt_5"
+msgstr "結束日期"
+
+#: Membertype
+
+msgid "membertype"
+msgstr "會員類別"
+
+msgid "Create New Member Type"
+msgstr "新增會員類別"
+
+#: error msg
+msgid "cutoff_time"
+msgstr "可更改的時間已過"
+
+msgid "cutoffdate_msg_title"
+msgstr "可更改的時間已過"
+
+
+#: Datatable
+
+msgid "sProcessing"
+msgstr "處理中..."
+
+msgid "sLengthMenu"
+msgstr "每頁顯示數目 _MENU_ "
+
+msgid "sZeroRecords"
+msgstr "沒有匹配結果"
+
+msgid "sInfo"
+msgstr "顯示第 _START_ 至 _END_ 項結果，共 _TOTAL_ 項"
+
+msgid "sInfoEmpty"
+msgstr "顯示第 0 至 0 項結果，共 0 項"
+
+msgid "sInfoFiltered"
+msgstr "(從 _MAX_ 項結果過濾)"
+
+msgid "sFirst"
+msgstr "首頁"
+
+msgid "sPrevious"
+msgstr "上頁"
+
+msgid "sNext"
+msgstr "下頁"
+
+msgid "sLast"
+msgstr "尾頁"
+
+msgid "sSearch"
+msgstr "搜尋"
+
+
+#: Financial Budget
+
+msgid "Cost"
+msgstr "單價"
+
+msgid "Quantity"
+msgstr "數目"
+
+
+#: Message/Notification/Announcement
+
+msgid "counter"
+msgstr "顯示第 {:start} 至 {:end} 項結果，共 {:count} 項"
+
+
+#: Date/Time format
+
+msgid "time_format"
+msgstr "Y年n月d日"
+
+
+#: Daterangerpicker
+
+msgid "Apply"
+msgstr "套用"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "From"
+msgstr "由"
+
+msgid "To"
+msgstr "至"
+
+msgid "Custom"
+msgstr "自訂"
+
+msgid "Su"
+msgstr "日"
+
+msgid "Mo"
+msgstr "一"
+
+msgid "Tu"
+msgstr "二"
+
+msgid "We"
+msgstr "三"
+
+msgid "Th"
+msgstr "四"
+
+msgid "Fr"
+msgstr "五"
+
+msgid "Sa"
+msgstr "六"
+
+msgid "January"
+msgstr "一月"
+
+msgid "February"
+msgstr "二月"
+
+msgid "March"
+msgstr "三月"
+
+msgid "April"
+msgstr "四月"
+
+msgid "May"
+msgstr "五月"
+
+msgid "June"
+msgstr "六月"
+
+msgid "July"
+msgstr "七月"
+
+msgid "August"
+msgstr "八月"
+
+msgid "September"
+msgstr "九月"
+
+msgid "October"
+msgstr "十月"
+
+msgid "November"
+msgstr "十一月"
+
+msgid "December"
+msgstr "十二月"
+
+msgid "Export Address Label"
+msgstr "匯出地址"
+
+msgid "Export Smart Card"
+msgstr "匯出智能卡"
+
+
+msgid "unit"
+msgstr "單位"
+
+msgid "user"
+msgstr "職員"
+
+msgid "please_login"
+msgstr "請登入"
+
+msgid "username"
+msgstr "用戶名稱"
+
+msgid "password"
+msgstr "密碼"
+
+msgid "login"
+msgstr "登入"
+
+msgid "list"
+msgstr "清單"
+
+msgid "view"
+msgstr "檢視"
+
+msgid "add"
+msgstr "新增"
+
+msgid "edit"
+msgstr "修改"
+
+msgid "previous_page"
+msgstr "上一頁"
+
+msgid "next_page"
+msgstr "下一頁"
+
+msgid "code"
+msgstr "編號"
+
+msgid "name"
+msgstr "名稱"
+
+msgid "logout"
+msgstr "登出"
+
+msgid "my_account"
+msgstr "我的帳戶"
+
+msgid "change_password"
+msgstr "更改密碼"
+
+msgid "account"
+msgstr "帳戶"
+
+msgid "role"
+msgstr "角色"
+
+msgid "actions"
+msgstr "行動"
+
+msgid "submit"
+msgstr "提交"
+
+msgid "group"
+msgstr "權限組別"
+
+msgid "phone"
+msgstr "電話"
+
+msgid "email"
+msgstr "電郵"
+
+msgid "remark"
+msgstr "備註"
+
+msgid "remarks"
+msgstr "備註"
+
+msgid "save_and_next"
+msgstr "儲存及下一步"
+
+msgid "hkid"
+msgstr "身份證明文件號碼"
+
+msgid "already_exist"
+msgstr "已經存在"
+
+

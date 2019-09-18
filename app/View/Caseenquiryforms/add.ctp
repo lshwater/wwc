@@ -1,0 +1,63 @@
+
+
+
+<?php echo $this->Form->create('Caseenquiryform', array('class'=>'form-horizontal validate_form preventDoubleSubmission')); ?>
+<div class="modal-header">
+    <span class="modal-title"><?=__('個案諮詢記錄')?></span>
+    <button type="button" class="close modalonly" data-dismiss="modal" style="display:none"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+    <?php echo $this->Form->hidden('user_id', array('value'=>$auth['id']));?>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <?php echo $this->Form->label('date', __('提交日期'), 'col-sm-3 control-label '); ?>
+                <div class="col-sm-9">
+                    <? echo $this->Form->input('date', array('type'=>'text','div'=>false,'class'=>'form-control bs_datepicker_modal','label'=>false, "required"=>"required"));?>
+                </div>
+            </div> <!-- / .form-group -->
+            <div class="form-group">
+                <?php echo $this->Form->label('enquiry', __('求助者/家人表達之問題及要求之協助'), 'col-sm-3 control-label '); ?>
+                <div class="col-sm-9">
+                    <? echo $this->Form->input('enquiry', array('type'=>'textarea','div'=>false,'class'=>'form-control','label'=>false, "required"=>"required"));?>
+                </div>
+            </div> <!-- / .form-group -->
+            <div class="form-group">
+                <?php echo $this->Form->label('followup', __('建議跟進項目'), 'col-sm-3 control-label'); ?>
+                <div class="col-sm-9">
+                    <? echo $this->Form->input('followup', array('type'=>'textarea','div'=>false,'class'=>'form-control','label'=>false));?>
+                </div>
+            </div> <!-- / .form-group -->
+        </div>
+    </div>
+</div>
+
+
+<div class="modal-footer text-right">
+    <button type="submit" class="btn btn-primary" ><i class="glyphicon glyphicon-ok-sign"></i><? echo ' '.__('Submit');?></button>
+</div>
+
+<?php echo $this->Form->end(); ?>
+
+
+
+<script>
+
+    $(document).ready(function() {
+
+        $('.bs_datepicker_modal').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true,
+            todayBtn: "linked",
+            startDate:'<?=$case['Casemanagement']['applicationdate']?>',
+            container: $('#modal')
+        });
+
+
+        validate_form();
+
+
+
+    });
+</script>

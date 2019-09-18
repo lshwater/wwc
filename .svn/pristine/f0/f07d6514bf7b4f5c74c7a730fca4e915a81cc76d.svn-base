@@ -1,0 +1,684 @@
+<?php $this->Html->script("barcode/jquery.scannerdetection.compatibility", array("inline"=>false)); ?>
+<?php $this->Html->script('barcode/jquery.scannerdetection', array("inline"=>false)); ?>
+
+<?php $this->Html->script('membercard', array("inline"=>false)); ?>
+<!--Matching-->
+
+<?
+//Configure::write('debug', 2);
+
+?>
+<div class="page-header">
+    <div class="row">
+        <!-- Page header, center on small screens -->
+        <h1 class="col-xs-12 col-sm-4 text-left-sm flashMessage">
+            <i class="fa fa-users page-header-icon"></i>&nbsp;&nbsp;<?=__("members_index_txt_1")?>
+        </h1>
+
+        <div class="col-xs-12 col-sm-8">
+            <div class="row">
+                <hr class="visible-xs no-grid-gutter-h">
+                <!-- "Create project" button, width=auto on desktops -->
+            </div>
+        </div>
+    </div>
+</div>
+<ul class="breadcrumb">
+    <li>
+        <?=$this->Html->link(__("newmember_title_1"), array("action"=>"newmembertype"))?>
+    </li>
+    <li class="active"><?=__("newmember_title_2")?></li>
+</ul>
+<div class="row">
+    <div class="col-sm-12">
+        <?php echo $this->Form->create('Member', array('class'=>'panel validate_form preventDoubleSubmission')); ?>
+        <?php echo $this->Form->hidden('active', array('value'=>1));?>
+        <div class="panel-heading">
+            <span class="panel-title"><?php echo __('newmember_title_3'); ?></span>
+            <div class="panel-heading-controls">
+                <a class="btn btn-xs btn-warning btn-outline importmembertmpbtn"><span class="fa fa-external-link-square"></span>&nbsp;&nbsp;匯入</a>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            <div class="row">
+                <div class="form-group">
+                    <?php echo $this->Form->label("membercard", __('配對會員卡'), 'col-sm-2 control-label'); ?>
+                    <div class="col-sm-10">
+                        <?php echo $this->Form->input("membercard", array('div'=>false, 'label'=>false, 'class'=>'form-control membercard', "readonly"=>"readonly"));?>
+                    </div>
+                </div> <!-- / .form-group -->
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('c_name', __('newmember_title_5'), 'control-label'); ?>
+                        <?php echo $this->Form->input('c_name', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>__('c_name')));?>
+                    </div> <!-- / .form-group -->
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('e_name', __('姓名(英)'), 'control-label required'); ?>
+                        <?php echo $this->Form->input('e_name', array('div'=>false, 'label'=>false, 'class'=>'form-control', "required"=>"required", 'placeholder'=>__('e_name_first')));?>
+                    </div> <!-- / .form-group -->
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('gender', __('性別'), 'control-label required'); ?>
+                        <?php echo $this->Form->input('gender', array('div'=>false, 'label'=>false, 'class'=>'form-control select2', "required"=>"required", 'empty'=>true, 'options'=>$genders, 'placeholder'=>__('性別')));?>
+                    </div> <!-- / .form-group -->
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                    <?php echo $this->Form->label('identitytype_id', __('身份証明文件'), 'control-label required'); ?>
+                    <?php echo $this->Form->input('identitytype_id', array('div'=>false, 'label'=>false,'class'=>'form-control select2 isselect2' ,"required"=>"required", "id"=>"identitytypeID"));?>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <?php echo $this->Form->label('identity', __('身份証明文件號碼'), 'control-label required'); ?>
+                    <div class="input-group m-b-2">
+                        <?php echo $this->Form->input('identity', array('div'=>false, 'label'=>false, 'type'=>"text",'class'=>'form-control vd_identity', 'id'=>"identity", "required"=>"required", 'placeholder'=>__('身份証明文件號碼')));?>
+                        <span class="input-group-btn" id="HKIDcheckbtndiv">
+                              <a href="javascript:void(0)" data-hkid="identity" class="btn btn-block btn-primary checkhkidbtn">認証</a>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('dob', __('newmember_title_7'), 'control-label required'); ?>
+                        <?php echo $this->Form->input('dob', array('div'=>false, 'label'=>false, 'type'=>"text",'class'=>'form-control bs_datepicker', "required"=>"required", 'placeholder'=>__('newmember_title_7')));?>
+
+                    </div> <!-- / .form-group -->
+                </div>
+            </div>
+
+
+            <div class="row">
+            <?
+            // Custom fields
+            if(!empty($customfields)){
+                foreach($customfields as $fields){
+
+                    $key = $fields['Memberinputfield']['id'];
+                    $col_size = $fields['Memberinputfield']['col-size'];
+
+                    if($fields['Memberinputfield']['group'] <= 2){
+
+
+                    if(!empty($fields['Selectionlist']['Selectionitem'])){
+                        $list = Set::combine($fields['Selectionlist']['Selectionitem'], '{n}.id', '{n}.name');
+                    }else{
+                        $list = NULL;
+                    }
+                    ?>
+                    <div class="col-md-<?=$col_size?>">
+                    <div class="form-group">
+                        <?
+                        echo $this->Form->hidden("MemberCustomField.{$key}.memberinputfield_id", array('value'=>$fields['Memberinputfield']['id']));
+
+                        if($fields['Inputtype']['htmltype'] == "checkbox"){
+                            ?>
+                            <div class=" col-sm-12 m-t-2">
+                                <?php
+                                echo $this->Form->unlockField("MemberCustomField.{$key}.value");
+                                echo $this->Form->hidden("MemberCustomField.{$key}.value", array('value'=>0));
+                                ?>
+                                <div class="checkbox">
+                                    <label>
+                                        <?php echo $this->Form->input("MemberCustomField.{$key}.value", array('div'=>false, 'class'=>'px', 'type'=>'checkbox', 'label'=>false , 'hiddenField'=>false));?>
+                                        <span class="lbl"><?=__($fields['Memberinputfield']['title'])?></span>
+                                    </label>
+                                </div>
+                            </div>
+                        <?
+                        }else{
+                            if(!$fields['Memberinputfield']['required']){
+                                $required = "";
+                                $lbstared = "";
+                            }
+                            else{
+                                $required = "required";
+                                $lbstared = "";
+                            }
+                            echo $this->Form->label("MemberCustomField.{$key}.value", __($fields['Memberinputfield']['title']).$lbstared, 'control-label '.$required);
+
+                                $class = "";
+                                if(!empty($fields['Memberinputfield']['class'])){
+                                    $class .= " ".$fields['Memberinputfield']['class'];
+                                }
+
+                                if($fields['Memberinputfield']['inputtype_id'] == 8){
+                                    $multiple = "multiple";
+                                }else{
+                                    $multiple = "";
+                                }
+
+
+
+                                echo $this->Form->input("MemberCustomField.{$key}.value", array(
+                                        'label'=>false,
+                                        'div'=>false,
+                                        'type'=>$fields['Inputtype']['htmltype'],
+                                        'options'=>$list,
+                                        'class'=>'form-control'.$class,
+                                        'placeholder'=>__($fields['Memberinputfield']['placeholder']),
+                                        'required'=>$required,
+                                         'multiple'=>$multiple,
+                                        'empty'=>true,
+                                    )
+                                );
+
+                                if ($fields['Memberinputfield']['function']){
+                                    echo $this->Html->scriptBlock($fields['Memberinputfield']['function'],
+                                        array('inline' => false));
+                                };
+
+                        }
+                        ?>
+                    </div>
+                    </div>
+                <?
+                    }
+                }
+            }
+            // Custom fields
+            ?>
+            </div>
+
+        </div>
+
+        <div class="panel-heading">
+            <span class="panel-title"><?php echo __('緊急聯絡人1'); ?></span>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('emergency1_name', __('姓名'), 'control-label'); ?>
+                        <?php echo $this->Form->input('emergency1_name', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>__('姓名')));?>
+                    </div> <!-- / .form-group -->
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('emergency1_tel', __('電話'), 'control-label required'); ?>
+                        <?php echo $this->Form->input('emergency1_tel', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>__('電話')));?>
+                    </div> <!-- / .form-group -->
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('emergency1_age', __('年齡'), 'control-label required'); ?>
+                        <?php echo $this->Form->input('emergency1_age', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>__('年齡')));?>
+                    </div> <!-- / .form-group -->
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('emergency1_relation', __('關係'), 'control-label required'); ?>
+                        <?php echo $this->Form->input('emergency1_relation', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>__('關係')));?>
+                    </div> <!-- / .form-group -->
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('emergency1_address', __('地址'), 'control-label required'); ?>
+                        <?php echo $this->Form->input('emergency1_address', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>__('地址')));?>
+                    </div> <!-- / .form-group -->
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-heading">
+            <span class="panel-title"><?php echo __('緊急聯絡人2'); ?></span>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('emergency2_name', __('姓名'), 'control-label'); ?>
+                        <?php echo $this->Form->input('emergency2_name', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>__('姓名')));?>
+                    </div> <!-- / .form-group -->
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('emergency2_tel', __('電話'), 'control-label required'); ?>
+                        <?php echo $this->Form->input('emergency2_tel', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>__('電話')));?>
+                    </div> <!-- / .form-group -->
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('emergency2_age', __('年齡'), 'control-label required'); ?>
+                        <?php echo $this->Form->input('emergency2_age', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>__('年齡')));?>
+                    </div> <!-- / .form-group -->
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('emergency2_relation', __('關係'), 'control-label required'); ?>
+                        <?php echo $this->Form->input('emergency2_relation', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>__('關係')));?>
+                    </div> <!-- / .form-group -->
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('emergency2_address', __('地址'), 'control-label required'); ?>
+                        <?php echo $this->Form->input('emergency2_address', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'placeholder'=>__('地址')));?>
+                    </div> <!-- / .form-group -->
+                </div>
+            </div>
+        </div>
+
+
+        <div class="panel-heading">
+            <span class="panel-title"><?php echo __('重要事項'); ?></span>
+        </div>
+        <div class="panel-body">
+            <div class=" col-sm-12">
+                <?php
+                echo $this->Form->unlockField("recording");
+                echo $this->Form->hidden("recording", array('value'=>0));
+                ?>
+                <div class="checkbox">
+                    <label>
+                        <?php echo $this->Form->input("recording", array('div'=>false, 'class'=>'px', 'type'=>'checkbox', 'label'=>false , 'hiddenField'=>false));?>
+                        <span class="lbl"><?=__('同意中心在活動或小組拍攝照片或影片。')?></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="col-sm-12">
+                <?php
+                echo $this->Form->unlockField("noadvertise");
+                echo $this->Form->hidden("noadvertise", array('value'=>0));
+                ?>
+                <div class="checkbox">
+                    <label>
+                        <?php echo $this->Form->input("noadvertise", array('div'=>false, 'class'=>'px', 'type'=>'checkbox', 'label'=>false , 'hiddenField'=>false));?>
+                        <span class="lbl"><?=__('同意中心向義工披露本人之電話作聯絡之用。')?></span>
+                    </label>
+                </div>
+            </div>
+
+            <!--            <div class="col-sm-offset-2 col-sm-10">-->
+            <!--                --><?php
+            //                echo $this->Form->unlockField("isvolunteer");
+            //                echo $this->Form->hidden("isvolunteer", array('value'=>0));
+            //                ?>
+            <!--                <div class="checkbox">-->
+            <!--                    <label>-->
+            <!--                        --><?php //echo $this->Form->input("isvolunteer", array('div'=>false, 'class'=>'px', 'type'=>'checkbox', 'label'=>false , 'hiddenField'=>false));?>
+            <!--                        <span class="lbl">--><?//=__('同時申請為義工。')?><!--</span>-->
+            <!--                    </label>-->
+            <!--                </div>-->
+            <!--            </div>-->
+        </div>
+
+        <div class="panel-heading">
+            <span class="panel-title"><?php echo __('newmember_title_25'); ?></span>
+        </div>
+        <?php echo $this->Form->hidden('Memberapplication.memberapplicationtype_id', array('value'=>1));?>
+        <?php echo $this->Form->hidden('Memberapplication.valid', array('value'=>1));?>
+        <?php echo $this->Form->hidden('Memberapplication.active', array('value'=>1));?>
+        <?php echo $this->Form->hidden('Memberapplication.user_id', array('value'=>$auth['id']));?>
+        <div class="panel-body">
+
+<!--            <div class="form-group">-->
+<!--                --><?php //echo $this->Form->label('Memberapplication.payment_code', __('payment_code'), 'col-sm-2 control-label required'); ?>
+<!--                <div class="col-sm-10">-->
+<!--                    --><?php //echo $this->Form->input('Memberapplication.payment_code', array('div'=>false, 'label'=>false, 'class'=>'form-control', "default"=>"", "required"=>"required", 'placeholder'=>__('payment_code')));?>
+<!--                </div>-->
+<!--            </div> -->
+
+<!--            <div class="form-group">-->
+<!--                --><?php //echo $this->Form->label('Memberapplication.paymentdate', __('付款日期'), 'col-sm-2 control-label required'); ?>
+<!--                <div class="col-sm-10">-->
+<!--                    --><?php //echo $this->Form->input('Memberapplication.paymentdate', array('div'=>false, 'label'=>false, 'class'=>'form-control', "default"=>"", "required"=>"required", "type"=>"text", "id"=>"paymentdate", "placeholder"=> __('付款日期')));?>
+<!--                </div>-->
+<!--            </div> -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('Memberapplication.membertype_id', __('會員類別'), 'control-label required'); ?>
+                            <?php
+                            echo $this->Form->input('Memberapplication.membertype_id', array(
+                                    'label'=>false,
+                                    'div'=>false,
+                                    'options'=>$membertypes,
+                                    'class'=>'form-control select2-multiple',
+                                    'required'=>true,
+                                    "empty"=>true
+                                )
+                            );?>
+
+                    </div> <!-- / .form-group -->
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('Memberapplication.price', __('會費'), 'control-label required'); ?>
+                        <?php echo $this->Form->input('Memberapplication.price', array('div'=>false, 'label'=>false, 'class'=>'form-control', "default"=>30, "required"=>"required"));?>
+
+                    </div> <!-- / .form-group -->
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('Memberapplication.period', __('年期'), 'control-label required'); ?>
+                        <?php echo $this->Form->input('Memberapplication.period', array('div'=>false, 'label'=>false, 'class'=>'form-control membershipperiod', "default"=>1, "required"=>"required", "id"=>"periodinput", "min"=>1));?>
+
+                    </div> <!-- / .form-group -->
+
+                    <div style="display:none">
+                        <?php echo $this->Form->input("Memberapplication.period_d", array("default"=>365, "id"=>"period_d"));?>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('', __('會藉有效期'), 'control-label required'); ?>
+                        <div class="input-daterange input-group datepicker-range">
+                            <?php echo $this->Form->input('Memberapplication.startdate', array('div'=>false, 'label'=>false, 'class'=>'form-control membershipperiod', 'required'=>'required', 'id'=>'startdate', 'placeholder'=>"開始日期", 'type'=>"text"));?>
+                            <span class="input-group-addon"><?=__('至')?></span>
+                            <?php echo $this->Form->input('Memberapplication.enddate', array('div'=>false, 'label'=>false, 'class'=>'form-control', 'required'=>'required', 'id'=>'enddate', 'placeholder'=>"最後日期", 'type'=>"text"));?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <?php echo $this->Form->label('Memberapplication.remarks', __('備註'), 'control-label'); ?>
+                        <?php echo $this->Form->input('Memberapplication.remarks', array('div'=>false, 'label'=>false, 'class'=>'form-control'));?>
+                    </div> <!-- / .form-group -->
+                </div>
+            </div>
+
+        </div>
+
+        <?if($layout){?>
+        <div class="panel-heading">
+            <span class="panel-title"><?php echo __('會藉(資料)'); ?></span>
+        </div>
+
+            <?php echo $this->element('Customtype/form_builder_group'); ?>
+        <?}?>
+        <div class="panel-heading">
+            <span class="panel-title"><?php echo __('內部用途'); ?></span>
+        </div>
+
+        <div class="panel-body">
+
+            <div class="form-group">
+                <?php echo $this->Form->label('t.username', __('填寫職員'), 'col-sm-2 control-label'); ?>
+                <div class="col-sm-10">
+                    <?php echo $this->Form->input('t.username', array('div'=>false, 'label'=>false, 'class'=>'form-control', "default"=>$auth['name'], 'disabled'=>"disabled"));?>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="panel-footer text-right">
+            <button type="submit" class="btn btn-primary" ><i class="fa fa-check"></i><? echo ' '.__('Submit');?></button>
+        </div>
+        <?php echo $this->Form->end(); ?>
+
+    </div>
+</div>
+
+<!-- Success -->
+<div id="hkidok" class="modal modal-alert modal-success fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fa fa-check-circle"></i>
+            </div>
+            <div class="modal-title">香港身份証認証</div>
+            <div class="modal-body">正確</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">OK</button>
+            </div>
+        </div> <!-- / .modal-content -->
+    </div> <!-- / .modal-dialog -->
+</div> <!-- / .modal -->
+<!-- / Success -->
+
+<!-- Danger -->
+<div id="hkidfail" class="modal modal-alert modal-danger fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fa fa-times-circle"></i>
+            </div>
+            <div class="modal-title">香港身份証認証</div>
+            <div class="modal-body">不正確</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">OK</button>
+            </div>
+        </div> <!-- / .modal-content -->
+    </div> <!-- / .modal-dialog -->
+</div> <!-- / .modal -->
+<!-- / Danger -->
+
+
+<script>
+
+//    var matching_card = false;
+
+    function cal_expect_expiry_date(){
+        var org = $("#startdate").val();
+        var period = $("#periodinput").val();
+        period = parseInt(period);
+        if(!period){
+            period = 0;
+        }
+        if(org){
+            var newdate = new Date(org);
+            newdate.setFullYear(newdate.getFullYear() + period);
+
+            var yyyy = newdate.getFullYear().toString();
+            var mm = newdate.getMonth().toString(); // getMonth() is zero-based
+            var dd  = newdate.getDate().toString();
+            $('#enddate').datepicker('setDate',  new Date(yyyy, mm, dd));
+        }
+        cal_membershipt_period_d();
+    }
+
+    function cal_membershipt_period_d(){
+        var end = $("#enddate").val();
+        var org = $("#startdate").val();
+
+        if(end && org){
+
+            moment().format();
+            var startdate = moment(org);
+            var enddate = moment(end);
+            var diffDays = Math.ceil(enddate.diff(startdate, 'days'));
+
+            $("#period_d").val(diffDays);
+        }
+    }
+
+    function cal_membershipt_period(){
+        var end = $("#enddate").val();
+        var org = $("#startdate").val();
+
+        if(end && org){
+
+            moment().format();
+            var startdate = moment(org);
+            var enddate = moment(end);
+            var diffDays = Math.ceil(enddate.diff(startdate, 'years', true));
+
+            $("#periodinput").val(diffDays);
+            cal_membershipt_period_d();
+        }
+    }
+
+    function checkidentitytypeID(){
+        var identitytypeID = $("#identitytypeID").val();
+        if(identitytypeID == 1){
+            $("#HKIDcheckbtndiv").show();
+        }else{
+            $("#HKIDcheckbtndiv").hide();
+        }
+    }
+
+    function importmembertmp(mcode){
+        $.ajax({
+            type: "POST",
+            url: "<?=$this->Html->url(array("controller"=>"membertmps", 'action'=>'ajax_import'))?>",
+            data: {
+                code: mcode
+            },
+            dataType: "json"
+        })
+            .done(function( msg ) {
+                if(!msg){
+                    bootbox.alert({
+                        message: "找不到相關記錄",
+                        callback: function() {
+
+                        },
+                        className: "bootbox-sm"
+                    });
+                }else{
+                    var obj = $.parseJSON(msg.Membertmp.json);
+                    $.each(obj, function(key, value){
+                        if(key === "Member"){
+                            $.each(value, function(k, v){
+                                if($("[name='data["+key+"]["+k+"]']" ).hasClass('select2')){
+                                    $("[name='data["+key+"]["+k+"]']").select2("val", v);
+                                }else if($("[name='data["+key+"]["+k+"]']" ).is(':checkbox')){
+                                    if(v == "1"){
+                                        $("[name='data["+key+"]["+k+"]']" ).prop('checked', true);
+                                    }
+                                    else{
+                                        $("[name='data["+key+"]["+k+"]']" ).prop('checked', false);
+                                    }
+                                }else{
+                                    $("[name='data["+key+"]["+k+"]']" ).val(v);
+                                }
+                            })
+                        }
+                        if(key === "MemberCustomField"){
+                            $.each(value, function(k, v){
+                                if($("[name='data["+key+"]["+ v.memberinputfield_id+"][value]']" ).hasClass('isselect2')){
+                                    $("[name='data["+key+"]["+ v.memberinputfield_id+"][value]']" ).select2("val", v.value);
+                                }else{
+                                    $("[name='data["+key+"]["+ v.memberinputfield_id+"][value]']" ).val(v.value);
+                                }
+                            })
+                        }
+                    });
+                    $.growl.notice({ title: "成功", message: "匯入成功" });
+                }
+            })
+            .always(function(){
+                $(".checkhkidbtn").button("reset");
+            });
+    }
+
+    $(document).ready(function() {
+        validate_form();
+        checkidentitytypeID();
+
+        $('.membercard').scannerdevice();
+
+        var options2 = {
+            autoclose: true,
+            todayBtn: "linked",
+            format: 'yyyy-mm-dd',
+            orientation: $('body').hasClass('right-to-left') ? "auto right" : 'auto auto',
+            <?if(!empty($_cutoffdate)){?>
+            startDate:'<?=h($_cutoffdate['Cutoffdate']['name'])?>'
+            <?}?>
+        };
+        $('.datepicker-range').datepicker(options2);
+
+        $('#startdate').datepicker()
+            .on('hide', function(e){
+                cal_expect_expiry_date();
+            }
+        );
+
+        $('#enddate').datepicker()
+            .on('hide', function(e){
+                cal_membershipt_period();
+            }
+        );
+
+        var paymentdateoptions = {
+            orientation: $('body').hasClass('right-to-left') ? "auto right" : 'auto auto',
+            autoclose: true,
+            format: 'yyyy-mm-dd',
+            todayBtn: "linked"
+            <?
+               if(!empty($_cutoffdate)){
+           ?>
+            ,startDate:'<?=h($_cutoffdate['Cutoffdate']['name'])?>'
+            <?
+                }
+            ?>
+        };
+        $('#paymentdate').datepicker(paymentdateoptions);
+
+        $.validator.addClassRules("vd_identity", {
+            remote: {
+                url:"<?=$this->Html->url(array('action'=>'ajax_checkunique'));?>",
+                type:"post",
+                data:{
+                    field: 'identity',
+                    value: function() {
+                        return $("#identity").val();
+                    }
+                }
+            }
+        });
+
+        $("#identitytypeID").change(function(){
+            checkidentitytypeID();
+        });
+
+        $("#periodinput").change(function(){
+            cal_expect_expiry_date();
+        });
+
+        $(".checkhkidbtn").click(function(){
+            var targetid = $(this).attr('data-hkid');
+            $(".checkhkidbtn").button('loading');
+            $.ajax({
+                type: "POST",
+                url: "<?=$this->Html->url(array("controller"=>"members", 'action'=>'ajax_checkidentity'))?>",
+                data: {
+                    hkid: $("#"+targetid).val()
+                },
+                dataType: "json"
+            })
+                .done(function( msg ) {
+                    if(msg){
+                        $("#hkidok").modal('show');
+                    }else{
+                        $("#hkidfail").modal('show');
+                    }
+                })
+                .always(function(){
+                    $(".checkhkidbtn").button("reset");
+                });
+        });
+
+        $(".importmembertmpbtn").click(function(){
+            bootbox.prompt({
+                title: "會員表格登記號碼",
+                callback: function(result) {
+                    if (result === null) {
+                        //alert("請填上登記號碼！");
+                    } else {
+                        importmembertmp(result);
+                    }
+                },
+                className: "bootbox-sm"
+            });
+        });
+    });
+</script>

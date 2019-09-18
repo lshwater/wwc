@@ -1,0 +1,298 @@
+<?php
+App::uses('AppModel', 'Model');
+/**
+ * Agency Model
+ *
+ * @property Unit $Unit
+ */
+class Dynamicmodel extends AppModel {
+	public $recursive = -1;
+//	public $useDbConfig = 'mysql';
+/**
+ * Validation rules
+ *
+ * @var array
+ */
+	public $validate = array(
+		'name' => array(
+			'notEmpty' => array(
+				'rule' => array('notEmpty'),
+				'message' => 'This field cannot be empty',
+				//'allowEmpty' => false,
+				//'required' => false,
+				//'last' => false, // Stop validation after this rule
+				//'on' => 'create', // Limit validation to 'create' or 'update' operations
+			),
+		),
+    );
+
+	//The Associations below have been created with all possible keys, those that are not needed can be removed
+
+/**
+ * hasMany associations
+ *
+ * @var array
+ */
+	public $hasMany = array(
+		'Dynamicmodelstruct' => array(
+			'className' => 'Dynamicmodelstruct',
+			'foreignKey' => 'model_id',
+			'dependent' => false,
+			'conditions' => '',
+			'fields' => '',
+			'order' => '',
+			'limit' => '',
+			'offset' => '',
+			'exclusive' => '',
+			'finderQuery' => '',
+			'counterQuery' => ''
+		)
+	);
+
+//	public function get_struct($id){
+//
+//		$object =array();
+//
+//		$fields = $this->Dynamicmodelstruct->find('all',array(
+//				'conditions'=>array(
+//						'model_id'=>$id
+//				),
+//				'order'=>array(
+//						'order'=>'ASC',
+//						'main_struct_id'=>'ASC'
+//				),
+//				'recursive'=>-1
+//		));
+//
+//		$fields = Set::combine($fields, "{n}.Dynamicmodelstruct.id","{n}");
+//
+//		foreach($fields as $k=>$field){
+//
+//			if(!$field['Dynamicmodelstruct']['main_struct_id']){
+//				$object[$field['Dynamicmodelstruct']['name']] = array(
+//						'type'=>$field['Dynamicmodelstruct']['type']
+//				);
+//				if($field['Dynamicmodelstruct']['required']){
+//					$object[$field['Dynamicmodelstruct']['name']]['required'] = true;
+//				}
+//
+//				if($field['Dynamicmodelstruct']['default']){
+//					$object[$field['Dynamicmodelstruct']['name']]['default'] = $field['Dynamicmodelstruct']['default'];
+//				}
+//
+//				if($field['Dynamicmodelstruct']['placeholder']){
+//					$object[$field['Dynamicmodelstruct']['name']]['placeholder'] = $field['Dynamicmodelstruct']['placeholder'];
+//				}
+//
+//				$attribute = get_object_vars(json_decode($field['Dynamicmodelstruct']['attribute']));
+//				if(!empty($attribute)){
+//					foreach($attribute as $j=>$v){
+//						$object[$field['Dynamicmodelstruct']['name']][$j]=$v;
+//					}
+//				}
+//			}else{
+//				if($field['Dynamicmodelstruct']['type'] == $this->Dynamicmodelstruct->type_select_item){
+//					$main_struct_name = $fields[$field['Dynamicmodelstruct']['main_struct_id']]['Dynamicmodelstruct']['name'];
+//					if(!empty($object[$main_struct_name])){
+//						$object[$main_struct_name]['options'][$field['Dynamicmodelstruct']['type']] = $field['Dynamicmodelstruct']['name'];
+//					}
+//
+//				}else if($field['Dynamicmodelstruct']['type'] != $this->Dynamicmodelstruct->type_array){
+//					$main_struct_name = $fields[$field['Dynamicmodelstruct']['main_struct_id']]['Dynamicmodelstruct']['name'];
+//
+//					$new_array_field = array(
+//						'type'=>$field['Dynamicmodelstruct']['type']
+//					);
+//
+//					if($field['Dynamicmodelstruct']['required']){
+//						$new_array_field['required'] = true;
+//					}
+//
+//					if($field['Dynamicmodelstruct']['default']){
+//						$new_array_field['default'] = $field['Dynamicmodelstruct']['default'];
+//					}
+//
+//					if($field['Dynamicmodelstruct']['placeholder']){
+//						$new_array_field['placeholder'] = $field['Dynamicmodelstruct']['placeholder'];
+//					}
+//
+//					$object[$main_struct_name][$field['Dynamicmodelstruct']['name']] = $new_array_field;
+//
+//					$attribute = get_object_vars(json_decode($field['Dynamicmodelstruct']['attribute']));
+//					if(!empty($attribute)){
+//						foreach($attribute as $j=>$v){
+//							$object[$main_struct_name][$field['Dynamicmodelstruct']['name']][$j]=$v;
+//						}
+//					}
+//
+//				}
+//			}
+//
+//		}
+//		return $object;
+//
+//	}
+
+	public function get_struct($id){
+
+		$object =array();
+
+		$fields = $this->Dynamicmodelstruct->find('all',array(
+				'conditions'=>array(
+						'model_id'=>$id
+				),
+				'order'=>array(
+					'main_struct_id'=>'ASC',
+					'order'=>'ASC',
+				),
+				'recursive'=>-1
+		));
+
+		$fields = Set::combine($fields, "{n}.Dynamicmodelstruct.id","{n}");
+
+		foreach($fields as $k=>$field){
+
+			if(!$field['Dynamicmodelstruct']['main_struct_id']){
+
+				$object[$field['Dynamicmodelstruct']['id']] = array(
+						'name'=>$field['Dynamicmodelstruct']['name'],
+						'label'=>(empty($field['Dynamicmodelstruct']['label']))?$field['Dynamicmodelstruct']['name']:$field['Dynamicmodelstruct']['label'],
+						'type'=>$field['Dynamicmodelstruct']['type'],
+						'hidden'=>$field['Dynamicmodelstruct']['hidden'],
+						'order'=>$field['Dynamicmodelstruct']['order']
+				);
+
+				if($field['Dynamicmodelstruct']['required']){
+					$object[$field['Dynamicmodelstruct']['id']]['required'] = true;
+				}
+
+				if(isset($field['Dynamicmodelstruct']['default'])){
+					$object[$field['Dynamicmodelstruct']['id']]['default'] = $field['Dynamicmodelstruct']['default'];
+				}
+
+				if($field['Dynamicmodelstruct']['placeholder']){
+					$object[$field['Dynamicmodelstruct']['id']]['placeholder'] = $field['Dynamicmodelstruct']['placeholder'];
+				}
+
+				$attribute = get_object_vars(json_decode($field['Dynamicmodelstruct']['attribute']));
+				if(!empty($attribute)){
+					foreach($attribute as $j=>$v){
+						$object[$field['Dynamicmodelstruct']['id']]['attribute'][$j]=$v;
+					}
+				}
+
+				if($field['Dynamicmodelstruct']['type'] == $this->Dynamicmodelstruct->type_select){
+					$object[$field['Dynamicmodelstruct']['id']]['multiple'] = intval($field['Dynamicmodelstruct']['multiple']);
+					$object[$field['Dynamicmodelstruct']['id']]['options'] = array();
+				}
+
+			}else{
+				if($field['Dynamicmodelstruct']['type'] == $this->Dynamicmodelstruct->type_select_item){
+					if($object[$field['Dynamicmodelstruct']['main_struct_id']]){
+						$object[$field['Dynamicmodelstruct']['main_struct_id']]['options'][$field['Dynamicmodelstruct']['id']] = $field['Dynamicmodelstruct']['label'];
+					}
+
+				}else if($field['Dynamicmodelstruct']['type'] != $this->Dynamicmodelstruct->type_array){
+//					$main_struct_name = $fields[$field['Dynamicmodelstruct']['main_struct_id']]['Dynamicmodelstruct']['name'];
+					if($object[$field['Dynamicmodelstruct']['main_struct_id']]){
+						$new_array_field = array(
+							'name'=>$field['Dynamicmodelstruct']['name'],
+							'label'=>(empty($field['Dynamicmodelstruct']['label']))?$field['Dynamicmodelstruct']['name']:$field['Dynamicmodelstruct']['label'],
+							'type'=>$field['Dynamicmodelstruct']['type'],
+							'hidden'=>$field['Dynamicmodelstruct']['hidden'],
+							'order'=>$field['Dynamicmodelstruct']['order']
+						);
+
+						if($field['Dynamicmodelstruct']['required']){
+							$new_array_field['required'] = true;
+						}
+
+						if(isset($field['Dynamicmodelstruct']['default'])){
+							$new_array_field['default'] = $field['Dynamicmodelstruct']['default'];
+						}
+
+						if($field['Dynamicmodelstruct']['placeholder']){
+							$new_array_field['placeholder'] = $field['Dynamicmodelstruct']['placeholder'];
+						}
+
+						$object[$field['Dynamicmodelstruct']['main_struct_id']]['child'][$field['Dynamicmodelstruct']['id']] = $new_array_field;
+
+						$attribute = get_object_vars(json_decode($field['Dynamicmodelstruct']['attribute']));
+						if(!empty($attribute)){
+							foreach($attribute as $j=>$v){
+								$object[$field['Dynamicmodelstruct']['main_struct_id']]['child'][$field['Dynamicmodelstruct']['id']]['attribute'][$j]=$v;
+							}
+						}
+					}
+
+
+				}
+			}
+
+		}
+		return $object;
+
+	}
+
+
+	public function copy_model($from_model_id, $to_model_id){
+		$from_model = $this->get_struct($from_model_id);
+		if(!$this->exists($to_model_id)){
+			return false;
+		}
+		$success = false;
+		$this->begin();
+		if(!empty($from_model)){
+			foreach($from_model as $field){
+				if($field['type'] == $this->Dynamicmodelstruct->type_select){
+					$success = $this->Dynamicmodelstruct->create_struct($to_model_id, $field['name'], $field['type'], $field['required'], $field['label'], $field['default'], $field['attribute'], $field['placeholder']);
+					if($success){
+						if(!empty($field['options'])){
+							$main_id =  $this->Dynamicmodelstruct->getLastInsertID();
+							foreach($field['options'] as $k=>$option){
+								$success = $this->Dynamicmodelstruct->create_struct($to_model_id, $k, $this->Dynamicmodelstruct->type_select_item,0, $option, null, null, null, $main_id);
+								if(!$success){
+									break;
+								}
+							}
+						}
+					}else{
+						break;
+					}
+				} else if($field['type'] == $this->Dynamicmodelstruct->type_array){
+					$success = $this->Dynamicmodelstruct->create_struct($to_model_id, $field['name'], $field['type'], $field['required'], $field['label'], $field['default'], $field['attribute'], $field['placeholder']);
+					if($success){
+						$parent = $this->Dynamicmodelstruct->read(null, $this->Dynamicmodelstruct->getLastInsertID());
+						foreach($field['child'] as $child){
+							if(!$child['hidden']){
+								$success = $this->Dynamicmodelstruct->create_struct($to_model_id, $child['name'], $child['type'],$child['required'], $child['label'], $child['default'], $field['attribute'], $child['placeholder'], $parent['Dynamicmodelstruct']['main_struct_id']);
+								if(!$success){
+									break;
+								}
+							}
+						}
+
+					}else{
+						break;
+					}
+
+				}else{
+					$success = $this->Dynamicmodelstruct->create_struct($to_model_id, $field['name'], $field['type'], $field['required'], $field['label'], $field['default'], $field['attribute'], $field['placeholder']);
+					if(!$success){
+						break;
+					}
+				}
+			}
+		}
+
+		if($success){
+			$this->commit();
+			return true;
+		}else{
+			return false;
+		}
+
+	}
+
+
+}

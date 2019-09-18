@@ -1,0 +1,3 @@
+.no-search .select2-search {
+    display:none
+}

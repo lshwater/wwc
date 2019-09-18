@@ -1,0 +1,150 @@
+
+
+
+<?php echo $this->Form->create('Servicerecord', array('class'=>'form-horizontal validate_form preventDoubleSubmission')); ?>
+<div class="modal-header">
+    <span class="modal-title"><?=__('接觸記錄')?></span>
+    <button type="button" class="close modalonly" data-dismiss="modal" style="display:none"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+    <?=$this->Form->hidden('id');?>
+    <?=$this->Form->hidden('user_id');?>
+    <?=$this->Form->hidden('casemanagementform_id');?>
+
+    <div class="row">
+        <div class="col-sm-12" id="new_record">
+            <div class="form-group">
+                <?php echo $this->Form->label('servicerecordtype_id', __('接觸類別'), 'col-sm-3 control-label'); ?>
+                <div class="col-sm-9">
+                    <?php echo $this->Form->input('servicerecordtype_id', array('div'=>false, 'label'=>false, 'class'=>'form-control select2-modal','options'=>$servicerecords, 'required'=>'required'));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+
+            <div class="form-group">
+                <?php echo $this->Form->label('service_provider_id', __('跟進職員'), 'col-sm-3 control-label'); ?>
+                <div class="col-sm-9">
+                    <?php echo $this->Form->input('service_provider_id', array('div'=>false, 'label'=>false, 'class'=>'form-control select2-modal','options'=>$users, 'required'=>'required'));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+            <div class="form-group">
+                <?php echo $this->Form->label('date', __('日期'), 'col-sm-3 control-label'); ?>
+                <div class="col-sm-9">
+                    <?php echo $this->Form->input('date', array('type'=>'text','div'=>false, 'label'=>false, 'class'=>'form-control bs_datepicker_modal', 'required'=>'required', 'id'=>'date'));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+
+
+            <div class="form-group">
+                <?php echo $this->Form->label('start_time', __('開始時間'), 'col-sm-3 control-label'); ?>
+                <div class="col-sm-9">
+                    <?php echo $this->Form->input('start_time', array('type'=>'text','div'=>false, 'label'=>false, 'class'=>'form-control start', 'required'=>'required'));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+            <div class="form-group">
+                <?php echo $this->Form->label('end_time', __('結束時間'), 'col-sm-3 control-label'); ?>
+                <div class="col-sm-9">
+                    <?php echo $this->Form->input('end_time', array('type'=>'text','div'=>false, 'label'=>false, 'class'=>'form-control end', 'required'=>'required'));?>
+                </div>
+            </div> <!-- / .form-group -->
+
+            <div class="form-group">
+                <?php echo $this->Form->label('', __('時長'), 'col-sm-3 control-label'); ?>
+                <div class="col-sm-9">
+                    <input type="number"  class="form-control duration" value=1 onwheel="this.blur()" />
+                    <!--                                --><?php //echo $this->Form->input('date', array('type'=>'text','div'=>false, 'label'=>false, 'class'=>'form-control bs_datepicker_modal', 'required'=>'required', 'id'=>'date'));?>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <?php echo $this->Form->label('remark', __('備註'), 'col-sm-3 control-label'); ?>
+                <div class="col-sm-9">
+                    <?php echo $this->Form->input('remark', array('div'=>false, 'label'=>false, 'class'=>'form-control ', 'placeholder'=>'備註'));?>
+                </div>
+            </div> <!-- / .form-group -->
+        </div>
+    </div>
+</div>
+
+
+<div class="modal-footer text-right">
+    <button type="submit" class="btn btn-primary" ><i class="glyphicon glyphicon-ok-sign"></i><? echo ' '.__('Submit');?></button>
+</div>
+
+<?php echo $this->Form->end(); ?>
+
+
+
+<script>
+
+    $(document).ready(function() {
+
+        $(".select2-modal").select2({
+            allowClear: false,
+            dropdownParent: $("#modal"),
+            dropdownCssClass : 'no-search'
+        });
+
+        $('.bs_datepicker_modal').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true,
+            todayBtn: "linked",
+            startDate:'<?=$case['Casemanagement']['applicationdate']?>',
+            container: $('#modal')
+        });
+
+
+        $('#new_record').find('.duration').val(1);
+
+
+        $('#new_record').find('.start').timepicker({
+            template: 'dropdown',
+            minuteStep: 5,
+            showSeconds: false,
+            defaultTime: '9:00 AM',
+            showMeridian: false,
+            // explicitMode: true
+        });
+
+        $('#new_record').find('.end').timepicker({
+            template: 'dropdown',
+            minuteStep: 5,
+            showSeconds: false,
+            defaultTime: '10:00 AM',
+            showMeridian: false,
+            // explicitMode: true
+        });
+
+        // $('#'+row_id).find('.start, .end, .slider').on('change',function(){
+        $('#new_record').find('.start, .end, .duration').on('change',function(){
+
+            var date = $('#new_record').find('.bs_datepicker_modal').val();
+            var start = $('#new_record').find('.start').val();
+            var end = $('#new_record').find('.end').val();
+            // var duration = $(this).closest('tr').find('.slider').val();
+            var duration = $('#new_record').find('.duration').val();
+            if($(this).hasClass('start')){
+                end = moment(date +" "+start, "YYYY-MM-DD HH:mm").add(duration, 'hour').format('HH:mm');
+                $('#new_record').find('.end').val(end);
+                // }else if($(this).hasClass('slider')){
+            }else if($(this).hasClass('duration')){
+                end = moment(date +" "+start, "YYYY-MM-DD HH:mm").add(duration, 'hour').format('HH:mm');
+                $('#new_record').find('.end').val(end);
+            }else if($(this).hasClass('end')){
+                start = moment(date +" "+end, "YYYY-MM-DD HH:mm").subtract(duration, 'hour').format('HH:mm');
+                $('#new_record').find('.start').val(start);
+            }
+
+        });
+
+
+        validate_form();
+
+
+
+    });
+</script>

@@ -1,0 +1,222 @@
+<?php
+App::uses('AppController', 'Controller');
+/**
+ * Groups Controller
+ *
+ * @property Group $Group
+ * @property PaginatorComponent $Paginator
+ */
+class CustomtypedropdownsController extends AppController {
+
+
+/**
+ * Components
+ *
+ *
+ * @var array
+ */
+	public $components = array('Paginator');
+
+    public function view($customfield_id = null){
+
+        if(!$this->Customtypedropdown->Customfield->exists($customfield_id)){
+            throw new NotFoundException(__('Invalid Dbfield'));
+        }
+
+        $list = $this->Customtypedropdown->find('all', array(
+            'conditions'=>array(
+                'Customtypedropdown.customfield_id' => $customfield_id
+            ),
+            'order'=>array(
+                'Customtypedropdown.order'=>'ASC'
+            )
+        ));
+
+//        debug($list);exit();
+
+
+        $this->set('list', $list);
+        $this->set('field', $this->Customtypedropdown->Customfield->read(null, $customfield_id));
+
+    }
+
+/**
+ * add method
+ *
+ * @return void
+ */
+	public function add($customfield_id = null) {
+        if (!$this->Customtypedropdown->Customfield->exists($customfield_id)) {
+            throw new NotFoundException(__('Invalid input'));
+        }
+
+		if ($this->request->is('post')) {
+            configure::write('debug',2);
+
+            $last = $this->Customtypedropdown->find('first',array(
+                'conditions'=>array(
+                    'Customtypedropdown.customfield_id'=>$customfield_id,
+                ),
+                'order'=>array(
+                    'Customtypedropdown.order'=>"DESC"
+                ),
+                'recursive'=>-1
+            ));
+
+            $custominput = $this->Customtypedropdown->Customfield->read(null, $customfield_id);
+
+            $this->request->data['Customtypedropdown']['model_id'] = $custominput['Customfield']['model_id'];
+            $this->request->data['Customtypedropdown']['order'] = $last['Customtypedropdown']['order'] + 1;
+
+            $this->Customtypedropdown->create();
+			if ($this->Customtypedropdown->save($this->request->data)) {
+
+			    $this->Session->setFlash(__('The Customtypedropdown has been saved.'));
+                $this->redirect(array('controller'=>'dbmodels', 'action'=>'preview', $custominput['Customfield']['model_id']));
+
+			} else {
+				$this->Session->setFlash(__('The Customtypedropdowns could not be saved. Please, try again.'));
+			}
+		}
+		$this->set('customfield_id', $customfield_id);
+	}
+
+/**
+ * edit method
+ *
+ * @throws NotFoundException
+ * @param string $id
+ * @return void
+ */
+	public function edit($id = null) {
+		if (!$this->Customtypedropdown->exists($id)) {
+			throw new NotFoundException(__('Invalid group'));
+		}
+
+
+		if ($this->request->is(array('post', 'put'))) {
+
+//		    if($this->request->data['Dbfield']['default_value'] == ''){
+////		        debug('here');
+//                $this->request->data['Dbfield']['default_value'] = null;
+//            }
+//
+//            if($this->request->data['Dbfield']['hidden']){
+//                $this->request->data['Dbfield']['required'] = 0;
+//            }
+
+			if ($this->Customtypedropdown->save($this->request->data)) {
+
+                $this->Session->setFlash(__('The Customtypedropdown has been saved.'));
+                $redirecturl = urldecode($this->request->params['named']['redirect']);
+                if(!empty($redirecturl)){
+                    $this->redirect($redirecturl);
+                }else{
+                    $this->redirect(array('controller'=>'Customtypedropdown', 'action'=>'view', $this->request->data['Customtypedropdown']['customfield_id']));
+                }
+			} else {
+				$this->Session->setFlash(__('The Customtypedropdown could not be saved. Please, try again.'));
+			}
+		} else {
+			$options = array('conditions' => array('Customtypedropdown.' . $this->Customtypedropdown->primaryKey => $id));
+			$this->request->data = $this->Customtypedropdown->find('first', $options);
+		}
+	}
+
+
+/**
+ * delete method
+ *
+ * @throws NotFoundException
+ * @param string $id
+ * @return void
+ */
+	public function delete($id = null) {
+		$this->Customtypedropdown->id = $id;
+		if (!$this->Customtypedropdown->exists()) {
+			throw new NotFoundException(__('Invalid group'));
+		}
+		$this->request->allowMethod('post', 'delete');
+		$field = $this->Customtypedropdown->find('first',array(
+		    'conditions'=>array(
+		        'Customtypedropdown.id'=>$id
+            )
+        ));
+		if ($this->Customtypedropdown->delete()) {
+
+			$this->Session->setFlash(__('The Customtypedropdown has been deleted.'));
+		} else {
+			$this->Session->setFlash(__('The Customtypedropdown could not be deleted. Please, try again.'));
+		}
+		return $this->redirect(array('controller'=>'Customtypedropdowns', 'action'=>'view', $field['Customtypedropdown']['customfield_id']));
+
+    }
+
+    public function moveup($id = null) {
+        if (!$this->Customtypedropdown->exists($id)) {
+            throw new NotFoundException(__('Invalid Customtypedropdown'));
+        }
+        $struct = $this->Customtypedropdown->read(null, $id);
+
+        $order = $struct['Customtypedropdown']['order'];
+
+        $options = array();
+        $options['conditions']['Customtypedropdown.customfield_id'] = $struct['Customtypedropdown']['customfield_id'];
+        $options['conditions']['Customtypedropdown.order <'] = $struct['Customtypedropdown']['order'];
+        $options['conditions']['Customtypedropdown.order !='] = 0;
+
+        $options['order']['Customtypedropdown.order'] = 'DESC';
+        $options['recursive'] = -1;
+
+        $upper = $this->Customtypedropdown->find('first',$options);
+
+        if(!empty($upper)){
+            $this->Customtypedropdown->id = $id;
+            $this->Customtypedropdown->saveField('order',$upper['Customtypedropdown']['order']);
+
+            $this->Customtypedropdown->id = $upper['Customtypedropdown']['id'];
+            $this->Customtypedropdown->saveField('order',$order);
+        }
+
+        $this->Session->setFlash(__('The Customtypedropdown is updated.'));
+
+        return $this->redirect(array('controller'=>'Customtypedropdowns','action' => 'view',$struct['Customtypedropdown']['customfield_id']));
+    }
+
+
+    public function movedown($id = null) {
+
+        if (!$this->Customtypedropdown->exists($id)) {
+            throw new NotFoundException(__('Invalid Customtypedropdown'));
+        }
+        $struct = $this->Customtypedropdown->read(null, $id);
+
+        $order = $struct['Customtypedropdown']['order'];
+
+        $options = array();
+        $options['conditions']['Customtypedropdown.customfield_id'] = $struct['Customtypedropdown']['customfield_id'];
+        $options['conditions']['Customtypedropdown.order >'] = $struct['Customtypedropdown']['order'];
+
+        $options['order']['Customtypedropdown.order'] = 'ASC';
+
+        $upper = $this->Customtypedropdown->find('first',$options);
+
+        if(!empty($upper)){
+            $this->Customtypedropdown->id = $id;
+            $this->Customtypedropdown->saveField('order',$upper['Customtypedropdown']['order']);
+
+            $this->Customtypedropdown->id = $upper['Customtypedropdown']['id'];
+            $this->Customtypedropdown->saveField('order',$order);
+        }
+
+        $this->Session->setFlash(__('The Customtypedropdown is updated.'));
+
+        return $this->redirect(array('controller'=>'Customtypedropdowns','action' => 'view',$struct['Customtypedropdown']['customfield_id']));
+
+    }
+    
+	public function beforeFilter(){
+
+		parent::beforeFilter();
+	}
+}

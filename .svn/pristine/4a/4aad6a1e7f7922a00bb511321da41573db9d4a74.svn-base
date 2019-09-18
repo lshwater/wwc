@@ -1,0 +1,119 @@
+<?php
+App::uses('AppModel', 'Model');
+
+class Casemanagement extends AppModel {
+
+    public $referred_by_choices = array(
+        "SWD"=>"SWD",
+        "Other Org"=>"Other Org",
+        "Self-referral"=>"Self-referral"
+    );
+
+    public $types = array(
+        "隱蔽長者"=>"隱蔽長者",
+        "獨居長者"=>"獨居長者"
+    );
+
+    public $validate = array(
+        'code' => array(
+            'notempty' => array(
+                'rule' => array('notempty'),
+            ),
+            'code_unique' => array(
+                'rule' => 'isUnique',
+                'message' => 'That code is already in use',
+            )
+        ),
+        'user_id' => array(
+            'numeric' => array(
+                'rule' => array('numeric'),
+                //'message' => 'Your custom message here',
+                //'allowEmpty' => false,
+                //'required' => false,
+                //'last' => false, // Stop validation after this rule
+                //'on' => 'create', // Limit validation to 'create' or 'update' operations
+            ),
+        ),
+        'application_success' => array(
+            'rule'    => array('boolean'),
+            'allowEmpty'=>true,
+            'message' => 'Incorrect value for checkbox'
+        ),
+        'dateofapproval' => array(
+            'comparison2' => array(
+                'rule'=>array('field_comparison', '>=', 'applicationdate'), 'message' => '必須在個案申請日期後','allowEmpty'=>true
+            ),
+        )
+    );
+
+    public $belongsTo = array(
+        'User'=> array(
+            'className' => 'User',
+            'foreignKey' => 'user_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+        'Year'=> array(
+            'className' => 'Year',
+            'foreignKey' => 'year_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+        'Identitytype' => array(
+            'className' => 'Identitytype',
+            'foreignKey' => 'client_identitytype_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+        "Closereason"=> array(
+            'className' => 'Closereason',
+            'foreignKey' => 'closereason_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+    );
+
+    public $hasMany = array(
+        'Casemanagementform' => array(
+            'className' => 'Casemanagementform',
+            'foreignKey' => 'casemanagement_id',
+            'dependent' => true,
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        )
+    );
+
+    public $actsAs = array('Search.Searchable', 'Linkable.Linkable');
+
+    public $filterArgs = array(
+        'filter' => array('type' => 'query', 'method' => 'orConditions'),
+    );
+
+
+    public function orConditions($data = array()) {
+        $display = trim($data['filter']);
+        if($display == 1){
+            $cond = array(
+                'closed '=>0
+            );
+        }else if($display == 2){
+            $cond = array(
+                'closed '=>1
+            );
+        }else{
+
+        }
+
+        return $cond;
+    }
+}

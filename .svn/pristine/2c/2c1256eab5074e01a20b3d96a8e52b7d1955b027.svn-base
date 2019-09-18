@@ -1,0 +1,98 @@
+<?php
+App::uses('AppModel', 'Model');
+
+class Approvalrecord extends AppModel {
+
+    public $belongsTo = array(
+//        "User"=> array(
+//            'className' => 'User',
+//            'foreignKey' => 'user_id',
+//            'conditions' => '',
+//            'fields' => '',
+//            'order' => ''
+//        ),
+        "Requester"=> array(
+            'className' => 'User',
+            'foreignKey' => 'requester_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+        "Finalreviewer"=> array(
+            'className' => 'User',
+            'foreignKey' => 'final_reviewer_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+        "Approvalrecordstatus"=> array(
+            'className' => 'Approvalrecordstatus',
+            'foreignKey' => 'approvalrecordstatus_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        )
+    );
+
+//    public $hasMany = array(
+//        'ApprovalrecordReviewer' => array(
+//            'className' => 'ApprovalrecordReviewer',
+//            'foreignKey' => 'approvalrecord_id',
+//            'dependent' => true,
+//            'conditions' => '',
+//            'fields' => '',
+//            'order' => '',
+//            'limit' => '',
+//            'offset' => '',
+//            'exclusive' => '',
+//            'finderQuery' => '',
+//            'counterQuery' => ''
+//        )
+//    );
+
+    public $hasAndBelongsToMany = array(
+        'Reviewer' => array(
+            'className' => 'User',
+            'joinTable' => 'approvalrecords_reviewers',
+            'foreignKey' => 'approvalrecord_id',
+            'associationForeignKey' => 'user_id',
+            'unique' => 'keepExisting',
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'finderQuery' => '',
+        )
+    );
+
+    function new_approval_request($model, $id, $db_field, $from, $from_text, $to, $to_text, $requester, $reviewers = array(), $requester_comment){
+
+        $data = array(
+            'model'=>$model,
+            'model_id'=>$id,
+            'db_field'=>$db_field,
+            'update_from'=>$from,
+            'update_from_text'=>$from_text,
+            'update_to'=>$to,
+            'update_to_text'=>$to_text,
+            'approvalrecordstatus_id'=>2,
+            'requester_id'=>$requester,
+            'Reviewer'=>$reviewers,
+            'requester_comment'=>$requester_comment
+        );
+
+        $this->create();
+        if($this->save($data)){
+            ///// notification
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    function do_approval($model, $id, $approval_status, $reviewer_comment){
+
+    }
+
+}

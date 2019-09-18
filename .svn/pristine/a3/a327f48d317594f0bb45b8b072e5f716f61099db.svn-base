@@ -1,0 +1,31 @@
+<?php
+App::uses('AppController', 'Controller');
+
+class PaymentsController extends AppController
+{
+    /**
+     * Components
+     *
+     * @var array
+     */
+    public $components = array('Paginator', 'Search.Prg');
+
+
+    public function newpayment(){
+        $paymentitemcategories = $this->Payment->Paymentrecord->Paymentitem->Paymentitemcategory->find("all", array(
+           "conditions"=>array(
+               "Paymentitemcategory.active"=>1
+           )
+        ));
+//        Configure::write('debug',2);
+//        debug($paymentitemcategories);
+//        exit();
+
+        $this->set("paymentitemcategories", $paymentitemcategories);
+    }
+
+    public function checkout(){
+
+    }
+
+}

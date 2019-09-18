@@ -1,0 +1,557 @@
+<?php
+App::uses('AppController', 'Controller');
+
+
+class CasemanagementsController extends AppController
+{
+    public $components = array('Paginator', 'Search.Prg');
+
+    public function test(){
+
+        configure::write('debug',2);
+        exit();
+    }
+    public function index(){
+//        Configure::write('debug',2);
+//        if(!isset($this->request->params['named']['filter'])){
+//            $this->redirect(array("action"=>"index", "filter"=>1));
+//        }
+//        $this->Prg->commonProcess();
+//        $option = $this->Casemanagement->parseCriteria($this->Prg->parsedParams());
+//
+//        $cond = array("Casemanagement.user_id"=>$this->Auth->user("id"));
+//        $cond = array_merge($cond, $option);
+//
+//        $cases = $this->Casemanagement->find("all", array(
+//            "conditions"=>$cond
+//        ));
+
+//        $this->set("cases", $cases);
+    }
+
+    public function view($id = null){
+//        Configure::write('debug',2);
+        if (!$this->Casemanagement->exists($id)) {
+            throw new NotFoundException(__('Invalid'));
+        }
+        $this->Casemanagement->Behaviors->load('Containable');
+        $case = $this->Casemanagement->find("first", array(
+            "conditions"=>array(
+                "Casemanagement.id"=>$id
+            ),
+            "contain"=>array(
+                "Membership.Membertype",
+                'Member',
+                'User',
+                'Year',
+                'Casenature',
+                'Casetype',
+                "Closereason",
+                "Casemanagementform"=>array(
+                    "order"=>array(
+                        "form_date DESC",
+                        "id DESC"
+                    )
+                )
+            )
+        ));
+        configure::WritE('debug',2);
+        $timelines = array();
+        if(!empty($case['Casemanagementform'])){
+
+            foreach($case['Casemanagementform'] as $val){
+
+                $form_model = $case['Casemanagementform']['form_name'];
+                $this->loadModel($case['Casemanagementform']['form_name']);
+
+                $form_content = $this->{$form_model}->find('first',array(
+                    'conditions'=>array(
+                        $form_model.".id"=>$val['form_id']
+                    ),
+                    'recursive'=>-1
+                ));
+
+                $timelines[] = array(
+                    "date"=>$val['form_date'],
+                    "form_id"=>$val['form_id'],
+                    "form_controller"=>$val['form_controller'],
+                    "form_name"=>$val['form_name'],
+                    "form_type"=>$val['form_type'],
+                    "form_content"=>$form_content
+                );
+            }
+        }
+
+        $this->set("case", $case);
+        $this->set("casefrom", $this->Casemanagement->casefrom);
+        $this->set("case_status", $this->Casemanagement->case_status);
+        $this->set("timelines", $timelines);
+    }
+
+
+    public function add(){
+//            configure::write('debug',2);
+
+        if ($this->request->is('post') || $this->request->is('put')) {
+
+//            configure::write('debug',2);
+//            debug($this->request->data);exit();
+
+            $error = false;
+
+            $this->Casemanagement->begin();
+
+            if (!$this->request->data['Casemanagement']['existing_member']) {
+
+                $this->loadModel("Membernextcode");
+
+                $new_member = $this->request->data['Newmember'];
+                $member2save = $new_member['Member'];
+
+                $this->Casemanagement->Member->create();
+                if(!$this->Casemanagement->Member->save($member2save)){
+                    $error = true;
+                    $this->Session->setFlash(__('會員資料存儲失敗 #EMA01'), 'default', array('class' => 'alert alert-danger'));
+
+                }
+
+                $membertype_id = $member2save['membertype_id'];
+
+                if($membertype_id){
+
+                    $membertype = $this->Casemanagement->Member->Membership->Membertype->find("first", array(
+                        'conditions' => array(
+                            'Membertype.id' => $membertype_id
+                        ),
+                        "recursive"=>-1
+                    ));
+
+                    if($membertype['Membertype']['default_period'] == 0){
+                        $new_member['Membership']['startdate'] = date("Y-m-d");
+                        $new_member['Membership']['enddate'] = "2099-12-31";
+                        $new_member['Membership']['period_d'] = 9999;
+                        $new_member['Membership']['period'] = 99;
+                    }
+                    $new_member['Membership']['membershiprecordtype_id'] = 1;
+
+                    //Membership save
+                    $membership2save = $new_member['Membership'];
+
+
+                    $this->Casemanagement->Member->Membership->create();
+
+                    $membership2save['member_id'] = $this->Casemanagement->Member->id;
+                    $membership2save['membertype_id'] = $membertype_id;
+                    $membership2save['code'] = $this->Membernextcode->getnextcode($membertype_id);
+                    while ($this->Casemanagement->Member->Membership->find("count", array("conditions"=>array("code"=>$membership2save['code'])))){
+                        $membership2save['code'] = $this->Membernextcode->getnextcode($membertype_id);
+                    }
+
+                    if(!$this->Casemanagement->Member->Membership->save($membership2save)){
+                        $error = true;
+                        $this->Session->setFlash(__('會藉資料存儲失敗 #EMA03'), 'default', array('class' => 'alert alert-danger'));
+
+                    }
+
+                    //Membership Record save
+                    $membershiprecord2save = $new_member['Membership'];
+                    $membershiprecord2save['member_id'] = $this->Casemanagement->Member->id;
+                    $membershiprecord2save['membership_id'] = $this->Casemanagement->Member->Membership->id;
+                    $membershiprecord2save['membertype_id'] = $membertype_id;
+                    $membershiprecord2save['user_id'] = $this->Auth->user('id');
+
+                    $this->Casemanagement->Member->Membershiprecord->create();
+
+                    if(!$this->Casemanagement->Member->Membershiprecord->save($membershiprecord2save)){
+                        $error = true;
+                        $this->Session->setFlash(__('會藉記錄新增失敗 #EMA02'), 'default', array('class' => 'alert alert-danger'));
+
+                    }
+                }
+
+                if(!empty($new_member['Parentmember'])){
+                    foreach($new_member['Parentmember'] as $pm){
+                        if(!empty($pm['id'])){
+                            $this->Casemanagement->Member->Parentmember->id = $pm['id'];
+                            $this->Casemanagement->Member->Parentmember->savefield("relationship_id", $pm['relationship_id']);
+                        }else{
+                            $this->Casemanagement->Member->Parentmember->saverelation($this->Casemanagement->Member->id, $pm['member_child'],  $pm['relationship_id']);
+                        }
+                    }
+                }
+
+                $this->request->data['Casemanagement']['member_id'] = $this->Casemanagement->Member->id;
+                $this->request->data['Casemanagement']['membership_id'] = $this->Casemanagement->Member->Membership->id;
+            }
+
+            $this->request->data['Casemanagement']['code'] = uniqid();
+//            $this->request->data['Casemanagement']['status'] = 0;
+
+
+            $this->Casemanagement->create();
+
+            if($this->Casemanagement->save($this->request->data['Casemanagement'])){
+
+                $code = "C". str_pad($this->Casemanagement->id, 8, 0, STR_PAD_LEFT);
+                if (!$this->Casemanagement->saveField('code', $code)) {
+                    $error = configure::read("error_prefix") . "00020";
+                }
+
+                if($this->request->data['Casemanagement']['status'] > 0){
+
+                    $enquiry_form_data = $this->request->data;
+
+                    unset($enquiry_form_data['Casereferralform']);
+                    unset($enquiry_form_data['Casemanagement']);
+                    unset($enquiry_form_data['Newmember']);
+                    $enquiry_form_data['Caseenquiryform']['date'] = $this->request->data['Casemanagement']['applicationdate'];
+                    $enquiry_form_data['Caseenquiryform']['Casemanagementform'] = '';
+                    $enquiry_form_data['Casemanagementform']['casemanagement_id'] = $this->Casemanagement->id;
+                    $enquiry_form_data['Casemanagementform']['form_type'] = $this->Casemanagement->Casemanagementform->Caseenquiryform->alias;
+                    $enquiry_form_data['Casemanagementform']['form_controller'] = $this->Casemanagement->Casemanagementform->Caseenquiryform->alias.'s';
+                    $enquiry_form_data['Casemanagementform']['form_date'] = $this->request->data['Casemanagement']['applicationdate'];
+                    $enquiry_form_data['Casemanagementform']['form_name'] = $this->Casemanagement->Casemanagementform->Caseenquiryform->form_name;
+
+                    if(!$this->Casemanagement->Casemanagementform->Caseenquiryform->saveAll($enquiry_form_data, array("deep" => true))){
+                        $error = configure::read("error_prefix") . "00021";
+                    }
+
+                    if(!$this->Casemanagement->Casemanagementform->saveField('form_id', $this->Casemanagement->Casemanagementform->Caseenquiryform->id)){
+                        $error = configure::read("error_prefix") . "00022";
+                    }
+
+                }
+
+
+
+                if($this->request->data['Casemanagement']['status'] == 5){
+
+                    $referral_form_data = $this->request->data;
+
+                    unset($referral_form_data['Caseenquiryform']);
+                    unset($referral_form_data['Casemanagement']);
+                    unset($referral_form_data['Newmember']);
+
+                    $referral_form_data['Casereferralform']['Casemanagementform'] = '';
+                    $referral_form_data['Casemanagementform']['casemanagement_id'] = $this->Casemanagement->id;
+                    $referral_form_data['Casemanagementform']['form_type'] = $this->Casemanagement->Casemanagementform->Casereferralform->alias;
+                    $referral_form_data['Casemanagementform']['form_controller'] = $this->Casemanagement->Casemanagementform->Casereferralform->alias.'s';
+                    $referral_form_data['Casemanagementform']['form_date'] = $this->request->data['Casemanagement']['applicationdate'];
+                    $referral_form_data['Casemanagementform']['form_name'] = $this->Casemanagement->Casemanagementform->Casereferralform->form_name;
+
+                    if(!$this->Casemanagement->Casemanagementform->Casereferralform->saveAll($referral_form_data, array("deep" => true))){
+                        $error = configure::read("error_prefix") . "00023";
+                    }
+
+                    if(!$this->Casemanagement->Casemanagementform->saveField('form_id', $this->Casemanagement->Casemanagementform->Casereferralform->id)){
+                        $error = configure::read("error_prefix") . "00024";
+                    }
+
+                }
+
+            }
+
+//            exit();
+            if(!$error){
+                $this->Casemanagement->commit();
+                $this->Session->setFlash(__('新增成功'), 'default', array('class' => 'alert alert-success'));
+                $this->redirect(array("action"=>"view", $this->Casemanagement->id));
+            }else{
+                $this->Casemanagement->rollback();
+            }
+
+
+        }
+
+        $years = $this->Casemanagement->Year->find('list', array(
+            "fields"=>array(
+                "id", "name"
+            ),
+            'conditions'=>array('active'=>1)
+        ));
+
+        $referred_by_choices = $this->Casemanagement->referred_by_choices;
+        $types = $this->Casemanagement->types;
+        $this->set('casetypes', $this->Casemanagement->Casetype->find('list', array('conditions' => array('active' => 1))));
+        $this->set('caseclosereasons', $this->Casemanagement->Caseclosereason->find('list', array('conditions' => array('active' => 1))));
+        $this->set('casenatures', $this->Casemanagement->Casenature->find('l ist', array('conditions' => array('active' => 1))));
+        $this->set('casereferrals', $this->Casemanagement->Casemanagementform->Casereferralform->Casereferral->find('list', array('conditions' => array('active' => 1))));
+        $this->set('casefrom',$this->Casemanagement->casefrom);
+
+        $membertype = $this->Casemanagement->Member->Membership->Membertype->find("first", array(
+            'conditions' => array(
+                'Membertype.id' => 7
+            ),
+            "recursive"=>-1
+        ));
+
+        $memberrelations = $this->Casemanagement->Member->Parentmember->Memberrelation->find("list", array("conditions"=>array("active"=>1)));
+        $this->set("memberrelations", $memberrelations);
+        $this->set('membertype',$membertype);
+        $this->set("genders", $this->Casemanagement->Member->gender);
+        $this->set("case_enquiry_assessment", $this->Casemanagement->case_enquiry_assessment);
+        $this->set(compact("years", "referred_by_choices", "types"));
+
+    }
+
+    public function edit($id = null){
+        if (!$this->Casemanagement->exists($id)) {
+            throw new NotFoundException(__('Invalid'));
+        }
+        if ($this->request->is('post') || $this->request->is('put')) {
+            if($this->Casemanagement->save($this->request->data)){
+                $this->redirect(array("action"=>"view", $id));
+            }else{
+
+            }
+        }else{
+            $this->request->data = $this->Casemanagement->findById($id);
+        }
+        $years = $this->Casemanagement->Year->find('list', array(
+            "fields"=>array(
+                "id", "name"
+            )
+        ));
+        $referred_by_choices = $this->Casemanagement->referred_by_choices;
+        $types = $this->Casemanagement->types;
+        $this->set('identitytypes', $this->Casemanagement->Identitytype->find('list', array('conditions' => array('active' => true))));
+        $this->set(compact("years", "referred_by_choices", "types"));
+    }
+
+
+    public function delete($id = null) {
+        if (!$this->Casemanagement->exists($id)) {
+            throw new NotFoundException(__('Invalid'));
+        }
+        $this->Casemanagement->id = $id;
+
+        $this->request->allowMethod('post', 'delete');
+        if ($this->Casemanagement->delete()) {
+            $this->Session->setFlash(__('成功刪除'), 'default', array('class' => 'alert alert-success'));
+        } else {
+            $this->Session->setFlash(__('失敗，請再檢查後嘗試'), 'default', array('class' => 'alert alert-danger'));
+        }
+        return $this->redirect(array('action' => 'index'));
+    }
+
+    public function closecase($id = null){
+        if (!$this->Casemanagement->exists($id)) {
+            throw new NotFoundException(__('Invalid'));
+        }
+//        Configure::write('debug',2);
+
+        if ($this->request->is(array('post', 'put'))) {
+            if ($this->Casemanagement->save($this->request->data)) {
+                $this->Session->setFlash("成功完結", 'default', array('class'=>'alert alert-success'));
+                $this->redirect(array("action"=>'view', $id));
+            } else {
+                $this->Session->setFlash("失敗", 'default', array('class'=>'alert alert-danger'));
+            }
+        }else{
+            $this->set("case",$this->Casemanagement->findById($id));
+        }
+
+        $closereasons = $this->Casemanagement->Closereason->find("list", array("conditions"=>array($this->Casemanagement->Closereason->alias.".active"=>1)));
+        $this->set("closereasons", $closereasons);
+        $this->set("casemanagement_id", $id);
+    }
+
+    public function reactivecase($id = null){
+        if (!$this->Casemanagement->exists($id)) {
+            throw new NotFoundException(__('Invalid'));
+        }
+
+        $this->Casemanagement->id = $id;
+        if($this->Casemanagement->saveField("closed", 0)){
+            $this->Session->setFlash(__('計劃已重開'), 'default', array('class'=>'alert alert-success'));
+        }else{
+            $this->Session->setFlash(__('失敗，請再檢查後嘗試'), 'default', array('class'=>'alert alert-danger'));
+        }
+
+        $this->redirect(array("controller"=>"Casemanagements","action"=>'view', $id));
+    }
+
+    public function ajax_list(){
+
+        $this->autoRender = false;
+        $this->RequestHandler->respondAs('json');
+        $output = array();
+
+        $options = array();
+
+        $input =& $_GET;
+
+// Number of columns being displayed (useful for getting individual column search info)
+        $iColumns = $input['iColumns'];
+
+// Get mDataProp values assigned for each table column
+        $dataProps = array();
+        for ($i = 0; $i < $iColumns; $i++) {
+            $var = 'mDataProp_'.$i;
+            if (!empty($input[$var]) && $input[$var] != 'null') {
+                $dataProps[$i] = $input[$var];
+//                $options['fields'][] = $input[$var];
+            }
+        }
+
+
+//        if ( !empty($input['sSearch']) ) {
+//            $sSearch = $input['sSearch'];
+//
+//            $options['conditions']['OR']["Member.c_name LIKE"] = '%' . $input['sSearch'] . '%';
+//            $options['conditions']['OR']["Member.e_name LIKE"] = '%' . $input['sSearch'] . '%';
+//            $options['conditions']['OR']["Member.code LIKE"] = '%' . $input['sSearch'] . '%';
+//        }
+
+        /**
+         * Ordering
+         */
+        if ( isset($input['iSortCol_0']) ) {
+            $sort_fields = array();
+            for ( $i=0 ; $i<intval( $input['iSortingCols'] ) ; $i++ ) {
+                if ( $input[ 'bSortable_'.intval($input['iSortCol_'.$i]) ] == 'true' ) {
+                    $field = $dataProps[ intval( $input['iSortCol_'.$i] ) ];
+
+                    $order = ( $input['sSortDir_'.$i]=='desc' ? "DESC" : "ASC" );
+
+
+//                    if($field == "code_type"){
+//                        $options['order'][] = array('Member.membertype_id'=>$order);
+//                        $options['order'][] = array('Member.code'=>$order);
+//                    }else if($field == "c_name"){
+//                        $options['order'][] = array('Member.c_name'=>$order);
+//                    }else if($field == "membershipdate"){
+//                        $options['order'][] = array('Member.membershipdate'=>$order);
+//                    }else if($field == "modified"){
+//                        $options['order'][] = array('Member.modified'=>$order);
+//                    }else if($field == "status"){
+//                        $options['order'][] = array('Member.valid'=>$order);
+//                        $options['order'][] = array('Member.active'=>$order);
+//                    }
+                }
+            }
+        }
+
+        /**
+         * Paging
+         */
+        if ( isset( $input['iDisplayStart'] ) && $input['iDisplayLength'] != '-1' ) {
+            $options['limit'] = $input['iDisplayLength'];
+            $options['offset'] = $input['iDisplayStart'];
+        }
+
+        //Filter
+//        if(!empty($input['status'])){
+//            if($input['status'] == 1){
+//                $options['conditions']['Member.valid'] = 0;
+//            }else if($input['status'] == 2){
+//                $options['conditions']['Member.valid'] = 1;
+//                $options['conditions']['Member.active'] = 0;
+//            }else{
+//                $options['conditions']['Member.valid'] = 1;
+//                $options['conditions']['Member.active'] = 1;
+//            }
+//        }
+
+        if(!empty($input['member_id'])){
+            $options['conditions']['Casemanagement.member_id'] = $input['member_id'];
+        }
+
+        if(!empty($input['sort_member'])){
+            $options['conditions']['Casemanagement.member_id'] = $input['member_id'];
+        }
+
+        if(!empty($input['show_my_case'])){
+            $options['conditions']['Casemanagement.user_id'] = $this->Auth->user('id');
+        }
+
+
+        if(!empty($input['status'])){
+            if($input['status'] == 2){
+                $options['conditions']['Casemanagement.status'] = 1;
+
+            }else if($input['status'] == 3){
+                $options['conditions']['Casemanagement.status'] = 9;
+            }
+        }
+
+
+
+
+        $this->Casemanagement->Behaviors->load('Containable');
+        $options['contain'] = array(
+            "Membership.Membertype",
+            'Member',
+            'User',
+            'Year',
+            'Casenature',
+            'Casetype'
+        );
+
+
+        $result = $this->Casemanagement->find('all',$options);
+        unset($options['limit']);
+        unset($options['offset']);
+        $result_count = $this->Casemanagement->find('count',$options);
+        $all_count = $this->Casemanagement->find('count');
+
+        $output = array(
+            "sEcho" => intval($input['sEcho']),
+            "iTotalRecords" => $all_count,
+            "iTotalDisplayRecords" => $result_count,
+            "aaData" => array(),
+        );
+
+//        configure::write('debug',2);
+//        debug($result);exit();
+
+        App::import('Helper', 'Html');
+        $html = new HtmlHelper(new View());
+        App::import('Helper','Form');
+        $form = new FormHelper(new View());
+
+        foreach ( $result as $doc ) {
+            $doc['output'] = array();
+
+            $doc['output']['code'] = $doc['Casemanagement']['code'];
+
+            if(empty($doc['Casenature']['name'])){
+                $doc['output']['casenature'] = "不適用";
+            }
+
+            if(empty($doc['Casetype']['name'])){
+                $doc['output']['casetype'] = "不適用";
+            }
+
+            $status = $this->Casemanagement->case_status[$doc['Casemanagement']['status']];
+            $status = "<span class='label label-".$status['class']."'>".$status['name']."</span>";
+
+
+            $doc['output']['code'] .= " ".$status;
+            $doc['output']['applicationdate'] = $doc['Casemanagement']['applicationdate'];
+
+            $doc['output']['year'] = $doc['Year']['name'];
+            $doc['output']['user'] = $doc['User']['name'];
+
+            $doc['output']['member'] = $html->link($doc['Member']['displayname'], array('controller'=>'members','action' => 'view', $doc['Member']['id']), array('class' => '', 'escape' => false));
+            $doc['output']['member'] .= ' <span class="'.$doc['Membership']['Membertype']['labelclass'].'">'.h($doc['Membership']['Membertype']['name']).' '.h($doc['Membership']['code']).'</span>';
+
+
+
+            $doc['output']['action'] = " ".$html->link('<button class="btn btn-sm btn-info" style="width: 30px;"><i class="fa fa-info"></i></button>', array('controller'=>'casemanagements','action' => 'view', $doc['Casemanagement']['id']), array('class' => '', 'escape' => false));
+
+//            $doc['Memberoutput']['action'] .= " ".$html->link('<i class="fa fa-pencil"></i>', array('action' => 'edit', $doc['Member']['id']), array('class' => 'btn btn-sm btn-warning', 'escape' => false));
+//
+//            $doc['Memberoutput']['action'] .= " ".$html->link('<button class="btn btn-sm btn-success" style="width: 32px;"><i class="fa fa-wifi"></i></button>', array('action' => 'reissuecard', $doc['Member']['id']), array("class" => 'openasnew', 'escape' => false));
+//
+//            if ($doc['Member']['valid'] && $doc['Member']['active']) {
+//                $doc['Memberoutput']['action'] .= " ".$form->postLink('<button class="btn btn-sm btn-danger" style="width: 30px;"><i class="fa fa-dot-circle-o"></i></button>', array('action' => 'changeinvalid', $doc['Member']['id']), array('escape' => false), __('確定要退會嗎?'));
+//            }
+
+            $output['aaData'][] = $doc['output'];
+        }
+
+        echo json_encode( $output );
+    }
+
+}

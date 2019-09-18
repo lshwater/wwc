@@ -1,0 +1,178 @@
+<?php
+App::uses('AppController', 'Controller');
+App::uses('CakeEmail', 'Network/Email');
+/**
+ * Members Controller
+ *
+ * @property Memberapplication $Memberapplication
+ * @property PaginatorComponent $Paginator
+ */
+class MembershiprecordsController extends AppController
+{
+    public function index(){
+        $this->set("membertypes", $this->Membershiprecord->Membertype->find("list", array("conditions"=>array("active"=>1)));
+    }
+
+    public function edit($id = null){
+
+        if (!$this->Membershiprecord->exists($id)) {
+            throw new NotFoundException(__('Invalid Membership'));
+        }
+        $options = array('conditions' => array(' Membershiprecord.' . $this-> Membershiprecord->primaryKey => $id));
+        $membershiprecord =  $this-> Membershiprecord->find('first', $options);
+
+        if ($this->request->is(array('post', 'put'))) {
+            if ($this->Membershiprecord->save($this->request->data)) {
+                $this->Session->setFlash(__('成功儲存'), 'default', array('class'=>'alert alert-success'));
+                return $this->redirect(array('controller'=>'members', 'action' => 'view', $membershiprecord['Membershiprecord']['member_id']));
+            } else {
+                $this->Session->setFlash(__('儲存失敗'), 'default', array('class'=>'alert alert-danger'));
+            }
+        } else {
+            $this->request->data = $membershiprecord;
+
+        }
+
+        $this->set("membershiprecord", $membershiprecord);
+
+    }
+
+    public function ajax_list()
+    {
+//        Configure::write('debug', 2);
+        $this->autoRender = false;
+
+        $options = array();
+
+        $input =& $_GET;
+
+        $iColumns = $input['iColumns'];
+
+        $dataProps = array();
+        for ($i = 0; $i < $iColumns; $i++) {
+            $var = 'mDataProp_'.$i;
+            if (!empty($input[$var]) && $input[$var] != 'null') {
+                $dataProps[$i] = $input[$var];
+//                $options['fields'][] = $input[$var];
+            }
+        }
+
+        $this->Membershiprecord->Behaviors->load('Containable');
+
+        $options['contain'] = array(
+            'Member',
+            "Membertype",
+            "Membership",
+            "Membershiprecordtype"
+        );
+
+
+        /**
+         * Ordering
+         */
+        if ( isset($input['iSortCol_0']) ) {
+            $sort_fields = array();
+            for ( $i=0 ; $i<intval( $input['iSortingCols'] ) ; $i++ ) {
+                if ( $input[ 'bSortable_'.intval($input['iSortCol_'.$i]) ] == 'true' ) {
+                    $field = $dataProps[ intval( $input['iSortCol_'.$i] ) ];
+
+                    $order = ( $input['sSortDir_'.$i]=='desc' ? "DESC" : "ASC" );
+//                    if($field == "unit") {
+//                        $options['order'][] = array("Unit.name" => $order);
+//
+//                    }else if($field == "category"){
+//                        $options['order'][] = array("Food.category_id"=>$order);
+//                    }else if($field == "code"){
+//                        $options['order'][] = array("Food.code"=>$order);
+//                    }else if($field == "name"){
+//                        $options['order'][] = array("Food.name"=>$order);
+//                    }else if($field == "stocktotal"){
+//                        $options['order'][] = array("stocktotal"=>$order);
+//                    }else{
+//                        break;
+//                    }
+                }
+            }
+        }
+
+        /**
+         * Paging
+         */
+        if ( isset( $input['iDisplayStart'] ) && $input['iDisplayLength'] != '-1' ) {
+            $options['limit'] = $input['iDisplayLength'];
+            $options['offset'] = $input['iDisplayStart'];
+        }
+
+        //Filter
+
+        if(!empty($input['membercode'])){
+            $options['conditions']["Membership.code LIKE"] = '%' . $input['membercode'] . '%';
+        }
+//
+        if(!empty($input['membername'])){
+            $listids = $this->Membershiprecord->Member->find("list", array(
+                "conditions"=>array(
+                    "Member.displayname LIKE"=>'%' . $input['membername'] . '%'
+                )
+            ));
+
+            $options['conditions']["Membershiprecord.member_id"] = array_keys($listids);
+        }
+
+        if(!empty($input['startdate']) && !empty($input['enddate'])){
+            $options['conditions']["Membershiprecord.created  BETWEEN ? AND ?"] = array(date('Y-m-d 0:0:0', strtotime($input['startdate'])), date('Y-m-d 23:59:59', strtotime($input['enddate'])));
+        }
+
+        if($input['valid'] != ""){
+            $options['conditions']["Membershiprecord.valid"] = $input['valid'];
+        }
+
+
+        $this->Membershiprecord->Behaviors->load('Containable');
+        $result = $this->Membershiprecord->find('all',$options);
+
+        unset($options['limit']);
+        unset($options['offset']);
+        $result_count = $this->Membershiprecord->find('count', array("conditions"=>$options["conditions"]));
+        $all_count = $this->Membershiprecord->find('count', array("recursive"=>-1));
+
+        $output = array(
+            "sEcho" => intval($input['sEcho']),
+            "iTotalRecords" => $all_count,
+            "iTotalDisplayRecords" => $result_count,
+            "aaData" => array(),
+        );
+
+        App::import('Helper', 'Html');
+        $html = new HtmlHelper(new View());
+
+        foreach ( $result as $doc ) {
+            $doc['Membershiprecord']['created'] = date("Y年m月d日", strtotime($doc['Membershiprecord']['created']));
+            $doc['Membershiprecord']['startdate'] = date("Y年m月d日", strtotime($doc['Membershiprecord']['startdate']));
+            $doc['Membershiprecord']['enddate'] = date("Y年m月d日", strtotime($doc['Membershiprecord']['enddate']));
+
+            $doc['Membershiprecord']['valid'] = ($doc['Membershiprecord']['valid'])?"有效":"無效";
+            $doc['action'] = $html->link("修改", array("controller"=>"membershiprecords", "action"=>"edit", $doc['Membershiprecord']['id']), array("class"=>"btn btn-warning btn-sm"));
+            $output['aaData'][] = $doc;
+        }
+
+        echo json_encode( $output );
+    }
+
+    public function delete($id = null){
+        $this->Membershiprecord->id = $id;
+
+        $member_id = $this->Membershiprecord->Field("member_id");
+
+        if (!$this->Membershiprecord->exists()) {
+            throw new NotFoundException(__('Invalid'));
+        }
+        $this->request->allowMethod('post', 'delete');
+        if ($this->Membershiprecord->delete()) {
+            $this->Session->setFlash(__('成功刪除'), 'default', array('class' => 'alert alert-success'));
+        } else {
+            $this->Session->setFlash(__('失敗，請再檢查後嘗試').' ('.configure::read("error_prefix")."00043".')', 'default', array('class' => 'alert alert-danger'));
+        }
+        return $this->redirect(array('controller'=>'members', 'action' => 'view', $member_id));
+    }
+}

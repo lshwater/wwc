@@ -1,0 +1,1 @@
+Link: <?=configure::read('memberdomain').$this->Html->url(array('controller'=>'Members', 'action'=>'resetpwd', $hashstring))?>

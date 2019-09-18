@@ -1,0 +1,198 @@
+<?php
+App::uses('AppController', 'Controller');
+
+
+class CasemanagementsController extends AppController
+{
+    public $components = array('Paginator', 'Search.Prg');
+
+    public function index(){
+//        Configure::write('debug',2);
+        if(!isset($this->request->params['named']['filter'])){
+            $this->redirect(array("action"=>"index", "filter"=>1));
+        }
+        $this->Prg->commonProcess();
+        $option = $this->Casemanagement->parseCriteria($this->Prg->parsedParams());
+
+        $cond = array("Casemanagement.user_id"=>$this->Auth->user("id"));
+        $cond = array_merge($cond, $option);
+
+        $cases = $this->Casemanagement->find("all", array(
+            "conditions"=>$cond
+        ));
+
+        $this->set("cases", $cases);
+    }
+
+    public function view($id = null){
+        Configure::write('debug',2);
+        if (!$this->Casemanagement->exists($id)) {
+            throw new NotFoundException(__('Invalid'));
+        }
+        $this->Casemanagement->Behaviors->load('Containable');
+        $case = $this->Casemanagement->find("first", array(
+            "conditions"=>array(
+                "Casemanagement.id"=>$id
+            ),
+            "contain"=>array(
+                "User",
+                "Year",
+                "Identitytype",
+                "Closereason",
+                "Casemanagementform"=>array(
+                    "order"=>array(
+                        "form_date DESC"
+                    )
+                )
+            )
+        ));
+
+        $timelines = array();
+        if(!empty($case['Casemanagementform'])){
+
+            foreach($case['Casemanagementform'] as $val){
+                $timelines[] = array(
+                    "date"=>$val['form_date'],
+                    "form_id"=>$val['form_id'],
+                    "form_controller"=>$val['form_controller'],
+                    "form_name"=>$val['form_name']
+                );
+            }
+        }
+        $this->set("case", $case);
+        $this->set("timelines", $timelines);
+    }
+
+    public function addtype(){
+
+    }
+
+    public function add(){
+
+        if ($this->request->is('post') || $this->request->is('put')) {
+            $this->request->data['Casemanagement']['code'] = uniqid();
+            $this->Casemanagement->create();
+            if($this->Casemanagement->save($this->request->data)){
+                $code = "C". str_pad($this->Casemanagement->id, 8, 0, STR_PAD_LEFT);
+                if (!$this->Casemanagement->saveField('code', $code)) {
+                    $error = configure::read("error_prefix") . "00020";
+                }
+                $this->redirect(array("action"=>"view", $this->Casemanagement->id));
+            }
+        }
+
+        $years = $this->Casemanagement->Year->find('list', array(
+            "fields"=>array(
+                "id", "name"
+            )
+        ));
+
+        $referred_by_choices = $this->Casemanagement->referred_by_choices;
+        $types = $this->Casemanagement->types;
+        $this->set('identitytypes', $this->Casemanagement->Identitytype->find('list', array('conditions' => array('active' => true))));
+        $this->set(compact("years", "referred_by_choices", "types"));
+
+    }
+
+    public function edit($id = null){
+        if (!$this->Casemanagement->exists($id)) {
+            throw new NotFoundException(__('Invalid'));
+        }
+        if ($this->request->is('post') || $this->request->is('put')) {
+            if($this->Casemanagement->save($this->request->data)){
+                $this->redirect(array("action"=>"view", $id));
+            }else{
+
+            }
+        }else{
+            $this->request->data = $this->Casemanagement->findById($id);
+        }
+        $years = $this->Casemanagement->Year->find('list', array(
+            "fields"=>array(
+                "id", "name"
+            )
+        ));
+        $referred_by_choices = $this->Casemanagement->referred_by_choices;
+        $types = $this->Casemanagement->types;
+        $this->set('identitytypes', $this->Casemanagement->Identitytype->find('list', array('conditions' => array('active' => true))));
+        $this->set(compact("years", "referred_by_choices", "types"));
+    }
+
+    public function addnonmember(){
+
+        if ($this->request->is('post') || $this->request->is('put')) {
+            $this->request->data['Casemanagement']['code'] = uniqid();
+            $this->Casemanagement->create();
+            if($this->Casemanagement->save($this->request->data)){
+                $code = "C". str_pad($this->Casemanagement->id, 8, 0, STR_PAD_LEFT);
+                if (!$this->Casemanagement->saveField('code', $code)) {
+                    $error = configure::read("error_prefix") . "00020";
+                }
+                $this->redirect(array("action"=>"view", $this->Casemanagement->id));
+            }
+        }
+
+        $years = $this->Casemanagement->Year->find('list', array(
+            "fields"=>array(
+                "id", "name"
+            )
+        ));
+
+        $referred_by_choices = $this->Casemanagement->referred_by_choices;
+        $types = $this->Casemanagement->types;
+        $this->set('identitytypes', $this->Casemanagement->Identitytype->find('list', array('conditions' => array('active' => true))));
+        $this->set(compact("years", "referred_by_choices", "types"));
+    }
+
+    public function delete($id = null) {
+        if (!$this->Casemanagement->exists($id)) {
+            throw new NotFoundException(__('Invalid'));
+        }
+        $this->Casemanagement->id = $id;
+
+        $this->request->allowMethod('post', 'delete');
+        if ($this->Casemanagement->delete()) {
+            $this->Session->setFlash(__('成功刪除'), 'default', array('class' => 'alert alert-success'));
+        } else {
+            $this->Session->setFlash(__('失敗，請再檢查後嘗試'), 'default', array('class' => 'alert alert-danger'));
+        }
+        return $this->redirect(array('action' => 'index'));
+    }
+
+    public function closecase($id = null){
+        if (!$this->Casemanagement->exists($id)) {
+            throw new NotFoundException(__('Invalid'));
+        }
+//        Configure::write('debug',2);
+
+        if ($this->request->is(array('post', 'put'))) {
+            if ($this->Casemanagement->save($this->request->data)) {
+                $this->Session->setFlash("成功完結", 'default', array('class'=>'alert alert-success'));
+                $this->redirect(array("action"=>'view', $id));
+            } else {
+                $this->Session->setFlash("失敗", 'default', array('class'=>'alert alert-danger'));
+            }
+        }else{
+            $this->set("case",$this->Casemanagement->findById($id));
+        }
+
+        $closereasons = $this->Casemanagement->Closereason->find("list", array("conditions"=>array($this->Casemanagement->Closereason->alias.".active"=>1)));
+        $this->set("closereasons", $closereasons);
+        $this->set("casemanagement_id", $id);
+    }
+
+    public function reactivecase($id = null){
+        if (!$this->Casemanagement->exists($id)) {
+            throw new NotFoundException(__('Invalid'));
+        }
+
+        $this->Casemanagement->id = $id;
+        if($this->Casemanagement->saveField("closed", 0)){
+            $this->Session->setFlash(__('計劃已重開'), 'default', array('class'=>'alert alert-success'));
+        }else{
+            $this->Session->setFlash(__('失敗，請再檢查後嘗試'), 'default', array('class'=>'alert alert-danger'));
+        }
+
+        $this->redirect(array("controller"=>"Casemanagements","action"=>'view', $id));
+    }
+}

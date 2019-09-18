@@ -1,0 +1,157 @@
+<?php
+App::uses('AppController', 'Controller');
+/**
+ * Groups Controller
+ *
+ * @property Group $Group
+ * @property PaginatorComponent $Paginator
+ */
+class DynamicmodelsController extends AppController {
+
+
+
+	public function test(){
+
+        configure::write('debug',2);
+
+        $object = $this->Dynamicmodel->get_struct(10);
+		debug($object);
+
+//		debug($this->Dynamicmodel->copy_model(1,4));
+
+        exit();
+
+	}
+
+	public function preview($id){
+
+		$object = $this->Dynamicmodel->get_struct($id);
+
+		$this->set('object',$object);
+		$this->set('model_id',$id);
+
+	}
+
+/**
+ * Components
+ *
+ * @var array
+ */
+	public $components = array('Paginator');
+
+/**
+ * index method
+ *
+ * @return void
+ */
+	public function index() {
+	    configure::write('debug',2);
+		$this->Dynamicmodel->recursive = 0;
+		$this->set('objects', $this->Paginator->paginate());
+	}
+
+/**
+ * add method
+ *
+ * @return void
+ */
+	public function add() {
+		if ($this->request->is('post')) {
+			$this->Dynamicmodel->create();
+			if ($this->Dynamicmodel->save($this->request->data)) {
+				$this->Session->setFlash(__('The Dynamicmodel has been saved.'));
+				return $this->redirect(array('action' => 'index'));
+			} else {
+				$this->Session->setFlash(__('The Dynamicmodel could not be saved. Please, try again.'));
+			}
+		}
+	}
+
+	/**
+	 * add method
+	 *
+	 * @return void
+	 */
+	public function copy($id) {
+		if ($this->request->is('post')) {
+
+//			configure::write('debug',2);
+//			debug($id);exit();
+			$this->Dynamicmodel->create();
+			if ($this->Dynamicmodel->save($this->request->data)) {
+
+				$model_id = $this->Dynamicmodel->getLastInsertID();
+				$rst = $this->Dynamicmodel->copy_model($id,$model_id);
+				if($rst){
+					$this->Session->setFlash(__('The Dynamicmodel has been saved.'));
+					return $this->redirect(array('action' => 'index'));
+				}else{
+					$this->Session->setFlash(__('The Dynamicmodel could not be saved. Please, try again.'));
+					return $this->redirect(array('action' => 'index'));
+				}
+
+			} else {
+				$this->Session->setFlash(__('The Dynamicmodel could not be saved. Please, try again.'));
+			}
+		}
+
+//		$this->set('model_id',$id);
+	}
+
+
+/**
+ * edit method
+ *
+ * @throws NotFoundException
+ * @param string $id
+ * @return void
+ */
+	public function edit($id = null) {
+		if (!$this->Dynamicmodel->exists($id)) {
+			throw new NotFoundException(__('Invalid group'));
+		}
+		if ($this->request->is(array('post', 'put'))) {
+//			configure::write('debug',2);
+			if ($this->Dynamicmodel->save($this->request->data)) {
+				$this->Session->setFlash(__('The Dynamicmodel has been saved.'));
+				return $this->redirect(array('action' => 'index'));
+			} else {
+				$this->Session->setFlash(__('The Dynamicmodel could not be saved. Please, try again.'));
+			}
+		} else {
+			$options = array('conditions' => array('Dynamicmodel.' . $this->Dynamicmodel->primaryKey => $id));
+			$this->request->data = $this->Dynamicmodel->find('first', $options);
+		}
+	}
+
+
+/**
+ * delete method
+ *
+ * @throws NotFoundException
+ * @param string $id
+ * @return void
+ */
+	public function delete($id = null) {
+		$this->Dynamicmodel->id = $id;
+		if (!$this->Dynamicmodel->exists()) {
+			throw new NotFoundException(__('Invalid group'));
+		}
+		$this->request->allowMethod('post', 'delete');
+		if ($this->Dynamicmodel->delete()) {
+
+			$this->Dynamicmodel->Dynamicmodelstruct->deleteAll(
+                array('model_id'=>$id)
+			);
+			$this->Session->setFlash(__('The Dynamicmodel has been deleted.'));
+		} else {
+			$this->Session->setFlash(__('The Dynamicmodel could not be deleted. Please, try again.'));
+		}
+		return $this->redirect(array('action' => 'index'));
+	}
+
+	public function beforeFilter(){
+
+		parent::beforeFilter();
+	}
+}

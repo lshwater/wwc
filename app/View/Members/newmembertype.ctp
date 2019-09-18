@@ -1,0 +1,107 @@
+<?//
+//Configure::write('debug', 2);
+//?>
+<?php $this->Html->script("barcode/jquery.scannerdetection.compatibility", array("inline"=>false)); ?>
+<?php $this->Html->script('barcode/jquery.scannerdetection', array("inline"=>false)); ?>
+
+<?php $this->Html->script('membercard', array("inline"=>false)); ?>
+
+<div class="page-header">
+    <div class="row">
+        <!-- Page header, center on small screens -->
+        <h1 class="col-xs-12 col-sm-4 text-left-sm flashMessage">
+            <i class="fa fa-address-card page-header-icon"></i>&nbsp;&nbsp;<?=__("新增會藉")?>
+        </h1>
+
+        <div class="col-xs-12 col-sm-8">
+            <div class="row">
+                <hr class="visible-xs no-grid-gutter-h">
+                <!-- "Create project" button, width=auto on desktops -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row" id="buttongroup">
+    <h2 class="text-center"><? echo __('選擇會藉類別');?></h2>
+
+    <?php
+        foreach($membertypes as $key=>$type){?>
+            <div class="col-md-12 m-t-1">
+                <button onclick="selectmember(<?=$key?>)" class="btn btn-info btn-lg btn-block"><?=h($type)?></button>
+            </div>
+    <?  }
+    ?>
+
+</div>
+
+<div class="row" id="popupmodal" style="display: none">
+
+    <ul class="breadcrumb">
+        <li>
+            <?=$this->Html->link("返回", array("action"=>"newmembertype"))?>
+        </li>
+        <li class="active">選擇</li>
+    </ul>
+
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-body">
+
+                <p class="font-size-15">選擇現有服務對象</p>
+
+                <?=$this->Html->link('<i class="fa fa-search"></i> 選擇現有服務對象', array('action' => 'popupsearch', 'ajax' => true), array('class' => 'btn btn-info btn-lg btn-block', 'escape' => false, 'data-toggle' => "modal", 'data-target' => '#modal'));?>
+                <?=$this->Html->link("<i class='fa fa-plus'></i> 以新會員身份登記", "javascript:void(0)", array("class"=>"btn btn-success btn-lg btn-block", "id"=>"addasnew", 'escape'=>false))?>
+
+
+        </div>
+    </div>
+</div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal">
+        <div class="modal-dialog  modal-lg">
+            <div class="modal-content">
+
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+
+
+<script>
+    var selectedtype_id;
+    var table;
+    function selectmember(type_id){
+        selectedtype_id = type_id;
+        $("#buttongroup").hide();
+        $("#popupmodal").show();
+
+
+    }
+
+    $(document).ready(function() {
+
+
+        $("#addasnew").click(function(){
+            window.location.href = "<?=$this->Html->url(array("action"=>"add"))?>/"+selectedtype_id;
+        });
+
+        $("#modal").on("click", ".selectmember", function(){
+            window.location.href = "<?=$this->Html->url(array("action"=>"add"))?>/"+selectedtype_id+"/"+$(this).data("mid");
+        });
+
+        $('#modal').on('hidden.bs.modal', function () {
+            $('#modal').removeData('bs.modal')
+        });
+
+        $('#modal').on('loaded.bs.modal', function () {
+            $('.modalonly').show();
+            $('.modaloff').hide();
+        });
+
+
+    });
+</script>

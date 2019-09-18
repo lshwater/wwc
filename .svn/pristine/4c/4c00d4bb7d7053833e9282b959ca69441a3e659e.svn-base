@@ -1,0 +1,309 @@
+<?php
+App::uses('AppModel', 'Model');
+/**
+ * Agency Model
+ *
+ * @property Unit $Unit
+ */
+class Customfield extends AppModel {
+
+    public $recursive = -1;
+//    public $useDbConfig = 'mysql';
+
+    public $type_db = array(
+        'int'=>'Custominputnumber',
+        'float'=>'Custominputnumber',
+        'select'=>'Custominputnumber',
+        'bool'=>'Custominputnumber',
+        'text'=>'Custominputtext',
+        'textarea'=>'Custominputlongtext',
+        'date'=>'Custominputdatetime',
+        'time'=>'Custominputdatetime',
+        'datetime'=>'Custominputdatetime',
+        'daterange'=>'Custominputdaterange',
+    );
+
+    public $type = array(
+        'int'=>'int',
+        'float'=>'float',
+        'select'=>'select',
+        'bool'=>'bool',
+        'text'=>'text',
+        'textarea'=>'textarea',
+        'date'=>'date',
+        'time'=>'time',
+        'datetime'=>'datetime',
+        'daterange'=>'daterange',
+    );
+
+    public $belongsTo = array(
+//        'Customtype' => array(
+//            'className' => 'Customtype',
+//            'foreignKey' => 'type_id',
+//            'conditions' => '',
+//            'fields' => '',
+//            'order' => ''
+//        ),
+        'Dbmodel' => array(
+            'className' => 'Dbmodel',
+            'foreignKey' => 'model_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+    );
+
+    public $hasMany = array(
+        'Customtypedropdown' => array(
+            'className' => 'Customtypedropdown',
+            'foreignKey' => 'customfield_id',
+            'dependent' => false,
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        )
+    );
+
+//
+//    public $type_int = 'int';
+//    public $type_float = 'float';
+//    public $type_string = 'string';
+//    public $type_longtext = 'longtext';
+//    public $type_bool = 'bool';
+//    public $type_date = 'date';
+//    public $type_datetime = 'datetime';
+//    public $type_array = 'array';
+//    public $type_select = 'select';
+//    public $type_select_item = 'select_item';
+//    public $type_image = 'image';
+
+
+//    private $parent_array = 'self';
+//
+//    public $type = array(
+//		'int',
+//		'float',
+//        'string',
+//        'longtext',
+//        'bool',
+//        'date',
+//        'datetime',
+//        'array',
+//        'select',
+//        'select_item',
+//        'image'
+//	);
+/**
+ * Validation rules
+ *
+ * @var array
+ */
+	public $validate = array(
+		'name' => array(
+			'notEmpty' => array(
+				'rule' => array('notEmpty'),
+				'message' => 'This field cannot be empty',
+				//'allowEmpty' => false,
+				//'required' => false,
+				//'last' => false, // Stop validation after this rule
+				//'on' => 'create', // Limit validation to 'create' or 'update' operations
+			),
+		),
+		'required' => array(
+			'notEmpty' => array(
+				'rule' => array('notEmpty'),
+				'message' => 'This field cannot be empty',
+				//'allowEmpty' => false,
+				//'required' => false,
+				//'last' => false, // Stop validation after this rule
+				//'on' => 'create', // Limit validation to 'create' or 'update' operations
+			),
+		),
+		'type' => array(
+			'notEmpty' => array(
+				'rule' => array('notEmpty'),
+				'message' => 'This field cannot be empty',
+				//'allowEmpty' => false,
+				//'required' => false,
+				//'last' => false, // Stop validation after this rule
+				//'on' => 'create', // Limit validation to 'create' or 'update' operations
+			),
+		)
+    );
+
+//    public $hasMany = array(
+//        'Dynamicstructattribute' => array(
+//            'className' => 'Dynamicstructattribute',
+//            'dependent' => false
+//        )
+//    );
+
+	//The Associations below have been created with all possible keys, those that are not needed can be removed
+
+    public function retrieve_from_model($model_id, $item_id){
+//        configure::write('debug',2);
+        $fields = $this->Dbmodel->get_struct($model_id);
+
+        foreach($fields as $k=>$field){
+
+            $dbtable = $this->type_db[$field['type']];
+
+            if(empty($dbtable)){
+                $rst['errormsg'] = "Undefined data type";
+                return $rst;
+            }
+            App::import('Model', $dbtable);
+            $table = new $dbtable();
+
+            $rst = $table->find('first',array(
+                'conditions'=>array(
+                    $dbtable.".model_id"=>$model_id,
+                    $dbtable.".item_id"=>$item_id,
+                    $dbtable.".field_id"=>$field['field_id'],
+
+                )
+            ));
+
+            unset($rst[$dbtable]['model_id']);
+            unset($rst[$dbtable]['field_id']);
+            unset($rst[$dbtable]['item_id']);
+
+            $fields[$k] = array_merge($fields[$k], $rst[$dbtable]);
+
+        }
+        return $fields;
+
+    }
+
+    public function savecusfield($field_id, $item_id, $value){
+
+        $rst['errormsg'] = "";
+        $rst['success'] = false;
+
+        if(!isset($field_id)|| !isset($value)|| !isset($item_id)){
+
+            $rst['errormsg'] = "Invalid input";
+            return $rst;
+        }
+
+//        configure::write('debug',2);
+
+        $this->Behaviors->load('Containable');
+        $struct = $this->find('first',array(
+            'conditions'=>array(
+                'Customfield.id'=>$field_id
+            ),
+            'contain'=>array(
+                'Customtypedropdown'
+            )
+        ));
+
+
+        if($struct['Customfield']['required'] && empty($value)){
+            $rst['errormsg'] = $struct['Customfield']['label']." cannot be empty.";
+            return $rst;
+        }
+
+        $dbtable = $this->type_db[$struct['Customfield']['type']];
+
+        if(empty($dbtable)){
+            $rst['errormsg'] = "Undefined data type";
+            return $rst;
+        }
+        App::import('Model', $dbtable);
+        $table = new $dbtable();
+
+        $data = array(
+            'model_id' =>$struct['Customfield']['model_id'],
+            'field_id' =>$struct['Customfield']['id'],
+            'item_id' =>$item_id,
+            'value'=>$value
+        );
+
+
+        $table->create();
+        if(!$table->save($data)){
+            $rst['errormsg'] = "Fail to save record";
+        }else{
+            $rst['success'] = true;
+        }
+
+        return $rst;
+
+    }
+
+//    public function create_struct($model_id, $type_id, $name, $type, $required=0, $label=null, $default=null, $attribute=null, $placeholder=null){
+//
+//        if(empty($model_id)|| empty($type_id)|| empty($name) || empty($type)){
+//            debug(1);
+//
+//            return false;
+//        }
+//
+//        if(!$required){
+//            $required = 0;
+//        }
+//
+//        if(!in_array($type, $this->type)){
+//            debug(2);
+//            return false;
+//        }
+//
+//        $order = $this->find('count',array(
+//            'conditions'=>array(
+//                'type_id'=>$type_id,
+//            )
+//        ));
+//
+//        if(!empty($attribute)){
+//            if(!is_array($attribute)){
+//                debug(9);
+//                return false;
+//            }else{
+////                $list =$this->Dynamicstructattribute->find('list',array('conditions'=>array('type'=>$type),'fields'=>array('attribute')));
+////                foreach($attribute as $k=>$item){
+////                    if(!in_array($k, $list)){
+////                        debug(10);
+////                        return false;
+////                    }
+////                }
+//                $attribute = json_encode($attribute);
+//            }
+//        }
+//
+//
+//        $this->begin();
+//
+//        $new_struct = array(
+//            'alias'=>$name,
+//            'model_id'=>$model_id,
+//            'required'=>$required,
+//            'type'=>$type,
+//            'label'=>$label,
+//            'order'=>$order + 1,
+//            'attribute'=>$attribute,
+//            'default'=>$default,
+//            'placeholder'=>$placeholder,
+//        );
+//
+//        $this->create();
+//        if($this->save($new_struct)){
+//
+//
+//                $this->commit();
+//                return true;
+//        }else{
+//            debug(15);
+//            return false;
+//        }
+//
+//    }
+
+
+
+}

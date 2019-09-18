@@ -1,0 +1,42 @@
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="panel">
+            <div class="panel-heading">
+                <span class="panel-title">  <?=__("新增").h($model_name)?></span>
+                <div class="panel-heading-controls">
+                    <button type="button" class="close modalonly" data-dismiss="modal" style="display:none"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+
+                </div>
+            </div>
+            <div class="panel-body">
+
+                <?php echo $this->Form->create($model, array('class'=>'form-horizontal validate_form preventDoubleSubmission')); ?>
+                <?foreach($key_list as $key){?>
+                    <div class="form-group">
+                        <?php echo $this->Form->label($key, h($model_name).__($key), 'col-sm-4 control-label'); ?>
+                        <div class="col-sm-8">
+                            <?php echo $this->Form->input($key, array('div'=>false, 'label'=>false,'class'=>'form-control', 'required'=>'required')); ?>
+                        </div>
+                    </div> <!-- / .form-group -->
+                <?}?>
+
+                <?php echo $this->Form->hidden('active', array('value'=>0));?>
+                <?php echo $this->Form->hidden('editable', array('value'=>1));?>
+
+                <button type="submit" class="btn btn-primary" ><i class="fa fa-check"></i><? echo ' '.__('Submit');?></button>
+                <?php echo $this->Html->link('<span class="btn-primary"></span>'.__('Cancel'), array('action' => 'index'), array('escape'=>false, 'class'=>'btn btn-danger btn-labeled')); ?>
+                <?php echo $this->Form->end(); ?>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function() {
+        validate_form();
+
+    });
+</script>

@@ -1,0 +1,105 @@
+<?php
+App::uses('AppController', 'Controller');
+
+
+class CaseassessmentsController extends AppController
+{
+    public $components = array('Paginator', 'Search.Prg');
+
+    public function view($id){
+        if (!$this->Caseassessment->exists($id)) {
+            throw new NotFoundException(__('Invalid'));
+        }
+
+        $form = $this->Caseassessment->find("first", array(
+                "conditions"=>array(
+                    $this->Caseassessment->alias.".id"=>$id
+                )
+        ));
+        $this->set("form", $form);
+    }
+
+    public function delete($id = null) {
+//        Configure::write('debug',2);
+        $this->Caseassessment->id = $id;
+
+        $form = $this->Caseassessment->findById($id);
+
+        if (!$this->Caseassessment->exists()) {
+            throw new NotFoundException(__('Invalid Caseassessment'));
+        }
+        $this->Caseassessment->begin();
+//        $this->request->allowMethod('post', 'delete');
+        if ($this->Caseassessment->delete()) {
+
+            $this->Caseassessment->Casemanagementform->id = $form['Casemanagementform']['id'];
+            if($this->Caseassessment->Casemanagementform->exists()){
+                if($this->Caseassessment->Casemanagementform->delete()){
+                    $this->Caseassessment->commit();
+                    $this->Session->setFlash(__('成功刪除會面記錄'), 'default', array('class'=>'alert alert-success'));
+                }
+            }
+
+
+        } else {
+            $this->Session->setFlash(__('刪除會面記錄不成功'), 'default', array('class'=>'alert alert-danger'));
+        }
+        return $this->redirect(array("controller" => "Casemanagements", "action" => "view", $form['Casemanagementform']['casemanagement_id']));
+    }
+
+    public function addtype(){
+
+    }
+
+    public function add($case_id=null){
+
+
+
+        if (!$this->Casemanagement->exists($case_id)) {
+            throw new NotFoundException(__('Invalid'));
+        }
+
+        $this->Casemanagement->id = $case_id;
+        $case = $this->Casemanagement->read();
+
+        if ($this->request->is(array('post', 'put'))) {
+
+            $this->Caseassessment->create();
+
+            $this->request->data['Caseassessment']['Casemanagementform'] = '';
+            $this->request->data['Casemanagementform']['casemanagement_id'] = $case_id;
+            $this->request->data['Casemanagementform']['form_type'] = $this->Caseassessment->alias;
+            $this->request->data['Casemanagementform']['form_controller'] = $this->name;
+            $this->request->data['Casemanagementform']['form_date'] = $this->request->data['Caseassessment']['date'];
+            $this->request->data['Casemanagementform']['form_name'] = $this->Caseassessment->form_name;
+
+            $this->Caseassessment->saveAll($this->request->data, array("deep" => true));
+            $this->Caseassessment->Casemanagementform->saveField('form_id', $this->Caseassessment->id);
+
+            $this->Session->setFlash(__('新增會面記錄成功'), 'default', array('class' => 'alert alert-success'));
+            $this->redirect(array("controller" => "Casemanagements", "action" => "view", $case_id));
+        }
+
+        $this->set('casenatures', $this->Casemanagement->Casenature->find('list', array('conditions' => array('active' => 1))));
+        $casenature_list = $this->Casemanagement->Casenature->find('all', array('conditions' => array('active' => 1)));
+        $casenature_list = Set::combine($casenature_list, "{n}.Casenature.id","{n}.Casenature");
+        foreach($casenature_list as $k=>$list){
+            if($list['nextreview']){
+                $casenature_list[$k]['nextreview'] = date('Y-m-d',strtotime('now + '.$list['nextreview']));
+            }
+        }
+
+        $this->set('casenatures_list', $casenature_list);
+        $this->set('casetypes', $this->Casemanagement->Casetype->find('list', array('conditions' => array('active' => 1))));
+        $this->set('case_id', $case_id);
+        $this->set('case', $case);
+        $this->set(compact("types"));
+    }
+
+    public function beforeFilter(){
+        parent::beforeFilter();
+        $this->loadModel('Casemanagement');
+
+    }
+
+}

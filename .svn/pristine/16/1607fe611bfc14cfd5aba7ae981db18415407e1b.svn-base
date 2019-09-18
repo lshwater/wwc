@@ -1,0 +1,248 @@
+<div class="page-header">
+    <h1 class="doc-header"><?php echo __('收款'); ?></h1>
+</div>
+
+<div class="row  m-a-0">
+<div class="col-md-5 col-xl-4 m-a-0">
+    <div class="panel bg-transparent">
+        <div class="panel-heading p-x-1 bg-transparent">
+            <span class="panel-title">付款項目</span>
+        </div>
+        <div class="panel-body p-a-1">
+            <table class="table table-striped table-bordered table-condensed table-hover" id="boughtitemstable">
+                <thead>
+                    <tr>
+                        <th>項目</th>
+                        <th width="60px">數量</th>
+                        <th width="100px">費用</th>
+                        <th></th>
+                    </tr>
+                </thead>
+            </table>
+            <a href="<?=$this->Html->url(array('action'=>'checkout'))?>" class="btn btn-success btn-lg btn-block modalbtn" data-toggle="modal" data-target="#modal">付款</a>
+        </div>
+    </div>
+</div>
+<hr class="page-wide-block visible-xs visible-sm">
+<div class="col-md-7 col-xl-8  m-a-0">
+
+    <ul class="nav nav-lg nav-tabs nav-tabs-simple" id="profile-tabs">
+        <?
+           for($i = 0; $i < sizeof($paymentitemcategories); $i++){
+               $active_tab = "";
+                if($i == 0){
+                    $active_tab = "active";
+                }
+        ?>
+                <li class="<?=$active_tab?>">
+                    <a href="#paymentitemcategory_tab<?=$i?>" data-toggle="tab">
+                        <?=h($paymentitemcategories[$i]['Paymentitemcategory']['name'])?>
+                    </a>
+                </li>
+        <?  }
+        ?>
+
+        <li>
+            <a href="#paymentitemcategory_tab99" data-toggle="tab">
+                提款
+            </a>
+        </li>
+
+    </ul>
+
+    <div class="tab-content p-y-0">
+        <div class="tab-pane fade " id="paymentitemcategory_tab99">
+            <div class="table-default">
+                <table cellspacing="0" class="table table-striped" id="resulttable" width="100%">
+                    <thead>
+                    <tr>
+                        <th style="width:25%">項目</th>
+                        <th style="width:15%">負責職員</th>
+<!--                        <th style="width:20%">提交時間</th>-->
+                        <th style="width:10%">狀態</th>
+                        <th style="width:10%">金額</th>
+                        <th style="width:20%">行動</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>會費退款 - 會員編號 (#192371)</td>
+                        <td>黎瑞芳</td>
+<!--                        <td>2019-08-20 14:20:53</td>-->
+                        <td><span class="label label-success">可退款</span></td>
+                        <td>$140</td>
+                        <td><span class="btn btn-sm btn-info">查看</span> <span class="btn btn-sm btn-success"><i class="fa fa-plus addtocart" data-price="140" data-name="會費退款 - 會員編號 (#192371)"></i></span></td>
+                    </tr>
+                    <tr>
+                        <td>班組退款 - 中國水墨畫 初班 (08/10/2019)</td>
+                        <td>胡偉國</td>
+<!--                        <td>2019-08-15 11:05:13</td>-->
+                        <td><span class="label label-success">可退款</span></td>
+                        <td>$50</td>
+                        <td><span class="btn btn-sm btn-info">查看</span> <span class="btn btn-sm btn-success"><i class="fa fa-plus addtocart" data-price="50" data-name="班組退款 - 中國水墨畫 初班 (08/10/2019)"></i></span></td>
+                    </tr>
+                    </tbody>
+                </table>
+<!--                <div class="bottom"><div class="dataTables_length" id="jq-datatables_length"><label>每頁顯示數目 <select name="jq-datatables_length" aria-controls="jq-datatables" class="form-control input-sm"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select> </label></div><div class="dataTables_info" id="jq-datatables_info" role="status" aria-live="polite">顯示第 76 至 83 項結果，共 83 項 (從 94 項結果過濾)</div><div class="dataTables_paginate paging_simple_numbers" id="jq-datatables_paginate"><ul class="pagination"><li class="paginate_button previous" id="jq-datatables_previous"><a href="#" aria-controls="jq-datatables" data-dt-idx="0" tabindex="0">上頁</a></li><li class="paginate_button "><a href="#" aria-controls="jq-datatables" data-dt-idx="1" tabindex="0">1</a></li><li class="paginate_button "><a href="#" aria-controls="jq-datatables" data-dt-idx="2" tabindex="0">2</a></li><li class="paginate_button "><a href="#" aria-controls="jq-datatables" data-dt-idx="3" tabindex="0">3</a></li><li class="paginate_button active"><a href="#" aria-controls="jq-datatables" data-dt-idx="4" tabindex="0">4</a></li><li class="paginate_button next disabled" id="jq-datatables_next"><a href="#" aria-controls="jq-datatables" data-dt-idx="5" tabindex="0">下頁</a></li></ul></div><div class="clear"></div></div>-->
+            </div>
+        </div>
+        <?
+        for($i = 0; $i < sizeof($paymentitemcategories); $i++){
+            $active_tab = "";
+            if($i == 0){
+                $active_tab = "in active";
+            }
+            ?>
+            <div class="tab-pane fade <?=$active_tab?>" id="paymentitemcategory_tab<?=$i?>">
+                <div class="row p-t-4">
+                    <div class="clearfix">
+                        <?php
+                            for($k = 0; $k < sizeof($paymentitemcategories[$i]['Paymentitem']); $k++){?>
+                                <div class="col-md-4 col-xs-6">
+                                    <div class="widget-pricing-item">
+                                        <h2 class="widget-pricing-plan"><?=$paymentitemcategories[$i]['Paymentitem'][$k]['name']?>
+                                        <?if($paymentitemcategories[$i]['Paymentitem'][$k]['paymentitemcategory_id'] == 3){?>
+                                            <a href="#" class="fa fa-exclamation-circle"></a>
+                                        <?}?>
+                                        </h2>
+                                        <div class="widget-pricing-section p-y-2 bg-white darker">
+                                            <div class="font-size-24"><small>$</small><?=money_format("%i", $paymentitemcategories[$i]['Paymentitem'][$k]['unitprice'])?></div>
+                                        </div>
+                                        <div class="widget-pricing-section">
+                                            <div class="row">
+                                                <?if($paymentitemcategories[$i]['Paymentitem'][$k]['multiple']){?>
+                                                <div class="col-md-6 m-t-1">
+                                                    <button type="button" class="btn btn-lg btn-success addtocart btn-block " data-name="<?=$paymentitemcategories[$i]['Paymentitem'][$k]['name']?>" data-price="<?=h($paymentitemcategories[$i]['Paymentitem'][$k]['unitprice'])?>"><i class="fa fa-plus"></i> 1件</button>
+                                                </div>
+                                                <div class="col-md-6 m-t-1">
+                                                    <button type="button" class="btn btn-lg btn-warning popupcart btn-block col-md-6" data-name="<?=$paymentitemcategories[$i]['Paymentitem'][$k]['name']?>" data-price="<?=h($paymentitemcategories[$i]['Paymentitem'][$k]['unitprice'])?>"><i class="fa fa-plus"></i> 多件</button>
+                                                </div>
+                                                <?}else{?>
+                                                    <div class="col-sm-offset-3 col-md-6 m-t-1">
+                                                        <button type="button" class="btn btn-lg btn-success addtocart btn-block " data-name="<?=$paymentitemcategories[$i]['Paymentitem'][$k]['name']?>" data-price="<?=h($paymentitemcategories[$i]['Paymentitem'][$k]['unitprice'])?>"><i class="fa fa-plus"></i> 1件</button>
+                                                    </div>
+                                                <?}?>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                        <?  }
+                        ?>
+                    </div>
+                </div>
+            </div>
+        <?  }
+        ?>
+    </div>
+
+</div>
+</div>
+
+<table id="itemclone" style="display:none">
+
+    <tr class="itemdiv">
+        <td>
+            <?php echo $this->Form->input("Paymentrecord.__TMP__.name", array('label'=>false ,'div'=>false, 'class'=>'form-control', 'id'=>'item_name__TMP__','required'=>'required','type'=>'text', 'readonly'=>'readonly')); ?>
+        </td>
+        <td width="60px">
+            <?php echo $this->Form->input("Paymentrecord.__TMP__.quantity", array('label'=>false ,'div'=>false, 'class'=>'form-control quantity', 'id'=>'item_quantity__TMP__', 'value'=>1, "type"=>"number", 'required'=>'required', 'min'=>1, 'readonly'=>'readonly')); ?>
+        </td>
+        <td>
+            <?php echo $this->Form->input("Paymentrecord.__TMP__.price", array('label'=>false ,'div'=>false, 'class'=>'form-control', 'id'=>'item_price__TMP__','required'=>'required','type'=>'number', 'readonly'=>'readonly')); ?>
+        </td>
+        <td> <a href="javascript:void(0)" class="btn btn-danger btn-xs fbdeletebtn"><i class="fa fa-close"></i></a></td>
+    </tr>
+
+</table>
+
+<div class="modal fade" id="modal_popupcart" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4 class="modal-title" id="myModalLabel">選擇數量</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                <?php
+                    for($i=1;$i<=10;$i++){?>
+                        <div class="col-md-3 col-xs-6 m-t-1">
+                            <button class="btn btn-success btn-lg btn-block" onclick="additem(<?=$i?>);  $('#modal_popupcart').modal('hide');"><?=$i?></button>
+                        </div>
+                <?  }
+                ?>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<script>
+    var currentitemadded = 0;
+    var itemcount = 0;
+    var itemclone = $("#itemclone").html();
+
+    var clicked_name;
+    var clicked_price;
+
+    function additem(quantity){
+
+
+        var thishtmclone = itemclone.replace(/__TMP__/g, itemcount);
+        $("#boughtitemstable").append(thishtmclone);
+
+        var total_price = parseFloat(clicked_price)*quantity;
+
+        $('#item_name'+itemcount).val(clicked_name);
+        $('#item_price'+itemcount).val(total_price.toFixed(1));
+        $('#item_quantity'+itemcount).val(quantity);
+
+        itemcount++;
+        currentitemadded++;
+
+    }
+
+    $(document).ready(function () {
+        $(".addtocart").click(function(){
+            clicked_price = $(this).data('price');
+            clicked_name = $(this).data('name');
+
+            additem(1);
+        });
+
+        $('.popupcart').on('click', function() {
+            clicked_price = $(this).data('price');
+            clicked_name = $(this).data('name');
+
+            $("#modal_popupcart").modal("show");
+        });
+
+        $("#boughtitemstable").on( "click", ".fbdeletebtn", function(){
+            $(this).closest('.itemdiv').remove();
+            currentitemadded--;
+        });
+    });
+</script>
+
+<style>
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+</style>

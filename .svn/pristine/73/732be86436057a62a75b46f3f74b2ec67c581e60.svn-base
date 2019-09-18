@@ -1,0 +1,542 @@
+<?php
+App::uses('AppModel', 'Model');
+App::uses('AuthComponent', 'Controller/Component');
+App::uses('SimplePasswordHasher', 'Controller/Component/Auth');
+/**
+ * User Model
+ *
+ * @property Userloginlog $Userloginlog
+ * @property Group $Group
+ * @property Unit $Unit
+ * @property Userinputfield $Userinputfield
+ */
+class User extends AppModel {
+
+/**
+ * Validation rules
+ *
+ * @var array
+ */
+	public $validate = array(
+        'code' => array(
+            'notEmpty' => array(
+                'rule' => array('notEmpty'),
+                'message' => 'This field cannot be empty',
+                //'allowEmpty' => false,
+                //'required' => false,
+                //'last' => false, // Stop validation after this rule
+                //'on' => 'create', // Limit validation to 'create' or 'update' operations
+            ),
+            'unique' => array(
+                'rule' => 'isUnique',
+                'required' => 'create',
+                'message' => 'Value already exist',
+            ),
+            'pattern'=>array(
+                'rule'      => '/^[a-zA-Z0-9\w?!\.;:,@#$%^&*\/\[\]\(\)=\+-]*$/',
+                'message'   => 'Only alphenumeric allowed',
+            ),
+        ),
+        'username' => array(
+            'alphaNumeric' => array(
+                'rule' => array('alphaNumeric'),
+                'message' => 'Input value is not accepted',
+                //'allowEmpty' => false,
+                //'required' => false,
+                //'last' => false, // Stop validation after this rule
+                //'on' => 'create', // Limit validation to 'create' or 'update' operations
+            ),
+            'notEmpty' => array(
+                'rule' => array('notEmpty'),
+                'message' => 'This field cannot be empty',
+                //'allowEmpty' => false,
+                //'required' => false,
+                //'last' => false, // Stop validation after this rule
+                //'on' => 'create', // Limit validation to 'create' or 'update' operations
+            ),
+            'unique' => array(
+                'rule' => 'isUnique',
+                'required' => 'create',
+                'message' => 'Value already exist',
+            ),
+            'length'=>array(
+                'rule' => array('between', 4, 30),
+                'message' => 'Username should be between 6 chars and 30 chars long',
+            ),
+        ),
+        'password' => array(
+            'length'=>array(
+                'rule' => array('between', 6, 20),
+                'message' => 'Password should be at least 6 chars long',
+            ),
+            'alphaNumeric' => array(
+                'rule' => array('alphaNumeric'),
+                'message' => 'alphaNumeric Only',
+            ),
+            'limitDuplicatespassword'=>array(
+                'rule'=>array('limitDuplicatespassword'),
+                'message'=>'No repeating use of the two previously used passwords'
+            )
+        ),
+        'current_password' => array(
+            'rule' => 'checkCurrentPassword',
+            'message' => 'Current Password is not correct'
+        ),
+        'password2' => array(
+            'rule' => array('identicalFieldValues', 'password'),
+            'message' => 'Password does not match',
+        ),
+		'active' => array(
+            'myCheckbox' => array(
+                'rule'    => array('boolean'),
+                'message' => 'Incorrect value'
+            )
+		),
+        "name"=>array(
+            'notEmpty' => array(
+                'rule' => array('notEmpty'),
+                'message' => 'This field cannot be empty',
+                //'allowEmpty' => false,
+                //'required' => false,
+                //'last' => false, // Stop validation after this rule
+                //'on' => 'create', // Limit validation to 'create' or 'update' operations
+            ),
+        )
+	);
+
+    public function limitDuplicatespassword($check) {
+        // $check will have value: array('promotion_code' => 'some-value')
+        // $limit will have value: 25
+        $passwordHasher = new SimplePasswordHasher(array('hashType'=>'sha256'));
+        $check['password'] = $passwordHasher->hash($check['password']);
+
+        $existing = $this->UsersPassword->find('all', array(
+            'conditions' => array('user_id'=>$this->id),
+            'recursive' => -1,
+            'limit'=>2,
+            'order'=>array('created DESC')
+        ));
+
+        if(!empty($existing)){
+            foreach($existing as $val){
+                if($val['UsersPassword']['password'] == $check['password']){
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public function checkCurrentPassword($data) {
+        $this->id = AuthComponent::user('id');
+        $password = $this->field('password');
+        $passwordHasher = new SimplePasswordHasher(array('hashType'=>'sha256'));
+
+        return($passwordHasher->hash($data['current_password']) == $password);
+    }
+
+	//The Associations below have been created with all possible keys, those that are not needed can be removed
+
+/**
+ * hasMany associations
+ *
+ * @var array
+ */
+	public $hasMany = array(
+		'Userloginlog' => array(
+			'className' => 'Userloginlog',
+			'foreignKey' => 'user_id',
+			'dependent' => true,
+			'conditions' => '',
+			'fields' => '',
+			'order' => '',
+			'limit' => '',
+			'offset' => '',
+			'exclusive' => '',
+			'finderQuery' => '',
+			'counterQuery' => ''
+		),
+        'UsersPassword' => array(
+            'className' => 'UsersPassword',
+            'foreignKey' => 'user_id',
+            'dependent' => true,
+            'conditions' => '',
+            'fields' => '',
+            'order' => 'UsersPassword.created DESC',
+            'limit' => 1,
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        ),
+		'CustomField' => array(
+			'className' => 'UsersUserinputfield',
+            'dependent' => true
+
+		),
+        "Eventproposal"=> array(
+            'className' => 'Eventproposal',
+            'foreignKey' => 'user_id',
+            'dependent' => true,
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        ),
+        "NotificationUser"=>array(
+            'className' => 'NotificationUser',
+            'foreignKey' => 'user_id',
+            'dependent' => true,
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        ),
+        "MessagesUser"=>array(
+            'className' => 'MessagesUser',
+            'foreignKey' => 'user_id',
+            'dependent' => true,
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        ),
+        "AnnouncementUser"=>array(
+            'className' => 'AnnouncementUser',
+            'foreignKey' => 'user_id',
+            'dependent' => true,
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        ),
+        'ApprovalrecordReviewer' => array(
+            'className' => 'ApprovalrecordReviewer',
+            'foreignKey' => 'user_id',
+            'dependent' => true,
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+        ),
+	);
+
+
+/**
+ * hasAndBelongsToMany associations
+ *
+ * @var array
+ */
+	public $hasAndBelongsToMany = array(
+		'Group' => array(
+			'className' => 'Group',
+			'joinTable' => 'groups_users',
+			'foreignKey' => 'user_id',
+			'associationForeignKey' => 'group_id',
+			'unique' => 'keepExisting',
+			'conditions' => '',
+			'fields' => '',
+			'order' => '',
+			'limit' => '',
+			'offset' => '',
+			'finderQuery' => '',
+		),
+        "Viewunit" => array(
+            'className' => 'Unit',
+            'joinTable' => 'users_units',
+            'foreignKey' => 'user_id',
+            'associationForeignKey' => 'unit_id',
+            'unique' => 'keepExisting',
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'finderQuery' => '',
+            'deleteQuery' => '',
+            'insertQuery' => ''
+        ),
+        'EventproposalSupervisors' => array(
+            'className' => 'Eventproposal',
+            'joinTable' => 'eventproposalsupervisors',
+            'foreignKey' => 'user_id',
+            'associationForeignKey' => 'eventproposal_id',
+            'unique' => 'keepExisting',
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'finderQuery' => '',
+        ),
+        'EventproposalIncharge' => array(
+            'className' => 'Eventproposal',
+            'joinTable' => 'eventproposal_users',
+            'foreignKey' => 'user_id',
+            'associationForeignKey' => 'eventproposal_id',
+            'unique' => 'keepExisting',
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'finderQuery' => '',
+        ),
+        'Approvalrecord' => array(
+            'className' => 'Approvalrecord',
+            'joinTable' => 'approvalrecords_reviewers',
+            'foreignKey' => 'user_id',
+            'associationForeignKey' => 'approvalrecord_id',
+            'unique' => 'keepExisting',
+            'conditions' => '',
+            'fields' => '',
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'finderQuery' => '',
+        )
+	);
+
+    public $belongsTo = array(
+        'Unit' => array(
+            'className' => 'Unit',
+            'foreignKey' => 'unit_id',
+            'conditions' => '',
+            'fields' => '',
+            'order' => ''
+        ),
+    );
+	
+    public function beforeSave($options = array()) {
+        if (isset($this->data[$this->alias]['password'])) {
+            $passwordHasher = new SimplePasswordHasher(array('hashType'=>'sha256'));
+            $this->data[$this->alias]['password'] = $passwordHasher->hash(
+                $this->data[$this->alias]['password']
+            );
+        }
+        return true;
+    }
+
+    public function bindNode($user) {
+        $auth = CakeSession::read('Auth');
+        return array('model' => 'Group', 'foreign_key' => $auth['groupsinuse']);
+    }
+
+    /*
+        * Search Handler
+     */
+
+    public $actsAs = array(
+        'Search.Searchable'
+    );
+
+    public $filterArgs = array(
+        'filter' => array('type' => 'query', 'method' => 'orConditions'),
+    );
+
+    public function orConditions($data = array()) {
+        $filter = trim($data['filter']);
+        $cond = array(
+            'OR' => array(
+                $this->alias . '.code LIKE' => '%' . $filter . '%',
+                $this->alias . '.username LIKE' => '%' . $filter . '%',
+            ));
+        return $cond;
+    }
+
+    /*
+     * Search Handler
+     */
+    public function beforeFind(array $query){
+//        $this->virtualFields = array(
+//            'display_code'=>'CONCAT("'.configure::read('user_prefix').'" , '.$this->alias.'.code, "'.configure::read('user_suffix').'")'
+//        );
+        return $query;
+    }
+
+    public function getpendingcountofeventproposal($user_id = null){
+        if(!$user_id){
+            $user_id = CakeSession::read("Auth.User.id");
+        }
+        $count = 0;
+        $this->Behaviors->load('Containable');
+        $rs = $this->find("first", array(
+            "contain"=>array(
+
+                "EventproposalSupervisors.Approvalrecordstatus"=>array(
+                    "conditions"=>array(
+                        "needalert"=>1
+                    ),
+                ),
+                "EventproposalSupervisors.Eventfinalreport.Approvalrecordstatus"=>array(
+                    "conditions"=>array(
+                        "needalert"=>1
+                    ),
+                ),
+            ),
+            'conditions'=>array(
+                "User.id"=>$user_id,
+            )
+        ));
+        //Configure::write('debug',2);
+        //debug($rs);exit();
+        for($i = 0; $i < sizeof($rs['EventproposalSupervisors']); $i++){
+        	if(!$rs['EventproposalSupervisors'][$i]['closed']){
+            	if($rs['EventproposalSupervisors'][$i]['Approvalrecordstatus']['needalert']){
+            		$count++;
+            	}
+	            if($rs['EventproposalSupervisors'][$i]['Eventfinalreport']['Approvalrecordstatus']['needalert']){
+	            	$count++;
+	            }
+            }
+        }
+        return $count;
+    }
+
+    public function getpendingapproval($user_id = null){
+        if(!$user_id){
+            $user_id = CakeSession::read("Auth.User.id");
+        }
+
+        $count = 0;
+        $this->Behaviors->load('Containable');
+        $rs = $this->find("first", array(
+            "contain"=>array(
+                "Approvalrecord.Approvalrecordstatus"=>array(
+                    "conditions"=>array(
+                        "needalert"=>1
+                    ),
+                ),
+            ),
+            'conditions'=>array(
+                "User.id"=>$user_id,
+            )
+        ));
+        //Configure::write('debug',2);
+        //debug($rs);exit();
+        for($i = 0; $i < sizeof($rs['Approvalrecord']); $i++){
+            if($rs['Approvalrecordstatus']['needalert']){
+                $count++;
+            }
+        }
+        return $count;
+
+    }
+
+    public function getuserrolelist($id = array(), $myself = false){
+//        Configure::write('debug', 2);
+        $userauth = CakeSession::read('Auth.User');
+//        print_R($userauth);exit();
+        $this->Behaviors->load('Containable');
+        if($myself){
+            $rs = $this->find("all", array(
+                "contain"=>array(
+                    "Group"=>array(
+                        "conditions"=>array(
+                            "Group.id"=>$id
+                        )
+                    )
+                ),
+                'conditions'=>array(
+                    $this->alias.".active"=>1
+                )
+            ));
+        }else{
+            $rs = $this->find("all", array(
+                "contain"=>array(
+                    "Group"=>array(
+                        "conditions"=>array(
+                            "Group.id"=>$id
+                        )
+                    )
+                ),
+                'conditions'=>array(
+                    $this->alias.".active"=>1,
+                    $this->alias.".id !="=>$userauth['id'],
+                )
+            ));
+        }
+
+        $list = array();
+        for($i = 0; $i < sizeof($rs);$i++){
+            if(sizeof($rs[$i]['Group']) < 1){
+            }else{
+            	$list[$rs[$i][$this->alias]['id']] = $rs[$i][$this->alias]['name'];
+//                $list[$rs[$i][$this->alias]['id']] = "職員_".$rs[$i][$this->alias]['id'];
+            }
+        }
+        return $list;
+    }
+
+    public function getuserlist($notself = false, $selfonly= false, $options = null){
+        if($notself){
+            $users_options = array('conditions'=>array('User.id !='=> CakeSession::read("Auth.User.id")));
+        }else if($selfonly){
+            $users_options = array('conditions'=>array('User.id'=> CakeSession::read("Auth.User.id")));
+        }
+        else{
+            $users_options = array();
+        }
+
+        if(!empty($options)){
+            $users_options = $options;
+        }
+        $users_options['callbacks'] = "after";
+        $users_array = $this->find('all',$users_options);
+
+        if(!empty($users_array)){
+            $users = array();
+            foreach($users_array as $user){
+                $users[$user['User']['id']] = $user['User']['code'].' '.$user['User']['name'];
+            }
+        }
+        return $users;
+    }
+
+    public function afterFind($results, $primary = false) {
+        $groupsusers = CakeSession::read("Auth.groupsusers");
+        foreach ($results as $key => $val) {
+            if (is_array($val) && !empty($val[$this->Group->alias])) {
+                foreach($val[$this->Group->alias] as $group){
+                    if(in_array(1,  $groupsusers)) {
+                        if($group['id'] == 1){
+                            $results[$key][$this->alias]['readonly'] = 1;
+                        }
+                    }else if(in_array(2,  $groupsusers)) {
+                        if($group['id'] == 1 || $group['id'] == 2){
+                            $results[$key][$this->alias]['readonly'] = 1;
+                        }
+                    }
+                    else if(in_array(3,  $groupsusers)) {
+                        if($group['id'] == 1 || $group['id'] == 2 || $group['id'] == 3){
+                            $results[$key][$this->alias]['readonly'] = 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $results;
+    }
+}

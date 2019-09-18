@@ -1,0 +1,218 @@
+
+<?
+//Configure::write('debug', 2);
+////
+//debug($memberapplications); exit();
+?>
+
+<div class="page-header">
+    <div class="row">
+        <!-- Page header, center on small screens -->
+        <h1 class="col-xs-12 col-sm-4 text-left-sm flashMessage">
+            <i class="fa fa-address-card page-header-icon"></i>&nbsp;&nbsp;<?=__("續會記錄")?>
+        </h1>
+
+        <div class="col-xs-12 col-sm-8">
+            <div class="row">
+                <hr class="visible-xs no-grid-gutter-h">
+                <!-- "Create project" button, width=auto on desktops -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-2">
+        <?php echo $this->Form->input('code', array(
+                'div'=>false, 'label'=>false,
+                'class'=>'form-control filterauto',
+                'id'=>"filter-code",
+                'placeholder'=>__("會員編號")
+            )
+        ); ?>
+    </div>
+
+    <div class="col-md-2">
+        <?php echo $this->Form->input('name', array(
+                'div'=>false, 'label'=>false,
+                'class'=>'form-control filterauto',
+                'id'=>"filter-name",
+                'placeholder'=>__("會員姓名")
+            )
+        ); ?>
+    </div>
+
+    <div class="col-md-2">
+        <div class="form-group">
+            <div class="input-group">
+                <span class="input-group-addon no-border"><i class="fa fa-calendar"></i></span>
+                <?php echo $this->Form->input('startdaterange', array('class'=>'form-control', 'id'=>"filter-startdaterange",'placeholder'=>'選擇開始日期範圍','type'=>'text', 'label'=>false ,'div'=>false, "default"=>"")); ?>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <div class="form-group">
+            <div class="input-group">
+                <span class="input-group-addon no-border"><i class="fa fa-calendar"></i></span>
+                <?php echo $this->Form->input('enddaterange', array('class'=>'form-control', 'id'=>"filter-enddaterange", 'placeholder'=>'選擇開始完結範圍','type'=>'text', 'label'=>false ,'div'=>false, "default"=>"")); ?>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <?php echo $this->Form->input('valid', array(
+                'div'=>false, 'label'=>false,
+                'class'=>'form-control filterauto select2 allowClear', "empty"=>true,
+                'id'=>"filter-valid",
+                "options"=>array("有效", "無效"),
+                'placeholder'=>__("有效")
+            )
+        ); ?>
+    </div>
+
+</div>
+<hr>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered table-condensed table-hover" id="datatables">
+        <thead>
+        <tr>
+            <th><?=__('會藉')?></th>
+            <th>類別</th>
+            <th><?=__('編號')?></th>
+            <th><?=__('會員姓名')?></th>
+            <th><?=__('開始日期')?></th>
+            <th><?=__('完結日期')?></th>
+            <th><?=__('有效')?></th>
+            <th><?=__('Actions')?></th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modal_view">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script>
+
+    $(document).ready(function() {
+
+        var table = table = $('#datatables').dataTable({
+            dom: '<"top"<"toolbar"><"clear">>rt<"bottom"lip<"clear">>',
+
+            columnDefs: [
+                {
+                    className: 'control',
+                    orderable: false,
+                    targets:   1
+                },
+                {
+                    className: 'control',
+                    orderable: false,
+                    targets:   7
+                },
+            ],
+            order: [ 1, 'asc' ],
+            language: {
+                "sProcessing":   "<?=__('sProcessing')?>",
+                "sLengthMenu":   "<?=__('sLengthMenu')?>",
+                "sZeroRecords":  "<?=__('sZeroRecords')?>",
+                "sInfo":         "<?=__('sInfo')?>",
+                "sSearch":         "<?=__('sSearch')?>",
+                "sInfoEmpty":    "<?=__('sInfoEmpty')?>",
+                "sInfoFiltered": "<?=__('sInfoFiltered')?>",
+                "oPaginate": {
+                    "sFirst":    "<?=__('sFirst')?>",
+                    "sPrevious": "<?=__('sPrevious')?>",
+                    "sNext":     "<?=__('sNext')?>",
+                    "sLast":     "<?=__('sLast')?>"
+                }
+            },
+            "bProcessing": true,
+            "searching":true,
+            "bServerSide": true,
+            "sAjaxSource": "<?=$this->Html->url(array("action"=>"ajax_list"))?>",
+            fnServerParams: function ( aoData ) {
+                aoData.push(
+                    // { "name": "code", "value": $("#filter-code").val() } ,
+                    // { "name": "name", "value": $("#filter-displayname").val() } ,
+                    // { "name": "tel", "value": $("#filter-tel").val() } ,
+                    // { "name": "identity", "value": $("#filter-identity").val() } ,
+                    // { "name": "membercard", "value": $("#filter-membercard").val() } ,
+                );
+            },
+
+            "aoColumns": [
+                {mData:"Membertype.name"},
+                {mData:"Membershiprecordtype.name"},
+                {mData:"Membership.code"},
+                {mData:"Member.displayname"},
+                {mData:"Membershiprecord.startdate"},
+                {mData:"Membershiprecord.enddate"},
+                {mData:"Membershiprecord.valid"},
+                {mData:"action"}
+            ],
+        });
+
+        $("#filter-startdaterange").daterangepicker(
+            {
+                autoUpdateInput: false,
+                ranges: {
+                    '<?=__('today')?>': [moment(), moment()],
+                    '<?=__('yesterday')?>': [moment().subtract('days', 1), moment().subtract('days', 1)],
+                    '<?=__('last_7')?>': [moment().subtract('days', 6), moment()],
+                    '<?=__('last_30')?>': [moment().subtract('days', 29), moment()],
+                    '<?=__('this_month')?>': [moment().startOf('month'), moment().endOf('month')],
+                    '<?=__('prev_month')?>': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+                },
+                dateLimit: { months: 1 },
+                separator: " to ",
+                // autoApply: true,
+                locale: {
+                    applyLabel: '<?=__('submit')?>',
+                    cancelLabel: '<?=__('cancel')?>',
+                    fromLabel: '<?=__('from')?>',
+                    toLabel: '<?=__('to')?>',
+                    customRangeLabel: '<?=__('custom')?>',
+                    format: 'YYYY-MM-DD'
+                }
+            }
+        );
+
+
+        $("#filter-enddaterange").daterangepicker(
+            {
+                autoUpdateInput: false,
+                ranges: {
+                    '<?=__('today')?>': [moment(), moment()],
+                    '<?=__('yesterday')?>': [moment().subtract('days', 1), moment().subtract('days', 1)],
+                    '<?=__('last_7')?>': [moment().subtract('days', 6), moment()],
+                    '<?=__('last_30')?>': [moment().subtract('days', 29), moment()],
+                    '<?=__('this_month')?>': [moment().startOf('month'), moment().endOf('month')],
+                    '<?=__('prev_month')?>': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+                },
+                dateLimit: { months: 1 },
+                separator: " to ",
+                // autoApply: true,
+                locale: {
+                    applyLabel: '<?=__('submit')?>',
+                    cancelLabel: '<?=__('cancel')?>',
+                    fromLabel: '<?=__('from')?>',
+                    toLabel: '<?=__('to')?>',
+                    customRangeLabel: '<?=__('custom')?>',
+                    format: 'YYYY-MM-DD'
+                }
+            }
+        );
+    });
+
+</script>
